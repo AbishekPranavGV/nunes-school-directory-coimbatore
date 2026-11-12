@@ -1,0 +1,44 @@
+{
+  "name": "nunes-school-directory-coimbatore",
+  "version": "1.0.0",
+  "description": "Production-ready, secure web app for Nunes Instruments to discover, import, verify, search, and export schools in Coimbatore district, Tamil Nadu, India.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "seed": "node scripts/init_database.js",
+    "test": "node scripts/run_acceptance_tests.js"
+  },
+  "keywords": [
+    "coimbatore",
+    "schools",
+    "udise",
+    "directory",
+    "nunes-instruments",
+    "tamil-nadu"
+  ],
+  "author": "Nunes Instruments",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@libsql/client": "^0.15.15",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.1.1",
+    "jose": "^6.2.2",
+    "lucide-react": "^1.16.0",
+    "next": "^16.1.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3"
+  }
+}

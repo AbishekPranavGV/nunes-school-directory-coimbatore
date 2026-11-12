@@ -1,0 +1,7 @@
+node_modules
+.next
+out
+*.log
+.vercel
+data/tnea_school_blocks.pdf
+.DS_Store

@@ -1,0 +1,169 @@
+{
+  "anaimalai": [
+    "tamil-nadu/coimbatore/anaimalai/pums-thensengampalayam",
+    "tamil-nadu/coimbatore/anaimalai/pums-odayakulam",
+    "tamil-nadu/coimbatore/anaimalai/pums-manjanaickanur",
+    "tamil-nadu/coimbatore/anaimalai/pups-vettaikaranpudur",
+    "tamil-nadu/coimbatore/anaimalai/pups-devipattinam",
+    "tamil-nadu/coimbatore/anaimalai/pups-anaimalai",
+    "tamil-nadu/coimbatore/anaimalai/pums-angalakurichi",
+    "tamil-nadu/coimbatore/anaimalai/pums-periapothu",
+    "tamil-nadu/coimbatore/anaimalai/pums-ramanamudalipudur",
+    "tamil-nadu/coimbatore/anaimalai/pums-subbegoundenpudur"
+  ],
+  "annur": [
+    "tamil-nadu/coimbatore/annur/aamghss-annur",
+    "tamil-nadu/coimbatore/annur/pups-annur-south",
+    "tamil-nadu/coimbatore/annur/adw-mid-school-pasur",
+    "tamil-nadu/coimbatore/annur/pups-annur-north",
+    "tamil-nadu/coimbatore/annur/pups-ganeshapuram",
+    "tamil-nadu/coimbatore/annur/pums-pogalur",
+    "tamil-nadu/coimbatore/annur/pups-kunnathur"
+  ],
+  "coimbatore-city": [
+    "tamil-nadu/coimbatore/coimbatore-city/cps-okkiliyar-colony",
+    "tamil-nadu/coimbatore/coimbatore-city/cps-dhs-road",
+    "tamil-nadu/coimbatore/coimbatore-city/pvp-memorial-cps-r.spuram",
+    "tamil-nadu/coimbatore/coimbatore-city/cms-pappanaickenpalayam",
+    "tamil-nadu/coimbatore/coimbatore-city/cps-ganeshapuram",
+    "tamil-nadu/coimbatore/coimbatore-city/cms-mng-street",
+    "tamil-nadu/coimbatore/coimbatore-city/cps-ramalingam-colony",
+    "tamil-nadu/coimbatore/coimbatore-city/cps-r.s.puram-north",
+    "tamil-nadu/coimbatore/coimbatore-city/cms-tatabad",
+    "tamil-nadu/coimbatore/coimbatore-city/cps-sithapudur",
+    "tamil-nadu/coimbatore/coimbatore-city/cms-kottai",
+    "tamil-nadu/coimbatore/coimbatore-city/cms-b.b.street",
+    "tamil-nadu/coimbatore/coimbatore-city/cms-wederburnpet",
+    "tamil-nadu/coimbatore/coimbatore-city/cps-selvapuram-north",
+    "tamil-nadu/coimbatore/coimbatore-city/cps-ramakrishnapuram"
+  ],
+  "karamadai": [
+    "tamil-nadu/coimbatore/karamadai/pups-dhayanur",
+    "tamil-nadu/coimbatore/karamadai/mms-maninagar",
+    "tamil-nadu/coimbatore/karamadai/pups-thiruvalluvar-nagar",
+    "tamil-nadu/coimbatore/karamadai/mpl-valluvar-pri-school",
+    "tamil-nadu/coimbatore/karamadai/pups-vijayanagaram",
+    "tamil-nadu/coimbatore/karamadai/pums-karamadai",
+    "tamil-nadu/coimbatore/karamadai/pups-velliangadu",
+    "tamil-nadu/coimbatore/karamadai/pups-sirumugai-south",
+    "tamil-nadu/coimbatore/karamadai/pups-alangombu",
+    "tamil-nadu/coimbatore/karamadai/pups-pethikuttai",
+    "tamil-nadu/coimbatore/karamadai/ghss-mettupalayam",
+    "tamil-nadu/coimbatore/karamadai/pups-kannarpalayam",
+    "tamil-nadu/coimbatore/karamadai/pums-kuttaiyur"
+  ],
+  "kinathukkadavu": [
+    "tamil-nadu/coimbatore/kinathukkadavu/pups-seripalayam",
+    "tamil-nadu/coimbatore/kinathukkadavu/pups-vadasithur",
+    "tamil-nadu/coimbatore/kinathukkadavu/pups-kinathukadavu",
+    "tamil-nadu/coimbatore/kinathukkadavu/pups-kaliannanpudur",
+    "tamil-nadu/coimbatore/kinathukkadavu/pums-singayanpudur",
+    "tamil-nadu/coimbatore/kinathukkadavu/pups-kattampatti",
+    "tamil-nadu/coimbatore/kinathukkadavu/pups-tamaraikulam"
+  ],
+  "madukkarai": [
+    "tamil-nadu/coimbatore/madukkarai/pums-othakalmandapam",
+    "tamil-nadu/coimbatore/madukkarai/pums-marapalam",
+    "tamil-nadu/coimbatore/madukkarai/pups-malumichampatti",
+    "tamil-nadu/coimbatore/madukkarai/pums-palathurai",
+    "tamil-nadu/coimbatore/madukkarai/pums-kandegoundensalai",
+    "tamil-nadu/coimbatore/madukkarai/ghss-vellalore"
+  ],
+  "p.n.palayam": [
+    "tamil-nadu/coimbatore/p.n.palayam/pups-narasimanaickenpalay",
+    "tamil-nadu/coimbatore/p.n.palayam/pums-veerakeralam",
+    "tamil-nadu/coimbatore/p.n.palayam/ghss--naickenpalayam",
+    "tamil-nadu/coimbatore/p.n.palayam/pums-mathampalayam",
+    "tamil-nadu/coimbatore/p.n.palayam/pums-periyanaickenpalayam",
+    "tamil-nadu/coimbatore/p.n.palayam/gghss-chinnathadagam",
+    "tamil-nadu/coimbatore/p.n.palayam/pups-kanuvai",
+    "tamil-nadu/coimbatore/p.n.palayam/pums-thudiyalur",
+    "tamil-nadu/coimbatore/p.n.palayam/pums--housing-unit"
+  ],
+  "perur": [
+    "tamil-nadu/coimbatore/perur/ghss-kurichi",
+    "tamil-nadu/coimbatore/perur/cms-ramasamy-nagar",
+    "tamil-nadu/coimbatore/perur/chs-maniakaranpalayam",
+    "tamil-nadu/coimbatore/perur/pups-kurichi",
+    "tamil-nadu/coimbatore/perur/cps-p.n.pudur",
+    "tamil-nadu/coimbatore/perur/ghss-kuniamuthur",
+    "tamil-nadu/coimbatore/perur/pups-kuniamuthur",
+    "tamil-nadu/coimbatore/perur/pums-konavaikalpalayam",
+    "tamil-nadu/coimbatore/perur/cps-velandipalayam",
+    "tamil-nadu/coimbatore/perur/pups-kulathupalayam",
+    "tamil-nadu/coimbatore/perur/pums-perur",
+    "tamil-nadu/coimbatore/perur/cps-ganapathi"
+  ],
+  "pollachi-north": [
+    "tamil-nadu/coimbatore/pollachi-north/pups-pulimpatti",
+    "tamil-nadu/coimbatore/pollachi-north/pums-aachipatti",
+    "tamil-nadu/coimbatore/pollachi-north/pums-zaminmuthur",
+    "tamil-nadu/coimbatore/pollachi-north/pups-negamam",
+    "tamil-nadu/coimbatore/pollachi-north/pums-eripatti",
+    "tamil-nadu/coimbatore/pollachi-north/pums-vadakkipalayam",
+    "tamil-nadu/coimbatore/pollachi-north/pups-ramanathapuram"
+  ],
+  "pollachi-south": [
+    "tamil-nadu/coimbatore/pollachi-south/pums-amparaapalayamn",
+    "tamil-nadu/coimbatore/pollachi-south/pums-unjavalampatti",
+    "tamil-nadu/coimbatore/pollachi-south/pups-kanjampatty",
+    "tamil-nadu/coimbatore/pollachi-south/pums-kolarpatty",
+    "tamil-nadu/coimbatore/pollachi-south/mpl-boys-pollachi",
+    "tamil-nadu/coimbatore/pollachi-south/mmsb.g.puram",
+    "tamil-nadu/coimbatore/pollachi-south/mms-vsra",
+    "tamil-nadu/coimbatore/pollachi-south/telc-pollachi",
+    "tamil-nadu/coimbatore/pollachi-south/pups-samathur",
+    "tamil-nadu/coimbatore/pollachi-south/pums-suleswaranpatti"
+  ],
+  "s.s.kulam": [
+    "tamil-nadu/coimbatore/s.s.kulam/cms-uppilipalayam",
+    "tamil-nadu/coimbatore/s.s.kulam/gandhi-centinery-aided-ms",
+    "tamil-nadu/coimbatore/s.s.kulam/pums-udayampalayam",
+    "tamil-nadu/coimbatore/s.s.kulam/pums-saravanampatti",
+    "tamil-nadu/coimbatore/s.s.kulam/gghs-singanallur-",
+    "tamil-nadu/coimbatore/s.s.kulam/corp-pri-sch-peelamedu",
+    "tamil-nadu/coimbatore/s.s.kulam/gghss-ondipudur",
+    "tamil-nadu/coimbatore/s.s.kulam/cps-udayampalayam",
+    "tamil-nadu/coimbatore/s.s.kulam/pups-s.s.kulam",
+    "tamil-nadu/coimbatore/s.s.kulam/pups-vellakinar",
+    "tamil-nadu/coimbatore/s.s.kulam/chs-varadharajapuram",
+    "tamil-nadu/coimbatore/s.s.kulam/pups-kalapatti",
+    "tamil-nadu/coimbatore/s.s.kulam/sarvajana-hss"
+  ],
+  "sultanpet": [
+    "tamil-nadu/coimbatore/sultanpet/pups-malayadipalayam",
+    "tamil-nadu/coimbatore/sultanpet/pums-pappampatti",
+    "tamil-nadu/coimbatore/sultanpet/pups-senjeriputhur",
+    "tamil-nadu/coimbatore/sultanpet/pums-selakarachal",
+    "tamil-nadu/coimbatore/sultanpet/pups-sulthanpet"
+  ],
+  "sulur": [
+    "tamil-nadu/coimbatore/sulur/pums-karavazhi-madhapur",
+    "tamil-nadu/coimbatore/sulur/pups-sulur-south",
+    "tamil-nadu/coimbatore/sulur/pups-vagarayampalayam",
+    "tamil-nadu/coimbatore/sulur/pups-pallapalayam",
+    "tamil-nadu/coimbatore/sulur/pups-kangeyampalayam",
+    "tamil-nadu/coimbatore/sulur/pums-subbarayanpudur",
+    "tamil-nadu/coimbatore/sulur/pups-arasur",
+    "tamil-nadu/coimbatore/sulur/pums-kamatchipuram"
+  ],
+  "thondamuthur": [
+    "tamil-nadu/coimbatore/thondamuthur/pums-alandurai",
+    "tamil-nadu/coimbatore/thondamuthur/pups-madhampatti",
+    "tamil-nadu/coimbatore/thondamuthur/pums-kalampalayam",
+    "tamil-nadu/coimbatore/thondamuthur/pups-madvarayapuram",
+    "tamil-nadu/coimbatore/thondamuthur/pups-thondamuthur",
+    "tamil-nadu/coimbatore/thondamuthur/pups-muthipalayam",
+    "tamil-nadu/coimbatore/thondamuthur/pums-vadavalli"
+  ],
+  "valparai": [
+    "tamil-nadu/coimbatore/valparai/pups-valaparai",
+    "tamil-nadu/coimbatore/valparai/pups-rottikadai",
+    "tamil-nadu/coimbatore/valparai/pups-selaliparai-estate",
+    "tamil-nadu/coimbatore/valparai/pups-solayar-i",
+    "tamil-nadu/coimbatore/valparai/pups-attakatti",
+    "tamil-nadu/coimbatore/valparai/ghss-valparai",
+    "tamil-nadu/coimbatore/valparai/gghs-valparai",
+    "tamil-nadu/coimbatore/valparai/ghs-solayar-dam"
+  ]
+}
