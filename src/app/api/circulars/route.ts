@@ -127,6 +127,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, circular: circ });
     }
 
+    if (action === 'update' || action === 'update_email_draft') {
+      const circ = circularsStore.find(c => c.id === circular_id);
+      if (!circ) return NextResponse.json({ error: 'Circular not found' }, { status: 404 });
+
+      if (body.generated_email_subject !== undefined) circ.generated_email_subject = body.generated_email_subject;
+      if (body.generated_email_body !== undefined) circ.generated_email_body = body.generated_email_body;
+      if (body.title !== undefined) circ.title = body.title;
+      if (body.reference_number !== undefined) circ.reference_number = body.reference_number;
+      if (body.subject !== undefined) circ.subject = body.subject;
+      if (body.body_text !== undefined) circ.body_text = body.body_text;
+      if (body.target_group !== undefined) circ.target_group = body.target_group;
+      if (body.attachment_name !== undefined) circ.attachment_name = body.attachment_name;
+
+      return NextResponse.json({ success: true, circular: circ, message: 'Circular and email draft updated successfully' });
+    }
+
     // Create new circular
     const newId = `circ_2026_${Date.now().toString().slice(-4)}`;
     const title = body.title || 'Official School Educational Circular';
