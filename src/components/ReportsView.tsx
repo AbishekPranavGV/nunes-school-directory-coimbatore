@@ -67,7 +67,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </span>
           </div>
           <p className="text-xs sm:text-sm text-sky-100 max-w-2xl leading-relaxed">
-            Multi-taluk data quality auditing, contact discovery yield rates, management distribution, and official census compliance for all 2,097 educational institutions.
+            Multi-taluk data quality auditing, background verification yield rates, management distribution, and official census compliance for all 2,097 educational institutions.
           </p>
         </div>
 

@@ -619,7 +619,7 @@ export const SchoolDetailDrawer: React.FC<SchoolDetailDrawerProps> = ({
           {activeTab === 'waterfall' && (
             <div className="space-y-4">
               <div className="p-3 bg-sky-50 border border-sky-200 rounded-xl text-xs text-sky-800">
-                <p className="font-semibold">Exhaustive 7-Step Contact Discovery Waterfall</p>
+                <p className="font-semibold">Exhaustive 7-Step Background Ingestion & Verification Waterfall</p>
                 <p className="mt-0.5 text-sky-600">
                   Logs official school homepage, board affiliations (CBSE/TN DSE), public circulars, secondary directories, headmaster reception desk, outbound verification, and final audit record.
                 </p>

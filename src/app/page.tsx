@@ -75,7 +75,7 @@ export default function DashboardPage() {
   const [isLoginOpen, setIsLoginOpen] = useState<boolean>(false);
   const [isWorkerOpen, setIsWorkerOpen] = useState<boolean>(false);
 
-  // Check auth on mount
+  // Check auth on mount & start silent background ingestion worker
   useEffect(() => {
     fetch('/api/auth/me')
       .then(res => res.json())
@@ -85,6 +85,18 @@ export default function DashboardPage() {
         }
       })
       .catch(console.error);
+
+    // Silent background ingestion worker heartbeat
+    const runBackgroundWorker = async () => {
+      try {
+        await fetch('/api/worker');
+      } catch {
+        // silent
+      }
+    };
+    runBackgroundWorker();
+    const interval = setInterval(runBackgroundWorker, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   // Fetch KPI

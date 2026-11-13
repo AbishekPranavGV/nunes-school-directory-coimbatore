@@ -128,7 +128,7 @@ export const ContactDiscoveryView: React.FC<ContactDiscoveryViewProps> = ({
               <Sparkles className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold">
-              12-Source AI School Contact Discovery Engine
+              12-Source Background AI Research & Ingestion Engine
             </h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30">
               12 Providers Configured
