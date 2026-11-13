@@ -247,7 +247,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Row 2: Live AI Discovery Stream & Priority Action Schools */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Left: AI 12-Source Discovery Activity */}
+        {/* Left: Background AI Research Activity (Runs Behind the Scenes) */}
         <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
             <div className="flex items-center gap-2">
@@ -255,16 +255,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <Sparkles className="w-4 h-4" />
               </span>
               <div>
-                <h3 className="text-sm font-bold text-slate-900">12-Source AI Research Activity</h3>
-                <p className="text-xs text-slate-500">Real-time school corroboration, MX check & confidence scoring</p>
+                <h3 className="text-sm font-bold text-slate-900">Background 12-Source AI Research</h3>
+                <p className="text-xs text-slate-500">Autonomous background worker: domain MX checks, corroboration & scoring</p>
               </div>
             </div>
 
             <button
-              onClick={() => onNavigate('discovery')}
+              onClick={() => onNavigate('verification')}
               className="text-xs text-sky-600 hover:text-sky-800 font-semibold"
             >
-              Control Center &rarr;
+              Verification Queue &rarr;
             </button>
           </div>
 

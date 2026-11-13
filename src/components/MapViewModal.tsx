@@ -4,29 +4,21 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   MapPin, 
-  Building, 
   Phone, 
   Mail, 
-  CheckCircle, 
-  AlertTriangle, 
-  Layers, 
-  Globe, 
-  Compass, 
-  Maximize2, 
-  Minimize2, 
-  Play, 
-  Pause, 
-  RotateCcw, 
   Search, 
   ExternalLink, 
   Navigation,
-  Eye,
-  Sliders,
-  Sparkles,
-  Mountain,
-  Flame,
   Plus,
-  Minus
+  Minus,
+  Maximize2,
+  Minimize2,
+  Crosshair,
+  CheckCircle2,
+  AlertCircle,
+  Building2,
+  ShoppingBag,
+  Landmark
 } from 'lucide-react';
 import { SchoolRecord } from '@/types';
 
@@ -41,28 +33,26 @@ interface BlockPlace {
   name: string;
   lat: number;
   lng: number;
-  elevation: number;
   count: number;
-  description: string;
 }
 
 const COIMBATORE_BLOCK_PLACES: BlockPlace[] = [
-  { name: 'All Blocks', lat: 11.0168, lng: 76.9558, elevation: 411, count: 2097, description: 'Coimbatore District Full Register' },
-  { name: 'Coimbatore City', lat: 11.0168, lng: 76.9558, elevation: 411, count: 238, description: 'Urban Metropolitan Core' },
-  { name: 'Pollachi', lat: 10.6588, lng: 77.0084, elevation: 293, count: 254, description: 'Southern Agro & Coconut Hub' },
-  { name: 'Valparai', lat: 10.3255, lng: 76.9550, elevation: 1193, count: 86, description: 'High Anaimalai Tea Plateau' },
-  { name: 'Mettupalayam', lat: 11.3005, lng: 76.9400, elevation: 314, count: 188, description: 'Nilgiri Mountain Gateway' },
-  { name: 'Sulur', lat: 11.0255, lng: 77.1250, elevation: 340, count: 168, description: 'Air Base & Textile Corridor' },
-  { name: 'Perur', lat: 10.9722, lng: 76.9150, elevation: 418, count: 146, description: 'Heritage Noyyal Riverbank' },
-  { name: 'Annur', lat: 11.2333, lng: 77.1333, elevation: 338, count: 124, description: 'Northern Industrial Belt' },
-  { name: 'Karamadai', lat: 11.2422, lng: 76.9600, elevation: 353, count: 152, description: 'Bhavani River Valley' },
-  { name: 'Madukkarai', lat: 10.9011, lng: 76.9600, elevation: 311, count: 118, description: 'Cement & Mineral Corridor' },
-  { name: 'Anaimalai', lat: 10.5849, lng: 76.9298, elevation: 260, count: 98, description: 'Tiger Reserve Foothills' },
-  { name: 'Kinathukadavu', lat: 10.8211, lng: 77.0180, elevation: 308, count: 115, description: 'Windmill & Agro Basin' },
-  { name: 'Thondamuthur', lat: 10.9955, lng: 76.8350, elevation: 450, count: 128, description: 'Western Ghats Bio-Reserve' },
-  { name: 'Sultanpet', lat: 10.8855, lng: 77.1850, elevation: 320, count: 120, description: 'Eastern Agriculture Plain' },
-  { name: 'S.S.Kulam', lat: 11.1211, lng: 77.0250, elevation: 380, count: 95, description: 'Suburban Lake Cluster' },
-  { name: 'Periyanaickanpalayam', lat: 11.1455, lng: 76.9350, elevation: 405, count: 112, description: 'Northern Foothills Gateway' },
+  { name: 'All Blocks', lat: 11.0168, lng: 76.9558, count: 2097 },
+  { name: 'Coimbatore City', lat: 11.0168, lng: 76.9558, count: 238 },
+  { name: 'Pollachi', lat: 10.6588, lng: 77.0084, count: 254 },
+  { name: 'Sulur', lat: 11.0255, lng: 77.1250, count: 168 },
+  { name: 'Valparai', lat: 10.3255, lng: 76.9550, count: 86 },
+  { name: 'Mettupalayam', lat: 11.3005, lng: 76.9400, count: 188 },
+  { name: 'Perur', lat: 10.9722, lng: 76.9150, count: 146 },
+  { name: 'Annur', lat: 11.2333, lng: 77.1333, count: 124 },
+  { name: 'Karamadai', lat: 11.2422, lng: 76.9600, count: 152 },
+  { name: 'Madukkarai', lat: 10.9011, lng: 76.9600, count: 118 },
+  { name: 'Anaimalai', lat: 10.5849, lng: 76.9298, count: 98 },
+  { name: 'Kinathukadavu', lat: 10.8211, lng: 77.0180, count: 115 },
+  { name: 'Thondamuthur', lat: 10.9955, lng: 76.8350, count: 128 },
+  { name: 'Sultanpet', lat: 10.8855, lng: 77.1850, count: 120 },
+  { name: 'S.S.Kulam', lat: 11.1211, lng: 77.0250, count: 95 },
+  { name: 'Periyanaickanpalayam', lat: 11.1455, lng: 76.9350, count: 112 },
 ];
 
 export const MapViewModal: React.FC<MapViewModalProps> = ({
@@ -71,38 +61,18 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
   schools,
   onSelectSchool
 }) => {
-  // Map View Mode: Satellite, 3D Terrain, Roadmap, Heatmap
-  const [viewMode, setViewMode] = useState<'satellite' | 'terrain' | 'roadmap' | 'heatmap'>('satellite');
-  const [is3D, setIs3D] = useState<boolean>(true);
-  const [isOrbiting, setIsOrbiting] = useState<boolean>(false);
-  const [orbitHeading, setOrbitHeading] = useState<number>(0);
-  const [zoomLevel, setZoomLevel] = useState<number>(1.1);
+  const [zoomLevel, setZoomLevel] = useState<number>(1.0);
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [selectedBlock, setSelectedBlock] = useState<string>('All Blocks');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedSchool, setSelectedSchoolPin] = useState<SchoolRecord | null>(null);
+  const [hoveredSchoolId, setHoveredSchoolId] = useState<string | null>(null);
   const [allDistrictSchools, setAllDistrictSchools] = useState<SchoolRecord[]>(schools);
 
-  // Real-time Telemetry HUD coordinates
-  const [currentHud, setCurrentHud] = useState({
-    lat: 11.0168,
-    lng: 76.9558,
-    elevation: 411,
-    eyeAlt: '18.4 km',
-    tilt: 54
-  });
-  const [hoveredSchoolId, setHoveredSchoolId] = useState<string | null>(null);
-
-  // Auto-Orbit camera rotation interval
-  useEffect(() => {
-    let interval: any;
-    if (isOrbiting && is3D) {
-      interval = setInterval(() => {
-        setOrbitHeading(prev => (prev + 0.6) % 360);
-      }, 50);
-    }
-    return () => clearInterval(interval);
-  }, [isOrbiting, is3D]);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // Fetch full dataset if initial prop is partial
   useEffect(() => {
@@ -137,18 +107,48 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
     return Boolean(s.latitude && s.longitude);
   });
 
-  // Fly-to block handler
-  const handleFlyToBlock = (place: BlockPlace) => {
+  // Center on block
+  const handleSelectBlock = (place: BlockPlace) => {
     setSelectedBlock(place.name);
-    setCurrentHud({
-      lat: place.lat,
-      lng: place.lng,
-      elevation: place.elevation,
-      eyeAlt: place.name === 'All Blocks' ? '28.0 km' : '6.5 km',
-      tilt: is3D ? 54 : 0
-    });
-    setZoomLevel(place.name === 'All Blocks' ? 1.05 : 1.35);
     setSelectedSchoolPin(null);
+    if (place.name === 'All Blocks') {
+      setZoomLevel(1.0);
+      setPanOffset({ x: 0, y: 0 });
+    } else {
+      setZoomLevel(1.4);
+      // Pan toward target block coordinates
+      const targetPos = projectCoords(place.lat, place.lng);
+      const px = (50 - parseFloat(targetPos.left)) * 6;
+      const py = (50 - parseFloat(targetPos.top)) * 6;
+      setPanOffset({ x: px, y: py });
+    }
+  };
+
+  // Recenter map to Coimbatore City
+  const handleRecenter = () => {
+    setSelectedBlock('All Blocks');
+    setZoomLevel(1.0);
+    setPanOffset({ x: 0, y: 0 });
+    setSelectedSchoolPin(null);
+  };
+
+  // Mouse drag panning handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('.interactive-control')) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setPanOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   // Coordinate projection math into % bounds of Coimbatore District
@@ -162,233 +162,387 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
     const x = ((lng - MIN_LNG) / (MAX_LNG - MIN_LNG)) * 100;
     const y = ((MAX_LAT - lat) / (MAX_LAT - MIN_LAT)) * 100;
     return {
-      left: `${Math.max(4, Math.min(96, x))}%`,
-      top: `${Math.max(4, Math.min(96, y))}%`
+      left: `${Math.max(3, Math.min(97, x))}%`,
+      top: `${Math.max(3, Math.min(97, y))}%`
     };
   };
 
   return (
-    <div className={`fixed inset-0 z-50 overflow-hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 transition-all duration-300`}>
-      <div className={`bg-[#0a0f1d] text-white rounded-2xl shadow-2xl border border-sky-500/30 overflow-hidden flex flex-col transition-all duration-300 ${
-        isFullscreen ? 'w-full h-full rounded-none' : 'max-w-6xl w-full h-[92vh]'
-      }`}>
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 animate-in fade-in-50 duration-200">
+      <div 
+        className={`bg-[#f5f3f0] text-slate-800 rounded-2xl shadow-2xl border border-slate-300 overflow-hidden flex flex-col relative transition-all duration-300 ${
+          isFullscreen ? 'w-full h-full rounded-none' : 'max-w-6xl w-full h-[92vh]'
+        }`}
+      >
         
-        {/* Google Earth Navigation & Control Header */}
-        <div className="px-4 py-3 bg-[#0d1527] border-b border-sky-500/20 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        {/* Google Maps 2D Canvas Container (Pannable & Zoomable) */}
+        <div 
+          ref={mapContainerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          className={`relative flex-1 overflow-hidden select-none bg-[#f4f3f0] ${
+            isDragging ? 'cursor-grabbing' : 'cursor-grab'
+          }`}
+        >
           
-          {/* Logo & District Identification */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
-              <Globe className="w-5 h-5 animate-spin-slow" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm sm:text-base font-bold text-white tracking-wide flex items-center gap-1.5">
-                  Google Earth 3D <span className="text-sky-400 font-semibold">• Coimbatore District</span>
-                </h3>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[10px] font-mono font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  2,097 Geocoded Schools
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 hidden sm:block">
-                Western Ghats & Tamil Nadu Plateau • 10.32° N - 11.25° N, 76.82° E - 77.20° E
-              </p>
-            </div>
-          </div>
-
-          {/* Search Box */}
-          <div className="relative w-48 sm:w-64">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search school or block..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-sky-400"
-            />
-          </div>
-
-          {/* View Modes & 3D Controls */}
-          <div className="flex items-center gap-1.5">
-            {/* View Layer Selector */}
-            <div className="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-700 text-xs">
-              <button
-                onClick={() => setViewMode('satellite')}
-                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
-                  viewMode === 'satellite' ? 'bg-sky-600 text-white font-bold' : 'text-slate-400 hover:text-white'
-                }`}
-                title="Google Earth Satellite Hybrid View"
-              >
-                <Globe className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Satellite</span>
-              </button>
-
-              <button
-                onClick={() => setViewMode('terrain')}
-                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
-                  viewMode === 'terrain' ? 'bg-sky-600 text-white font-bold' : 'text-slate-400 hover:text-white'
-                }`}
-                title="3D Topographic Terrain View"
-              >
-                <Mountain className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Terrain</span>
-              </button>
-
-              <button
-                onClick={() => setViewMode('heatmap')}
-                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
-                  viewMode === 'heatmap' ? 'bg-rose-600 text-white font-bold' : 'text-slate-400 hover:text-white'
-                }`}
-                title="School Density Heatmap"
-              >
-                <Flame className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Heatmap</span>
-              </button>
-            </div>
-
-            {/* 3D Isometric Tilt Toggle */}
-            <button
-              onClick={() => {
-                const next3D = !is3D;
-                setIs3D(next3D);
-                setCurrentHud(h => ({ ...h, tilt: next3D ? 54 : 0 }));
-              }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
-                is3D 
-                  ? 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white border-sky-400 shadow-md shadow-sky-500/20' 
-                  : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500'
-              }`}
-              title="Toggle 3D Isometric Earth Perspective"
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              <span>{is3D ? '3D Active' : '2D Top-Down'}</span>
-            </button>
-
-            {/* 360° Orbit Tour Toggle */}
-            {is3D && (
-              <button
-                onClick={() => setIsOrbiting(!isOrbiting)}
-                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
-                  isOrbiting 
-                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md animate-pulse' 
-                    : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500'
-                }`}
-                title="Cinematic 360° Orbit Tour"
-              >
-                {isOrbiting ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-amber-400" />}
-                <span className="hidden lg:inline">{isOrbiting ? 'Orbiting...' : 'Orbit Tour'}</span>
-              </button>
-            )}
-
-            {/* Fullscreen Toggle */}
-            <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-1.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white"
-              title="Toggle Fullscreen"
-            >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </button>
-
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:bg-rose-500/20 hover:border-rose-500"
-              title="Close Map View"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* The 3D Google Earth Interactive Canvas */}
-        <div className="relative flex-1 bg-[#060a14] overflow-hidden select-none perspective-1200 flex items-center justify-center">
-          
-          {/* Outer Atmosphere Glow */}
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_50%_120%,rgba(56,189,248,0.22)_0%,rgba(14,165,233,0.08)_45%,transparent_75%)] z-10" />
-
-          {/* Deep Space Stars Background */}
-          <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none" />
-
-          {/* The 3D Map Surface Container */}
+          {/* Transforming Map Plane (2D Pan & Scale) */}
           <div 
-            className="relative w-[92%] h-[88%] max-w-[1200px] max-h-[800px] rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 preserve-3d border border-sky-400/20"
+            className="absolute inset-0 transition-transform duration-100 ease-out origin-center"
             style={{
-              transform: `rotateX(${is3D ? '52deg' : '0deg'}) rotateZ(${isOrbiting ? orbitHeading : 0}deg) scale(${zoomLevel})`,
-              transformOrigin: '50% 50%',
-              boxShadow: is3D 
-                ? '0 35px 60px -15px rgba(0, 0, 0, 0.9), 0 0 50px rgba(56, 189, 248, 0.25)' 
-                : '0 20px 40px rgba(0, 0, 0, 0.8)'
+              transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`
             }}
           >
-            {/* Satellite / Terrain Textured Surface */}
-            <div 
-              className={`absolute inset-0 transition-opacity duration-500 ${
-                viewMode === 'satellite' 
-                  ? 'bg-gradient-to-br from-[#0c2340] via-[#112d4e] to-[#0f1f38]' 
-                  : viewMode === 'terrain'
-                  ? 'bg-gradient-to-br from-[#1b3a2a] via-[#244b36] to-[#122b1e]'
-                  : viewMode === 'heatmap'
-                  ? 'bg-[#080d1a]'
-                  : 'bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#090d16]'
-              }`}
+            {/* SVG Base Layers: Geography, Rivers, Forests, Roads, Shields, Municipal Border */}
+            <svg 
+              className="absolute inset-0 w-full h-full pointer-events-none" 
+              viewBox="0 0 1200 800" 
+              preserveAspectRatio="none"
             >
-              {/* Simulated Coimbatore Geographic Topography Grid */}
-              <svg className="w-full h-full opacity-60 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                {/* Elevation Contours representing Western Ghats on West and South */}
-                <path d="M 20 50 Q 80 180 120 320 T 160 580" fill="none" stroke="rgba(56, 189, 248, 0.3)" strokeWidth="2" strokeDasharray="4 4" />
-                <path d="M 60 40 Q 140 190 190 350 T 220 620" fill="none" stroke="rgba(56, 189, 248, 0.2)" strokeWidth="1.5" />
-                <path d="M 120 20 Q 220 200 270 380 T 320 680" fill="none" stroke="rgba(56, 189, 248, 0.15)" strokeWidth="1" />
-                
-                {/* Noyyal River Path through Coimbatore */}
-                <path d="M 140 280 Q 320 320 520 300 T 820 340 T 1100 380" fill="none" stroke="rgba(56, 189, 248, 0.5)" strokeWidth="3" />
-                
-                {/* Bhavani River on Northern Mettupalayam */}
-                <path d="M 200 90 Q 450 70 700 80 T 1050 110" fill="none" stroke="rgba(56, 189, 248, 0.4)" strokeWidth="2.5" />
+              <defs>
+                {/* Highway Shield Pattern Filter */}
+                <filter id="shieldShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000000" floodOpacity="0.25" />
+                </filter>
+              </defs>
 
-                {/* Major Highways NH 544 & NH 81 */}
-                <line x1="180" y1="290" x2="980" y2="290" stroke="rgba(251, 191, 36, 0.35)" strokeWidth="2" />
-                <line x1="520" y1="90" x2="520" y2="680" stroke="rgba(251, 191, 36, 0.3)" strokeWidth="2" />
-              </svg>
+              {/* 1. Green Mountain / Forest / Western Ghats Topography (Exact match to Image 1) */}
+              {/* Western Ghats / Anaikatti Region (North-West) */}
+              <path 
+                d="M 0,0 L 220,0 Q 240,120 180,240 Q 140,320 100,420 Q 50,520 0,600 Z" 
+                fill="#d2edca" 
+                opacity="0.9" 
+              />
+              {/* Southwest Hills / Walayar Border Area */}
+              <path 
+                d="M 0,550 Q 80,560 140,620 Q 200,680 180,800 L 0,800 Z" 
+                fill="#d8eed2" 
+                opacity="0.85" 
+              />
+              {/* Southern Anaimalai Hills Foothills */}
+              <path 
+                d="M 180,720 Q 320,680 480,740 Q 600,780 720,800 L 180,800 Z" 
+                fill="#d2edca" 
+                opacity="0.75" 
+              />
+              {/* Northern Sirumugai / Bhavani Green Strip */}
+              <path 
+                d="M 280,0 Q 500,40 700,20 Q 950,50 1200,10 L 1200,0 Z" 
+                fill="#dcf1d6" 
+                opacity="0.6" 
+              />
 
-              {/* Heatmap Layer (when active) */}
-              {viewMode === 'heatmap' && (
-                <div className="absolute inset-0 pointer-events-none">
-                  {/* Urban Core Density Cluster */}
-                  <div className="absolute left-[45%] top-[38%] w-64 h-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-500/30 blur-3xl animate-pulse" />
-                  <div className="absolute left-[46%] top-[40%] w-36 h-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-400/40 blur-2xl" />
-                  
-                  {/* Pollachi Southern Cluster */}
-                  <div className="absolute left-[54%] top-[72%] w-48 h-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/30 blur-3xl" />
-                  
-                  {/* Mettupalayam Northern Cluster */}
-                  <div className="absolute left-[42%] top-[16%] w-40 h-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/30 blur-2xl" />
-                </div>
-              )}
-            </div>
+              {/* 2. Water Bodies & Lakes (Google Maps blue #aadaff) */}
+              {/* Walayar Reservoir / Lake in Southwest */}
+              <path 
+                d="M 110,610 C 130,590 170,595 190,615 C 210,635 180,660 150,655 C 120,650 100,630 110,610 Z" 
+                fill="#aadaff" 
+                stroke="#82b8e6" 
+                strokeWidth="1" 
+              />
 
-            {/* Geographical Regional Labels */}
+              {/* Noyyal River winding horizontally across Coimbatore (Image 1 alignment) */}
+              <path 
+                d="M 110,380 Q 240,410 380,415 T 560,420 T 780,440 T 1000,450 T 1200,470" 
+                fill="none" 
+                stroke="#aadaff" 
+                strokeWidth="4" 
+                strokeLinecap="round" 
+              />
+
+              {/* Singanallur Lake */}
+              <ellipse cx="610" cy="400" rx="22" ry="14" fill="#aadaff" stroke="#82b8e6" strokeWidth="0.8" />
+              {/* Ukkadam Periyakulam Lake */}
+              <ellipse cx="465" cy="415" rx="16" ry="12" fill="#aadaff" stroke="#82b8e6" strokeWidth="0.8" />
+              {/* Valankulam Lake */}
+              <ellipse cx="495" cy="410" rx="14" ry="10" fill="#aadaff" stroke="#82b8e6" strokeWidth="0.8" />
+              {/* Kurichi Kulam */}
+              <ellipse cx="480" cy="480" rx="18" ry="12" fill="#aadaff" stroke="#82b8e6" strokeWidth="0.8" />
+              {/* Sulur Lake */}
+              <ellipse cx="880" cy="430" rx="24" ry="15" fill="#aadaff" stroke="#82b8e6" strokeWidth="0.8" />
+
+              {/* 3. Secondary City & Local Roads (Crisp White #ffffff with subtle outline) */}
+              {/* Gandhipuram - Thudiyalur - Mettupalayam connector */}
+              <path d="M 460,200 L 460,390" stroke="#ffffff" strokeWidth="4" />
+              <path d="M 460,200 L 460,390" stroke="#e0dedb" strokeWidth="5" style={{ zIndex: -1 }} />
+
+              {/* Gandhipuram - Kalapatti - Neelambur connector */}
+              <path d="M 460,340 Q 560,290 680,260 T 800,280" stroke="#ffffff" strokeWidth="3.5" />
+
+              {/* Kovaipudur - Malumichampatti cross street */}
+              <path d="M 410,480 Q 480,510 560,520" stroke="#ffffff" strokeWidth="3.5" />
+
+              {/* Sulur - Somanur network */}
+              <path d="M 870,360 L 980,260" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 870,420 L 1050,490" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 560,520 L 760,590 T 960,650" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 280,390 L 460,390" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 380,450 L 420,530" stroke="#ffffff" strokeWidth="3" />
+
+              {/* 4. Major Arterial National Highways (Google Maps Golden Yellow #fbbc04 with #e5a108 border) */}
+              {/* NH 544 (Salem - Coimbatore - Walayar - Palakkad Corridor) */}
+              {/* Yellow road casing */}
+              <path 
+                d="M 1080,120 Q 920,220 800,280 T 640,360 T 480,430 T 360,530 T 200,640 T 120,680" 
+                fill="none" 
+                stroke="#e5a108" 
+                strokeWidth="7" 
+                strokeLinecap="round" 
+              />
+              <path 
+                d="M 1080,120 Q 920,220 800,280 T 640,360 T 480,430 T 360,530 T 200,640 T 120,680" 
+                fill="none" 
+                stroke="#fbbc04" 
+                strokeWidth="5" 
+                strokeLinecap="round" 
+              />
+
+              {/* NH 948 (Annur - Saravanampatti - Gandhipuram) */}
+              <path d="M 640,0 L 580,180 T 500,320" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 640,0 L 580,180 T 500,320" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+
+              {/* NH 181 (Mettupalayam - Thudiyalur - Coimbatore) */}
+              <path d="M 430,0 L 440,160 T 460,340" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 430,0 L 440,160 T 460,340" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+
+              {/* NH 81 (Coimbatore East to Sulur & Karur) */}
+              <path d="M 500,360 Q 680,390 880,410 T 1120,440" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 500,360 Q 680,390 880,410 T 1120,440" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+
+              {/* Pollachi Road / SH (South from Malumichampatti through Kinathukadavu) */}
+              <path d="M 540,490 L 580,620 T 620,800" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 540,490 L 580,620 T 620,800" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+
+              {/* SH 167 / Avinashi Road Core City Spine */}
+              <path d="M 460,340 L 640,320 T 800,280" fill="none" stroke="#fbbc04" strokeWidth="4.5" />
+              {/* SH 162 / Trichy Road */}
+              <path d="M 490,390 L 680,420 T 870,430" fill="none" stroke="#fbbc04" strokeWidth="4.5" />
+
+              {/* 5. Coimbatore City Corporation Municipal Boundary (Red Dashed Line - Exact match to Image 1) */}
+              <path 
+                d="M 410,215 Q 480,205 580,215 T 670,240 T 730,300 T 720,380 T 660,450 T 570,490 T 450,510 T 380,460 T 360,360 T 380,260 Z" 
+                fill="none" 
+                stroke="#ea4335" 
+                strokeWidth="1.8" 
+                strokeDasharray="4,4" 
+              />
+
+              {/* State Boundary Line (Tamil Nadu / Kerala) */}
+              <line x1="140" y1="560" x2="160" y2="800" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="6,4" />
+            </svg>
+
+            {/* Geographical Highway Shield Badges (Google Maps Yellow Badges with drop shadow) */}
             <div className="absolute inset-0 pointer-events-none">
-              <span className="absolute left-[6%] top-[12%] text-[10px] font-bold text-sky-400/70 tracking-widest uppercase">
-                ▲ Nilgiri Foothills (800m)
-              </span>
-              <span className="absolute left-[4%] top-[46%] text-[10px] font-bold text-sky-400/70 tracking-widest uppercase">
-                ▲ Siruvani / Western Ghats
-              </span>
-              <span className="absolute left-[8%] top-[86%] text-[10px] font-bold text-sky-400/70 tracking-widest uppercase">
-                ▲ Anaimalai Tiger Reserve (1,193m)
-              </span>
-              <span className="absolute right-[8%] top-[38%] text-[10px] font-bold text-slate-400/60 tracking-widest uppercase">
-                Sulur & Sultanpet Plains
-              </span>
-              <span className="absolute left-[44%] top-[33%] text-xs font-bold text-white/90 tracking-wider">
-                COIMBATORE METRO
-              </span>
+              {/* NH 544 Shields */}
+              <div className="absolute left-[72%] top-[25%] -translate-x-1/2 -translate-y-1/2 bg-[#fbbc04] text-black border border-black/40 text-[9px] font-bold px-1.5 py-0.2 rounded shadow-sm">
+                544
+              </div>
+              <div className="absolute left-[54%] top-[42%] -translate-x-1/2 -translate-y-1/2 bg-[#fbbc04] text-black border border-black/40 text-[9px] font-bold px-1.5 py-0.2 rounded shadow-sm">
+                544
+              </div>
+              <div className="absolute left-[24%] top-[65%] -translate-x-1/2 -translate-y-1/2 bg-[#fbbc04] text-black border border-black/40 text-[9px] font-bold px-1.5 py-0.2 rounded shadow-sm">
+                544
+              </div>
+
+              {/* NH 948 Shield */}
+              <div className="absolute left-[50%] top-[14%] -translate-x-1/2 -translate-y-1/2 bg-[#fbbc04] text-black border border-black/40 text-[9px] font-bold px-1.5 py-0.2 rounded shadow-sm">
+                948
+              </div>
+
+              {/* NH 181 Shield */}
+              <div className="absolute left-[38%] top-[17%] -translate-x-1/2 -translate-y-1/2 bg-[#fbbc04] text-black border border-black/40 text-[9px] font-bold px-1.5 py-0.2 rounded shadow-sm">
+                181
+              </div>
+
+              {/* NH 81 Shield */}
+              <div className="absolute left-[82%] top-[39%] -translate-x-1/2 -translate-y-1/2 bg-[#fbbc04] text-black border border-black/40 text-[9px] font-bold px-1.5 py-0.2 rounded shadow-sm">
+                81
+              </div>
+
+              {/* State Highway Shields matching Image 1 */}
+              <div className="absolute left-[44%] top-[19%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                872
+              </div>
+              <div className="absolute left-[39%] top-[19%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                489
+              </div>
+              <div className="absolute left-[33%] top-[27%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                164
+              </div>
+              <div className="absolute left-[27%] top-[31%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                167
+              </div>
+              <div className="absolute left-[33%] top-[45%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                169
+              </div>
+              <div className="absolute left-[52%] top-[50%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                162
+              </div>
+              <div className="absolute left-[54%] top-[62%] -translate-x-1/2 -translate-y-1/2 bg-[#fbbc04] text-black border border-black/40 text-[8px] font-bold px-1 py-0.1 rounded shadow-xs">
+                83
+              </div>
+              <div className="absolute left-[64%] top-[18%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                678
+              </div>
+              <div className="absolute left-[70%] top-[14%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                713
+              </div>
+              <div className="absolute left-[76%] top-[10%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                165
+              </div>
+              <div className="absolute left-[88%] top-[28%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                165
+              </div>
+              <div className="absolute left-[70%] top-[49%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                163
+              </div>
+              <div className="absolute left-[63%] top-[57%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                522
+              </div>
+              <div className="absolute left-[71%] top-[72%] -translate-x-1/2 -translate-y-1/2 bg-white text-slate-800 border border-slate-400 text-[8px] font-semibold px-1 py-0.1 rounded shadow-xs">
+                881
+              </div>
             </div>
 
-            {/* Interactive 3D School Pins */}
+            {/* Bilingual Place Name Labels (Exact Typography matching Image 1) */}
+            <div className="absolute inset-0 pointer-events-none text-slate-700 font-sans">
+              
+              {/* Gandhipuram (City Center) */}
+              <div className="absolute left-[41%] top-[34%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[12px] font-semibold text-slate-800 tracking-tight block">Gandhipuram</span>
+                <span className="text-[10px] text-slate-600 block leading-tight">காந்திபுரம்</span>
+              </div>
+
+              {/* Thudiyalur */}
+              <div className="absolute left-[36%] top-[22%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[11px] font-semibold text-slate-800 block">Thudiyalur</span>
+                <span className="text-[9px] text-slate-600 block leading-tight">துடியலூர்</span>
+              </div>
+
+              {/* Kalapatti */}
+              <div className="absolute left-[54%] top-[23%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[11px] font-semibold text-slate-800 block">Kalapatti</span>
+                <span className="text-[9px] text-slate-600 block leading-tight">காளப்பட்டி</span>
+              </div>
+
+              {/* Neelambur */}
+              <div className="absolute left-[63%] top-[25%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[11px] font-semibold text-slate-800 block">Neelambur</span>
+                <span className="text-[9px] text-slate-600 block leading-tight">நீலம்பூர்</span>
+              </div>
+
+              {/* Sulur */}
+              <div className="absolute left-[71%] top-[33%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[11px] font-semibold text-slate-800 block">Sulur</span>
+                <span className="text-[9px] text-slate-600 block leading-tight">சூலூர்</span>
+              </div>
+
+              {/* Somanur */}
+              <div className="absolute left-[80%] top-[19%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[11px] font-semibold text-slate-800 block">Somanur</span>
+                <span className="text-[9px] text-slate-600 block leading-tight">சோமனூர்</span>
+              </div>
+
+              {/* Kovaipudur */}
+              <div className="absolute left-[36%] top-[48%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[11px] font-semibold text-slate-800 block">Kovaipudur</span>
+                <span className="text-[9px] text-slate-600 block leading-tight">கோவை புதூர்</span>
+              </div>
+
+              {/* Malumichampatti */}
+              <div className="absolute left-[48%] top-[56%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[11px] font-semibold text-slate-800 block">Malumichampatti</span>
+                <span className="text-[9px] text-slate-600 block leading-tight">மலுமிச்சம்பட்டி</span>
+              </div>
+
+              {/* Kinathukadavu */}
+              <div className="absolute left-[51%] top-[74%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[11px] font-semibold text-slate-800 block">Kinathukadavu</span>
+                <span className="text-[9px] text-slate-600 block leading-tight">கிணத்துக்கடவு</span>
+              </div>
+
+              {/* Sultanpet */}
+              <div className="absolute left-[81%] top-[51%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[11px] font-semibold text-slate-800 block">Sultanpet</span>
+                <span className="text-[9px] text-slate-600 block leading-tight">சுல்தான்பேட்டை</span>
+              </div>
+
+              {/* Anaikatti */}
+              <div className="absolute left-[8%] top-[16%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[10px] font-medium text-emerald-900 block">Anaikatti</span>
+                <span className="text-[8.5px] text-emerald-800 block leading-tight">ஆனைக்கட்டி</span>
+              </div>
+
+              {/* Walayar */}
+              <div className="absolute left-[19%] top-[69%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[10px] font-medium text-sky-900 block">Walayar</span>
+                <span className="text-[8.5px] text-sky-800 block leading-tight">வாலையார்</span>
+              </div>
+
+              {/* Kaduvettipalayam */}
+              <div className="absolute left-[71%] top-[8%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[10px] font-medium text-slate-700 block">Kaduvettipalayam</span>
+                <span className="text-[8.5px] text-slate-500 block leading-tight">காடுவெட்டிபாளையம்</span>
+              </div>
+
+              {/* Devarayapuram */}
+              <div className="absolute left-[49%] top-[83%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[10px] font-medium text-slate-700 block">Devarayapuram</span>
+                <span className="text-[8.5px] text-slate-500 block leading-tight">தேவராயபுரம்</span>
+              </div>
+
+              {/* Periya Negamam */}
+              <div className="absolute left-[65%] top-[89%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[10px] font-medium text-slate-700 block">Periya Negamam</span>
+              </div>
+
+              {/* Velanthavalam */}
+              <div className="absolute left-[22%] top-[75%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[10px] font-medium text-slate-700 block">Velanthavalam</span>
+              </div>
+
+              {/* Elappully */}
+              <div className="absolute left-[4%] top-[86%] -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-[10px] font-medium text-slate-700 block">Elappully</span>
+                <span className="text-[8.5px] text-slate-500 block leading-tight">எலப்புள்ளி</span>
+              </div>
+
+              {/* State Labels (Tamil Nadu / Kerala) */}
+              <div className="absolute left-[6%] top-[55%] text-[11px] font-bold text-slate-500 tracking-wider">
+                TAMIL NADU
+              </div>
+              <div className="absolute left-[6%] top-[61%] text-[10px] font-bold text-slate-400 tracking-wider">
+                KERALA
+              </div>
+
+              {/* Key Landmark Pins (Matching Image 1) */}
+              {/* Fun Republic Mall */}
+              <div className="absolute left-[59%] top-[30%] -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-auto">
+                <div className="w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center shadow-md">
+                  <ShoppingBag className="w-3 h-3" />
+                </div>
+                <div className="text-left bg-white/90 px-1.5 py-0.5 rounded shadow-xs border border-slate-200">
+                  <span className="text-[9.5px] font-bold text-sky-800 block leading-tight">Fun Republic Mall</span>
+                  <span className="text-[8px] text-sky-600 block leading-tight">ஃபன் ரிபப்ளிக் மால்</span>
+                </div>
+              </div>
+
+              {/* Arulmigu Subramaniaswamy Temple */}
+              <div className="absolute left-[16%] top-[25%] -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-auto">
+                <div className="w-5 h-5 rounded-full bg-amber-700 text-white flex items-center justify-center shadow-md">
+                  <Landmark className="w-3 h-3" />
+                </div>
+                <div className="text-left bg-white/90 px-1.5 py-0.5 rounded shadow-xs border border-slate-200">
+                  <span className="text-[9.5px] font-bold text-amber-900 block leading-tight">Arulmigu Subramaniaswamy...</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* School Placemark Pins (Standard Google Maps Teardrop Markers) */}
             <div className="absolute inset-0">
-              {displaySchools.slice(0, 180).map((s) => {
+              {displaySchools.slice(0, 220).map((s) => {
                 const pos = projectCoords(s.latitude || 11.0, s.longitude || 76.9);
                 const isSelected = selectedSchool?.id === s.id;
                 const isHovered = hoveredSchoolId === s.id;
@@ -399,61 +553,40 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
                     key={s.id}
                     onClick={() => {
                       setSelectedSchoolPin(s);
-                      setCurrentHud({
-                        lat: s.latitude || 11.0,
-                        lng: s.longitude || 76.9,
-                        elevation: 411,
-                        eyeAlt: '4.2 km',
-                        tilt: is3D ? 54 : 0
-                      });
                     }}
                     onMouseEnter={() => setHoveredSchoolId(s.id)}
                     onMouseLeave={() => setHoveredSchoolId(null)}
-                    className="absolute cursor-pointer transition-all duration-200"
+                    className="absolute cursor-pointer transition-transform duration-150 interactive-control"
                     style={{
                       left: pos.left,
                       top: pos.top,
-                      // 3D Billboard Transform: Counter-rotate pin so it stands upright on the terrain!
-                      transform: is3D 
-                        ? `rotateZ(-${isOrbiting ? orbitHeading : 0}deg) rotateX(-52deg) translateZ(${isSelected ? '26px' : isHovered ? '20px' : '10px'}) scale(${isSelected ? 1.3 : isHovered ? 1.25 : 1})` 
-                        : `scale(${isSelected ? 1.3 : isHovered ? 1.2 : 1})`,
-                      transformOrigin: 'bottom center',
+                      transform: `translate(-50%, -100%) scale(${isSelected ? 1.4 : isHovered ? 1.25 : 1})`,
                       zIndex: isSelected ? 50 : isHovered ? 45 : 20
                     }}
+                    title={`${s.school_name} (${s.udise_code})`}
                   >
-                    {/* Pulsing Beacon Ring for Selected / Major Schools */}
-                    {(isSelected || isHovered || (isVerified && s.board === 'CBSE')) && (
-                      <span className={`absolute -inset-2 rounded-full opacity-75 animate-ping pointer-events-none ${
-                        isVerified ? 'bg-emerald-400' : 'bg-sky-400'
-                      }`} />
-                    )}
+                    {/* Google Maps Authentic Teardrop Pin */}
+                    <div className="relative group">
+                      <svg width="24" height="32" viewBox="0 0 24 32" fill="none">
+                        {/* Teardrop Body */}
+                        <path 
+                          d="M12 0C5.37258 0 0 5.37258 0 12C0 19.5 12 32 12 32C12 32 24 19.5 24 12C24 5.37258 18.6274 0 12 0Z" 
+                          fill={isVerified ? '#0f9d58' : '#ea4335'} 
+                          stroke="#ffffff" 
+                          strokeWidth="1.5" 
+                        />
+                        {/* Inner Dot / Icon */}
+                        <circle cx="12" cy="11" r="4.5" fill="#ffffff" />
+                      </svg>
 
-                    {/* Pin Graphic: Sleek Micro-Beacon by default, expanding pill on hover/selected */}
-                    {isSelected || isHovered ? (
-                      <div className={`relative px-2 py-1 rounded-xl flex items-center gap-1.5 shadow-2xl border transition-all whitespace-nowrap ${
-                        isSelected
-                          ? 'bg-sky-500 text-white border-white ring-2 ring-sky-300 shadow-sky-500/60'
-                          : isVerified
-                          ? 'bg-emerald-600/95 text-white border-emerald-300 shadow-emerald-500/50'
-                          : 'bg-slate-900/95 text-white border-sky-400/80 shadow-black/80'
-                      }`}>
-                        <MapPin className="w-3.5 h-3.5 shrink-0 text-white" />
-                        <span className="text-[11px] font-bold max-w-[130px] truncate">
-                          {s.school_name}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shadow-lg transition-transform hover:scale-150 ${
-                        isVerified
-                          ? 'bg-emerald-400 border-white shadow-emerald-500/60'
-                          : 'bg-rose-500 border-white/80 shadow-rose-500/50'
-                      }`}>
-                        <div className="w-1 h-1 rounded-full bg-white" />
-                      </div>
-                    )}
-
-                    {/* 3D Drop Shadow on the Ground */}
-                    <div className="w-2.5 h-1 bg-black/70 rounded-full mx-auto blur-[1px] mt-0.5" />
+                      {/* Hover Tooltip (School Name Chip) */}
+                      {(isHovered || isSelected) && (
+                        <div className="absolute left-1/2 -top-1 -translate-x-1/2 -translate-y-full bg-slate-900/95 text-white text-[11px] font-semibold px-2 py-1 rounded-md shadow-xl whitespace-nowrap pointer-events-none z-50 border border-slate-700">
+                          <p className="max-w-[160px] truncate">{s.school_name}</p>
+                          <p className="text-[9px] text-slate-300 font-mono">{s.udise_code} • {s.block}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -461,117 +594,173 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
 
           </div>
 
-          {/* Floating Right Navigation Controls (Google Earth Style) */}
-          <div className="absolute right-4 top-4 flex flex-col items-center gap-2 z-20">
-            {/* 3D Compass Rose */}
-            <button
-              onClick={() => {
-                setOrbitHeading(0);
-                setIsOrbiting(false);
-              }}
-              className="w-10 h-10 rounded-full bg-slate-900/90 border border-slate-700 text-white shadow-xl flex items-center justify-center hover:bg-slate-800 transition-all group"
-              title="Reset Heading to North (0°)"
-            >
-              <Compass 
-                className="w-6 h-6 text-sky-400 transition-transform duration-300 group-hover:scale-110" 
-                style={{ transform: `rotate(-${orbitHeading}deg)` }}
+          {/* Floating Google Maps Search & Filter Card (Top-Left) */}
+          <div className="absolute left-3 top-3 z-30 flex items-center gap-2 max-w-sm sm:max-w-md w-full interactive-control">
+            <div className="relative flex-1 bg-white rounded-lg shadow-md border border-slate-200 flex items-center px-3 py-2">
+              <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search schools or localities in Coimbatore..."
+                className="w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none bg-transparent"
               />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-full"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-lg bg-white border border-slate-200 shadow-md text-slate-600 hover:text-slate-900 hover:bg-slate-50 flex items-center justify-center shrink-0 transition-colors"
+              title="Close Map"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Floating Google Maps Zoom & Recenter Controls (Bottom-Right) */}
+          <div className="absolute right-3 bottom-14 z-30 flex flex-col gap-2 items-center interactive-control">
+            {/* Recenter Button */}
+            <button
+              onClick={handleRecenter}
+              className="w-9 h-9 rounded-lg bg-white border border-slate-200 shadow-md text-slate-700 hover:text-sky-600 hover:bg-slate-50 flex items-center justify-center transition-all"
+              title="Recenter Coimbatore"
+            >
+              <Crosshair className="w-4 h-4" />
             </button>
 
             {/* Zoom Controls */}
-            <div className="flex flex-col bg-slate-900/90 border border-slate-700 rounded-xl overflow-hidden shadow-xl">
+            <div className="flex flex-col bg-white rounded-lg border border-slate-200 shadow-md overflow-hidden">
               <button
-                onClick={() => setZoomLevel(z => Math.min(2.0, z + 0.2))}
-                className="p-2 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
-                title="Zoom In (+)"
+                onClick={() => setZoomLevel(z => Math.min(2.5, z + 0.25))}
+                className="p-2 hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors"
+                title="Zoom in (+)"
               >
                 <Plus className="w-4 h-4" />
               </button>
-              <div className="h-px bg-slate-800" />
+              <div className="h-px bg-slate-200" />
               <button
-                onClick={() => setZoomLevel(z => Math.max(0.8, z - 0.2))}
-                className="p-2 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
-                title="Zoom Out (-)"
+                onClick={() => setZoomLevel(z => Math.max(0.7, z - 0.25))}
+                className="p-2 hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors"
+                title="Zoom out (-)"
               >
                 <Minus className="w-4 h-4" />
               </button>
             </div>
-
-            {/* Recenter District Button */}
-            <button
-              onClick={() => handleFlyToBlock(COIMBATORE_BLOCK_PLACES[0])}
-              className="p-2 rounded-xl bg-slate-900/90 border border-slate-700 text-slate-300 hover:text-white shadow-xl"
-              title="Fly to District Center"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
           </div>
 
-          {/* Google Earth 3D Knowledge Card (When a school is selected) */}
+          {/* Google Official Watermark (Bottom-Left) */}
+          <div className="absolute left-3 bottom-14 z-30 pointer-events-none flex items-center gap-1.5 text-xs text-slate-600 select-none">
+            <span className="font-bold text-sm tracking-tighter">
+              <span className="text-[#4285F4]">G</span>
+              <span className="text-[#EA4335]">o</span>
+              <span className="text-[#FBBC05]">o</span>
+              <span className="text-[#4285F4]">g</span>
+              <span className="text-[#34A853]">l</span>
+              <span className="text-[#EA4335]">e</span>
+            </span>
+            <span className="text-[10px] text-slate-500 hidden sm:inline">
+              Map data ©2026 Google · UDISE+ Coimbatore District Master Register
+            </span>
+          </div>
+
+          {/* Google Maps Place Info Card (When a school is clicked) */}
           {selectedSchool && (
-            <div className="absolute left-4 top-4 max-w-sm w-full bg-slate-900/95 backdrop-blur-md border border-sky-500/40 rounded-2xl p-4 text-white shadow-2xl z-30 animate-in fade-in-50 slide-in-from-left-4">
-              <div className="flex items-start justify-between gap-2 pb-2 mb-2 border-b border-slate-800">
+            <div className="absolute left-3 top-16 max-w-sm w-[90%] sm:w-80 bg-white rounded-xl shadow-xl border border-slate-200 p-4 text-slate-800 z-40 animate-in fade-in-50 slide-in-from-left-4 interactive-control">
+              <div className="flex items-start justify-between gap-2 pb-2 mb-2 border-b border-slate-100">
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono">
+                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-sky-50 text-sky-800 border border-sky-200 font-mono">
                       {selectedSchool.udise_code}
                     </span>
                     <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
                       selectedSchool.official_landline || selectedSchool.official_email
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        : 'bg-rose-50 text-rose-800 border border-rose-200'
                     }`}>
-                      {selectedSchool.contact_status?.replace(/_/g, ' ') || 'Sourced Pin'}
+                      {selectedSchool.official_landline || selectedSchool.official_email ? 'Verified Contact' : 'Contact Missing'}
                     </span>
                   </div>
-                  <h4 className="text-sm font-bold text-white line-clamp-2 leading-snug">{selectedSchool.school_name}</h4>
-                  <p className="text-[11px] text-slate-400 mt-0.5">{selectedSchool.block} • {selectedSchool.board}</p>
+                  <h4 className="text-sm font-bold text-slate-900 line-clamp-2 leading-snug">
+                    {selectedSchool.school_name}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {selectedSchool.block} • {selectedSchool.board}
+                  </p>
                 </div>
                 <button
                   onClick={() => setSelectedSchoolPin(null)}
-                  className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-100"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Verified Contact Details */}
-              <div className="space-y-1.5 text-xs text-slate-300 mb-3">
-                {selectedSchool.official_landline && (
+              <div className="space-y-1.5 text-xs text-slate-600 mb-3">
+                {selectedSchool.official_landline ? (
                   <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-sky-400" />
-                    <span className="font-mono text-sky-300 font-semibold">{selectedSchool.official_landline}</span>
+                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                    <a 
+                      href={`tel:${selectedSchool.official_landline}`}
+                      className="font-mono text-emerald-700 font-semibold hover:underline"
+                    >
+                      {selectedSchool.official_landline}
+                    </a>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>No official landline published</span>
                   </div>
                 )}
+
                 {selectedSchool.official_email && (
                   <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="truncate text-emerald-300">{selectedSchool.official_email}</span>
+                    <Mail className="w-3.5 h-3.5 text-sky-600" />
+                    <a 
+                      href={`mailto:${selectedSchool.official_email}`}
+                      className="text-sky-700 hover:underline truncate"
+                    >
+                      {selectedSchool.official_email}
+                    </a>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono pt-1">
-                  <span>GPS: {selectedSchool.latitude?.toFixed(5)}° N, {selectedSchool.longitude?.toFixed(5)}° E</span>
+
+                <div className="flex items-center gap-2 text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                  <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                  <span className="font-mono">
+                    {selectedSchool.latitude?.toFixed(5)}° N, {selectedSchool.longitude?.toFixed(5)}° E
+                  </span>
                 </div>
               </div>
 
-              {/* Actions: View in Google Maps / Google Earth & Open Profile */}
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+              {/* Actions: Google Maps Directions & School Detail */}
+              <div className="flex items-center gap-2 pt-1">
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${selectedSchool.latitude},${selectedSchool.longitude}`}
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedSchool.school_name}, ${selectedSchool.block}, Coimbatore`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 rounded-xl text-center text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                  className="flex-1 py-1.5 px-3 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border border-sky-200 transition-colors"
                 >
-                  <ExternalLink className="w-3 h-3" />
-                  <span>Google Earth</span>
+                  <Navigation className="w-3 h-3 text-sky-600" />
+                  <span>Google Maps</span>
+                  <ExternalLink className="w-3 h-3 text-sky-400" />
                 </a>
 
                 <button
                   onClick={() => {
-                    onClose();
                     onSelectSchool(selectedSchool);
+                    onClose();
                   }}
-                  className="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-sky-600/30"
+                  className="flex-1 py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center justify-center transition-colors shadow-xs"
                 >
                   Inspect Profile
                 </button>
@@ -581,63 +770,30 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
 
         </div>
 
-        {/* Cinematic "Fly-To" Block Carousel Dock (Replacing plain white grid) */}
-        <div className="px-4 py-2.5 bg-[#09101f] border-t border-slate-800/80 shrink-0">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1">
-              <Navigation className="w-3 h-3" />
-              <span>Cinematic Fly-To Places & Educational Blocks</span>
-            </span>
-            <span className="text-[10px] text-slate-400 font-mono">
-              Displaying {displaySchools.length} of 2,097 Schools
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {COIMBATORE_BLOCK_PLACES.map((p) => {
-              const isSel = selectedBlock === p.name;
-              return (
-                <button
-                  key={p.name}
-                  onClick={() => handleFlyToBlock(p)}
-                  className={`px-3 py-1.5 rounded-xl text-left whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 border ${
-                    isSel
-                      ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white border-sky-400 shadow-md shadow-sky-500/20 scale-105'
-                      : 'bg-slate-900/90 text-slate-300 border-slate-800 hover:border-slate-700 hover:bg-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold leading-none">{p.name}</span>
-                    <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                      isSel ? 'bg-sky-900 text-sky-200' : 'bg-slate-800 text-slate-400'
-                    }`}>
-                      {p.count}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-slate-400">
-                    <span>{p.elevation}m MSL</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Real-Time Google Earth Telemetry HUD Bar */}
-        <div className="px-4 py-2 bg-[#060a14] border-t border-slate-800/60 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400 shrink-0">
-          <div className="flex items-center gap-3">
-            <span>LAT: <strong className="text-sky-300">{currentHud.lat.toFixed(4)}° N</strong></span>
-            <span>LON: <strong className="text-sky-300">{currentHud.lng.toFixed(4)}° E</strong></span>
-            <span>ELEV: <strong className="text-emerald-400">{currentHud.elevation} m</strong></span>
-            <span>EYE ALT: <strong className="text-slate-300">{currentHud.eyeAlt}</strong></span>
-            <span>TILT: <strong className="text-indigo-300">{currentHud.tilt}°</strong></span>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-2 text-slate-500 text-[10px]">
-            <span>© 2026 Google Earth / Maxar Satellite Imagery</span>
-            <span>•</span>
-            <span className="text-sky-400">UDISE+ Geocoded Layer</span>
-          </div>
+        {/* Bottom Educational Block Filter Bar (Clean Google Maps Style Ribbon) */}
+        <div className="px-3 py-2 bg-white border-t border-slate-200 flex items-center gap-2 overflow-x-auto shrink-0 z-30">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 pl-1">
+            Blocks:
+          </span>
+          {COIMBATORE_BLOCK_PLACES.map((place) => {
+            const isSelected = selectedBlock === place.name;
+            return (
+              <button
+                key={place.name}
+                onClick={() => handleSelectBlock(place)}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all border shrink-0 ${
+                  isSelected
+                    ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                }`}
+              >
+                <span>{place.name}</span>
+                <span className={`ml-1 text-[10px] ${isSelected ? 'text-sky-200' : 'text-slate-400'}`}>
+                  ({place.count})
+                </span>
+              </button>
+            );
+          })}
         </div>
 
       </div>
