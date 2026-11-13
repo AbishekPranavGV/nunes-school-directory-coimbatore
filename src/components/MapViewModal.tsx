@@ -91,6 +91,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
     eyeAlt: '18.4 km',
     tilt: 54
   });
+  const [hoveredSchoolId, setHoveredSchoolId] = useState<string | null>(null);
 
   // Auto-Orbit camera rotation interval
   useEffect(() => {
@@ -387,50 +388,72 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
 
             {/* Interactive 3D School Pins */}
             <div className="absolute inset-0">
-              {displaySchools.slice(0, 160).map((s) => {
+              {displaySchools.slice(0, 180).map((s) => {
                 const pos = projectCoords(s.latitude || 11.0, s.longitude || 76.9);
                 const isSelected = selectedSchool?.id === s.id;
+                const isHovered = hoveredSchoolId === s.id;
                 const isVerified = Boolean(s.official_landline || s.official_email);
 
                 return (
                   <div
                     key={s.id}
-                    onClick={() => setSelectedSchoolPin(s)}
-                    className="absolute cursor-pointer transition-transform duration-200 group"
+                    onClick={() => {
+                      setSelectedSchoolPin(s);
+                      setCurrentHud({
+                        lat: s.latitude || 11.0,
+                        lng: s.longitude || 76.9,
+                        elevation: 411,
+                        eyeAlt: '4.2 km',
+                        tilt: is3D ? 54 : 0
+                      });
+                    }}
+                    onMouseEnter={() => setHoveredSchoolId(s.id)}
+                    onMouseLeave={() => setHoveredSchoolId(null)}
+                    className="absolute cursor-pointer transition-all duration-200"
                     style={{
                       left: pos.left,
                       top: pos.top,
                       // 3D Billboard Transform: Counter-rotate pin so it stands upright on the terrain!
                       transform: is3D 
-                        ? `rotateZ(-${isOrbiting ? orbitHeading : 0}deg) rotateX(-52deg) translateZ(${isSelected ? '24px' : '10px'}) scale(${isSelected ? 1.4 : 1})` 
-                        : `scale(${isSelected ? 1.3 : 1})`,
+                        ? `rotateZ(-${isOrbiting ? orbitHeading : 0}deg) rotateX(-52deg) translateZ(${isSelected ? '26px' : isHovered ? '20px' : '10px'}) scale(${isSelected ? 1.3 : isHovered ? 1.25 : 1})` 
+                        : `scale(${isSelected ? 1.3 : isHovered ? 1.2 : 1})`,
                       transformOrigin: 'bottom center',
-                      zIndex: isSelected ? 40 : 20
+                      zIndex: isSelected ? 50 : isHovered ? 45 : 20
                     }}
                   >
                     {/* Pulsing Beacon Ring for Selected / Major Schools */}
-                    {(isSelected || (isVerified && s.board === 'CBSE')) && (
-                      <span className={`absolute -inset-1.5 rounded-full opacity-75 animate-ping ${
-                        isVerified ? 'bg-emerald-400' : 'bg-rose-400'
+                    {(isSelected || isHovered || (isVerified && s.board === 'CBSE')) && (
+                      <span className={`absolute -inset-2 rounded-full opacity-75 animate-ping pointer-events-none ${
+                        isVerified ? 'bg-emerald-400' : 'bg-sky-400'
                       }`} />
                     )}
 
-                    {/* Pin Graphic */}
-                    <div className={`relative px-1.5 py-1 rounded-lg flex items-center gap-1 shadow-lg border transition-all ${
-                      isSelected
-                        ? 'bg-sky-500 text-white border-white ring-2 ring-sky-300 scale-110 shadow-sky-500/50'
-                        : isVerified
-                        ? 'bg-emerald-600/90 text-white border-emerald-400/80 hover:bg-emerald-500'
-                        : 'bg-rose-600/90 text-white border-rose-400/80 hover:bg-rose-500'
-                    }`}>
-                      <MapPin className="w-3 h-3 shrink-0" />
-                      <span className="text-[10px] font-bold max-w-[70px] truncate hidden sm:inline">
-                        {s.school_name.split(' ')[0]}
-                      </span>
-                    </div>
+                    {/* Pin Graphic: Sleek Micro-Beacon by default, expanding pill on hover/selected */}
+                    {isSelected || isHovered ? (
+                      <div className={`relative px-2 py-1 rounded-xl flex items-center gap-1.5 shadow-2xl border transition-all whitespace-nowrap ${
+                        isSelected
+                          ? 'bg-sky-500 text-white border-white ring-2 ring-sky-300 shadow-sky-500/60'
+                          : isVerified
+                          ? 'bg-emerald-600/95 text-white border-emerald-300 shadow-emerald-500/50'
+                          : 'bg-slate-900/95 text-white border-sky-400/80 shadow-black/80'
+                      }`}>
+                        <MapPin className="w-3.5 h-3.5 shrink-0 text-white" />
+                        <span className="text-[11px] font-bold max-w-[130px] truncate">
+                          {s.school_name}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shadow-lg transition-transform hover:scale-150 ${
+                        isVerified
+                          ? 'bg-emerald-400 border-white shadow-emerald-500/60'
+                          : 'bg-rose-500 border-white/80 shadow-rose-500/50'
+                      }`}>
+                        <div className="w-1 h-1 rounded-full bg-white" />
+                      </div>
+                    )}
 
                     {/* 3D Drop Shadow on the Ground */}
-                    <div className="w-3 h-1 bg-black/60 rounded-full mx-auto blur-[1px] mt-0.5" />
+                    <div className="w-2.5 h-1 bg-black/70 rounded-full mx-auto blur-[1px] mt-0.5" />
                   </div>
                 );
               })}
