@@ -16,7 +16,8 @@ import {
   ArrowUpDown,
   Eye,
   Briefcase,
-  HelpCircle
+  MapPin,
+  Sparkles
 } from 'lucide-react';
 import { SchoolRecord } from '@/types';
 
@@ -32,6 +33,7 @@ interface SchoolTableProps {
   sortOrder: 'asc' | 'desc';
   onSort: (column: string) => void;
   onSelectSchool: (school: SchoolRecord) => void;
+  onTriggerResearch?: (schoolId: string) => void;
 }
 
 export const SchoolTable: React.FC<SchoolTableProps> = ({
@@ -45,7 +47,8 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
   sortBy,
   sortOrder,
   onSort,
-  onSelectSchool
+  onSelectSchool,
+  onTriggerResearch
 }) => {
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
@@ -63,7 +66,7 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
           </span>
           <span> of </span>
           <span className="font-bold text-slate-900">{totalCount.toLocaleString()}</span>
-          <span> schools</span>
+          <span> schools in Coimbatore District</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -82,11 +85,11 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
       </div>
 
       {/* Responsive Horizontal Scroll Container */}
-      <div className="overflow-x-auto min-h-[400px]">
+      <div className="overflow-x-auto min-h-[420px]">
         <table className="w-full text-left text-xs sm:text-sm text-slate-700">
           
-          {/* Table Header */}
-          <thead className="bg-sky-50/50 text-[11px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider border-b border-sky-100/80 sticky top-0 z-10 backdrop-blur-sm">
+          {/* Table Header Columns matching Section 7 */}
+          <thead className="bg-sky-50/60 text-[11px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider border-b border-sky-100 sticky top-0 z-10 backdrop-blur-sm">
             <tr>
               <th className="py-3.5 px-4 font-semibold">
                 <button
@@ -97,23 +100,22 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
                   <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 font-semibold">Management</th>
-              <th className="py-3.5 px-3 font-semibold">Board / Level</th>
+              <th className="py-3.5 px-3 font-semibold">Type / Board</th>
               <th className="py-3.5 px-3 font-semibold">
                 <button
-                  onClick={() => onSort('block')}
+                  onClick={() => onSort('taluk')}
                   className="flex items-center gap-1.5 hover:text-sky-700 transition-colors"
                 >
-                  <span>Block & Locality</span>
+                  <span>Area / Taluk</span>
                   <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                 </button>
               </th>
+              <th className="py-3.5 px-3 font-semibold">Principal / Headmaster</th>
               <th className="py-3.5 px-3 font-semibold">Official Phone</th>
-              <th className="py-3.5 px-3 font-semibold">Official WhatsApp</th>
+              <th className="py-3.5 px-3 font-semibold">WhatsApp Business</th>
               <th className="py-3.5 px-3 font-semibold">Official Email</th>
-              <th className="py-3.5 px-3 font-semibold">Principal Office</th>
-              <th className="py-3.5 px-3 font-semibold text-center">Verification</th>
-              <th className="py-3.5 px-3 font-semibold text-right">Action</th>
+              <th className="py-3.5 px-3 font-semibold text-center">Status</th>
+              <th className="py-3.5 px-3 font-semibold text-right">Actions</th>
             </tr>
           </thead>
 
@@ -121,17 +123,16 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
           <tbody className="divide-y divide-slate-100">
             {schools.length === 0 ? (
               <tr>
-                <td colSpan={10} className="py-12 text-center text-slate-400">
+                <td colSpan={9} className="py-14 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center">
-                    <HelpCircle className="w-8 h-8 text-slate-300 mb-2" />
-                    <p className="text-base font-medium text-slate-600">No schools match current filters</p>
-                    <p className="text-xs text-slate-400 mt-1">Try broadening your search term or clearing quick filters.</p>
+                    <p className="text-base font-medium text-slate-600">No schools match current search or filters</p>
+                    <p className="text-xs text-slate-400 mt-1">Try resetting filters or adjusting search keywords.</p>
                   </div>
                 </td>
               </tr>
             ) : (
               schools.map((s) => {
-                const isComplete = s.is_contact_complete;
+                const isComplete = s.is_contact_complete || s.contact_status === 'CONTACT_COMPLETE';
                 const hasWa = Boolean(s.official_whatsapp);
 
                 return (
@@ -145,49 +146,52 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
                       <div className="font-semibold text-slate-900 group-hover:text-sky-700 transition-colors line-clamp-1">
                         {s.school_name}
                       </div>
-                      <div className="flex items-center gap-2 mt-0.5">
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <span className="font-mono text-[11px] text-sky-800 bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200/60">
                           {s.udise_code}
                         </span>
-                        {s.status === 'HISTORICAL' && (
-                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded">
-                            Historical
-                          </span>
-                        )}
-                        {s.website && (
-                          <a
-                            href={s.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-slate-400 hover:text-sky-600 transition-colors"
-                            title="Visit Official School Website"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
+                        <span className="text-[10px] text-slate-500 font-medium truncate">
+                          {s.classes_offered ? s.classes_offered.split('(')[0] : s.category}
+                        </span>
                       </div>
                     </td>
 
-                    {/* Management Type */}
-                    <td className="py-3.5 px-3 max-w-[150px]">
-                      <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 truncate max-w-full">
-                        {s.management.replace(' / Education Department', '')}
-                      </span>
-                    </td>
-
-                    {/* Board / Level */}
+                    {/* School Type & Board */}
                     <td className="py-3.5 px-3 whitespace-nowrap">
-                      <div className="text-xs font-medium text-slate-800">{s.board}</div>
-                      <div className="text-[11px] text-slate-400">{s.category}</div>
+                      <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-800">
+                        {s.board}
+                      </span>
+                      <div className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[140px]">
+                        {s.management.replace(' / Education Department', '')}
+                      </div>
                     </td>
 
-                    {/* Block & Locality */}
+                    {/* Area / Taluk & Block */}
                     <td className="py-3.5 px-3 max-w-[160px]">
-                      <div className="font-medium text-slate-800 truncate">{s.block}</div>
-                      <div className="text-[11px] text-slate-400 truncate">
-                        {s.village_locality || s.block} • {s.pincode}
+                      <div className="font-semibold text-slate-800 truncate flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-sky-500 flex-shrink-0" />
+                        <span>{s.taluk || s.block}</span>
                       </div>
+                      <div className="text-[11px] text-slate-400 truncate">
+                        {s.block} • {s.pincode}
+                      </div>
+                    </td>
+
+                    {/* Principal / Headmaster Name */}
+                    <td className="py-3.5 px-3 max-w-[160px]">
+                      {s.principal_name ? (
+                        <div>
+                          <div className="font-medium text-slate-800 truncate" title={s.principal_name}>
+                            {s.principal_name}
+                          </div>
+                          <div className="text-[10px] text-slate-400">
+                            {s.principal_designation || 'Principal'}
+                            {s.principal_office_phone && <span className="text-amber-700 ml-1">• Office Desk</span>}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-300 italic">Not publicly listed</span>
+                      )}
                     </td>
 
                     {/* Official Phone */}
@@ -203,11 +207,11 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
                           <span>{s.official_landline || s.official_mobile}</span>
                         </a>
                       ) : (
-                        <span className="text-xs text-slate-300 italic">Not publicly available</span>
+                        <span className="text-xs text-slate-300 italic">Not available</span>
                       )}
                     </td>
 
-                    {/* Official WhatsApp */}
+                    {/* Official WhatsApp Business */}
                     <td className="py-3.5 px-3 whitespace-nowrap">
                       {hasWa ? (
                         <a
@@ -215,8 +219,8 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-teal-700 hover:text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 transition-all"
-                          title="Chat on Official WhatsApp Business"
+                          className="inline-flex items-center gap-1 text-xs font-mono font-medium text-teal-700 hover:text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 transition-all"
+                          title="Open WhatsApp Business"
                         >
                           <MessageSquare className="w-3 h-3 text-teal-600 fill-teal-600" />
                           <span>{s.official_whatsapp}</span>
@@ -227,7 +231,7 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
                     </td>
 
                     {/* Official Email */}
-                    <td className="py-3.5 px-3 max-w-[180px]">
+                    <td className="py-3.5 px-3 max-w-[170px]">
                       {s.official_email ? (
                         <a
                           href={`mailto:${s.official_email}`}
@@ -243,36 +247,20 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
                       )}
                     </td>
 
-                    {/* Principal Office Contact */}
-                    <td className="py-3.5 px-3 whitespace-nowrap">
-                      {s.principal_office_phone ? (
-                        <div className="flex items-center gap-1 text-xs font-mono font-medium text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                          <Briefcase className="w-3 h-3 text-amber-600" />
-                          <span>{s.principal_office_phone}</span>
-                        </div>
-                      ) : s.principal_name ? (
-                        <span className="text-xs text-slate-600 truncate block max-w-[140px]" title={`Headmaster: ${s.principal_name}`}>
-                          HM: {s.principal_name}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-300 italic">Not listed</span>
-                      )}
-                    </td>
-
                     {/* Verification Status */}
                     <td className="py-3.5 px-3 text-center whitespace-nowrap">
                       {isComplete ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           <CheckCircle className="w-3 h-3 text-emerald-600" />
                           Verified
                         </span>
-                      ) : s.workflow_state === 'FOUND_UNVERIFIED' ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                      ) : s.contact_status === 'PARTIALLY_ENRICHED' || s.workflow_state === 'FOUND_UNVERIFIED' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                           <Clock className="w-3 h-3 text-amber-600" />
-                          Lead Unverified
+                          Pending Verify
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
                           <AlertCircle className="w-3 h-3 text-rose-600" />
                           Missing Contact
                         </span>
@@ -281,16 +269,18 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
 
                     {/* Action */}
                     <td className="py-3.5 px-3 text-right whitespace-nowrap">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectSchool(s);
-                        }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors border border-sky-200"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Inspect</span>
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectSchool(s);
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors border border-sky-200"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Profile</span>
+                        </button>
+                      </div>
                     </td>
 
                   </tr>

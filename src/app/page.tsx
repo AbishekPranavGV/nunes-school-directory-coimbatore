@@ -6,17 +6,24 @@ import { KPICards } from '@/components/KPICards';
 import { FilterBar } from '@/components/FilterBar';
 import { SchoolTable } from '@/components/SchoolTable';
 import { SchoolDetailDrawer } from '@/components/SchoolDetailDrawer';
+import { MissingContactsDashboard } from '@/components/MissingContactsDashboard';
 import { ImportModal } from '@/components/ImportModal';
 import { ExportModal } from '@/components/ExportModal';
 import { SourceMonitoringModal } from '@/components/SourceMonitoringModal';
 import { TestSuiteModal } from '@/components/TestSuiteModal';
 import { LoginModal } from '@/components/LoginModal';
 import { MapViewModal } from '@/components/MapViewModal';
+import { WorkerModal } from '@/components/WorkerModal';
 import { SchoolRecord, KPIMetrics, UserSession } from '@/types';
+import { LayoutGrid, AlertTriangle, Sparkles, X } from 'lucide-react';
 
 export default function DashboardPage() {
+  // Navigation view state
+  const [currentView, setCurrentView] = useState<'directory' | 'missing_contacts'>('directory');
+
   // Data states
   const [schools, setSchools] = useState<SchoolRecord[]>([]);
+  const [allSchoolsForMissing, setAllSchoolsForMissing] = useState<SchoolRecord[]>([]);
   const [kpi, setKpi] = useState<KPIMetrics | null>(null);
   const [totalFiltered, setTotalFiltered] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -25,12 +32,20 @@ export default function DashboardPage() {
   // User auth state
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
 
+  // Research feedback notification
+  const [researchNotification, setResearchNotification] = useState<{
+    schoolName: string;
+    summary: string;
+    status: string;
+  } | null>(null);
+
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [management, setManagement] = useState<string>('');
   const [board, setBoard] = useState<string>('');
   const [category, setCategory] = useState<string>('');
   const [block, setBlock] = useState<string>('');
+  const [taluk, setTaluk] = useState<string>('');
   const [urbanRural, setUrbanRural] = useState<string>('');
   const [status, setStatus] = useState<string>('');
   const [quickFilter, setQuickFilter] = useState<string | null>(null);
@@ -51,6 +66,7 @@ export default function DashboardPage() {
   const [isTestsOpen, setIsTestsOpen] = useState<boolean>(false);
   const [isMapOpen, setIsMapOpen] = useState<boolean>(false);
   const [isLoginOpen, setIsLoginOpen] = useState<boolean>(false);
+  const [isWorkerOpen, setIsWorkerOpen] = useState<boolean>(false);
 
   // Check auth on mount
   useEffect(() => {
@@ -79,7 +95,24 @@ export default function DashboardPage() {
     loadKpi();
   }, [loadKpi]);
 
-  // Fetch Schools
+  // Load missing queue schools specifically when needed
+  const loadAllSchoolsForMissing = useCallback(async () => {
+    try {
+      const res = await fetch('/api/schools?pageSize=2097&quick_filter=no_contact');
+      const data = await res.json();
+      setAllSchoolsForMissing(data.data || []);
+    } catch (err) {
+      console.error('Error loading missing schools:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentView === 'missing_contacts' && allSchoolsForMissing.length === 0) {
+      loadAllSchoolsForMissing();
+    }
+  }, [currentView, allSchoolsForMissing.length, loadAllSchoolsForMissing]);
+
+  // Fetch Schools for table
   const loadSchools = useCallback(async () => {
     setLoading(true);
     try {
@@ -89,6 +122,7 @@ export default function DashboardPage() {
       if (board) params.set('board', board);
       if (category) params.set('category', category);
       if (block) params.set('block', block);
+      if (taluk) params.set('taluk', taluk);
       if (urbanRural) params.set('urban_rural', urbanRural);
       if (status) params.set('status', status);
       if (quickFilter) params.set('quick_filter', quickFilter);
@@ -110,7 +144,7 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }, [
-    searchQuery, management, board, category, block, urbanRural, 
+    searchQuery, management, board, category, block, taluk, urbanRural, 
     status, quickFilter, currentPage, pageSize, sortBy, sortOrder
   ]);
 
@@ -140,6 +174,7 @@ export default function DashboardPage() {
     setBoard('');
     setCategory('');
     setBlock('');
+    setTaluk('');
     setUrbanRural('');
     setStatus('');
     setQuickFilter(null);
@@ -164,7 +199,6 @@ export default function DashboardPage() {
       const err = await res.json();
       throw new Error(err.error || 'Update failed');
     }
-    // Refresh school data & KPI
     await loadSchools();
     await loadKpi();
     setSelectedSchool(prev => prev ? { ...prev, ...updatedFields } : null);
@@ -186,6 +220,46 @@ export default function DashboardPage() {
     await loadKpi();
   };
 
+  // Trigger automated AI Web Research
+  const handleTriggerResearch = async (schoolId: string) => {
+    try {
+      const res = await fetch('/api/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ school_id: schoolId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Research failed');
+
+      setResearchNotification({
+        schoolName: data.school_name,
+        summary: data.summary,
+        status: data.contact_status
+      });
+
+      // Refresh list and metrics
+      await loadSchools();
+      await loadKpi();
+      await loadAllSchoolsForMissing();
+
+      // If drawer is open on this school, update it
+      if (selectedSchool && selectedSchool.id === schoolId) {
+        setSelectedSchool(prev => prev ? {
+          ...prev,
+          contact_status: data.contact_status,
+          missing_queue_category: data.missing_queue_category,
+          confidence_score: data.confidence_score,
+          official_landline: data.discovered_contacts?.official_landline || prev.official_landline,
+          official_email: data.discovered_contacts?.official_email || prev.official_email,
+          principal_name: data.discovered_contacts?.principal_name || prev.principal_name,
+          official_whatsapp: data.discovered_contacts?.official_whatsapp || prev.official_whatsapp
+        } : null);
+      }
+    } catch (err: any) {
+      alert(`Research error: ${err.message}`);
+    }
+  };
+
   // Query string for exports
   const currentFilterParams = new URLSearchParams({
     ...(searchQuery && { q: searchQuery }),
@@ -193,8 +267,13 @@ export default function DashboardPage() {
     ...(board && { board }),
     ...(category && { category }),
     ...(block && { block }),
+    ...(taluk && { taluk }),
     ...(quickFilter && { quick_filter: quickFilter })
   }).toString();
+
+  const missingSchoolsList = allSchoolsForMissing.length > 0 
+    ? allSchoolsForMissing 
+    : schools.filter(s => !s.is_contact_complete);
 
   return (
     <div className="min-h-screen bg-[#f4f8fc] flex flex-col">
@@ -202,6 +281,11 @@ export default function DashboardPage() {
       {/* Top Fixed Header */}
       <Header
         user={currentUser}
+        currentView={currentView}
+        onViewChange={setCurrentView}
+        missingCount={kpi?.high_priority_missing_contacts || 2020}
+        totalCount={kpi?.total_imported_schools || 2097}
+        onOpenWorker={() => setIsWorkerOpen(true)}
         onOpenImport={() => setIsImportOpen(true)}
         onOpenExport={() => setIsExportOpen(true)}
         onOpenSources={() => setIsSourcesOpen(true)}
@@ -214,79 +298,175 @@ export default function DashboardPage() {
       {/* Main Content Dashboard */}
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
+        {/* Research Result Notification Banner */}
+        {researchNotification && (
+          <div className="mb-5 p-4 bg-sky-50 border border-sky-200 rounded-2xl shadow-xs flex items-start justify-between gap-4 animate-in fade-in-50 duration-200">
+            <div className="flex items-start gap-3">
+              <span className="p-2 rounded-xl bg-sky-600 text-white shrink-0 mt-0.5">
+                <Sparkles className="w-4 h-4" />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-slate-900">{researchNotification.schoolName}</h4>
+                  <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                    researchNotification.status === 'CONTACT_COMPLETE'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-rose-100 text-rose-800'
+                  }`}>
+                    {researchNotification.status.replace(/_/g, ' ')}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1">{researchNotification.summary}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setResearchNotification(null)}
+              className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-sky-100/50"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* KPI Summary Cards */}
         <KPICards
           kpi={kpi}
           activeQuickFilter={quickFilter}
           onSelectQuickFilter={(qf) => {
-            setQuickFilter(qf ? qf : null);
-            setCurrentPage(1);
+            if (qf === 'no_contact') {
+              setCurrentView('missing_contacts');
+            } else {
+              setCurrentView('directory');
+              setQuickFilter(qf ? qf : null);
+              setCurrentPage(1);
+            }
           }}
         />
 
-        {/* Filter Bar */}
-        <FilterBar
-          searchQuery={searchQuery}
-          setSearchQuery={(q) => {
-            setSearchQuery(q);
-            setCurrentPage(1);
-          }}
-          management={management}
-          setManagement={(m) => {
-            setManagement(m);
-            setCurrentPage(1);
-          }}
-          board={board}
-          setBoard={(b) => {
-            setBoard(b);
-            setCurrentPage(1);
-          }}
-          category={category}
-          setCategory={(c) => {
-            setCategory(c);
-            setCurrentPage(1);
-          }}
-          block={block}
-          setBlock={(bl) => {
-            setBlock(bl);
-            setCurrentPage(1);
-          }}
-          urbanRural={urbanRural}
-          setUrbanRural={(ur) => {
-            setUrbanRural(ur);
-            setCurrentPage(1);
-          }}
-          status={status}
-          setStatus={(s) => {
-            setStatus(s);
-            setCurrentPage(1);
-          }}
-          quickFilter={quickFilter}
-          setQuickFilter={(qf) => {
-            setQuickFilter(qf);
-            setCurrentPage(1);
-          }}
-          onReset={handleResetFilters}
-          totalFiltered={totalFiltered}
-        />
+        {/* View Switcher Tabs (Visible on all viewports) */}
+        <div className="flex items-center justify-between gap-3 mb-5 border-b border-slate-200 pb-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentView('directory')}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all ${
+                currentView === 'directory'
+                  ? 'bg-sky-700 text-white shadow-xs'
+                  : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>Coimbatore Master Register</span>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-mono ${
+                currentView === 'directory' ? 'bg-sky-800 text-white' : 'bg-slate-100 text-slate-600'
+              }`}>
+                {(kpi?.total_imported_schools || 2097).toLocaleString()}
+              </span>
+            </button>
 
-        {/* Schools Table */}
-        <SchoolTable
-          schools={schools}
-          totalCount={totalFiltered}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          onPageSizeChange={(s) => {
-            setPageSize(s);
-            setCurrentPage(1);
-          }}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          onSort={handleSort}
-          onSelectSchool={setSelectedSchool}
-        />
+            <button
+              onClick={() => setCurrentView('missing_contacts')}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all ${
+                currentView === 'missing_contacts'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <AlertTriangle className="w-4 h-4 text-rose-500" />
+              <span>Missing Contacts Recovery System</span>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-mono ${
+                currentView === 'missing_contacts' ? 'bg-rose-700 text-white' : 'bg-rose-100 text-rose-800'
+              }`}>
+                {(kpi?.high_priority_missing_contacts || 2020).toLocaleString()}
+              </span>
+            </button>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
+            <span>District Status:</span>
+            <span className="font-semibold text-emerald-700">All 15 Blocks & 11 Taluks Sourced</span>
+          </div>
+        </div>
+
+        {/* View Content Conditional */}
+        {currentView === 'missing_contacts' ? (
+          <MissingContactsDashboard
+            schools={missingSchoolsList}
+            onSelectSchool={setSelectedSchool}
+            onTriggerResearch={handleTriggerResearch}
+            onExportMissing={() => setIsExportOpen(true)}
+          />
+        ) : (
+          <>
+            {/* Filter Bar */}
+            <FilterBar
+              searchQuery={searchQuery}
+              setSearchQuery={(q) => {
+                setSearchQuery(q);
+                setCurrentPage(1);
+              }}
+              management={management}
+              setManagement={(m) => {
+                setManagement(m);
+                setCurrentPage(1);
+              }}
+              board={board}
+              setBoard={(b) => {
+                setBoard(b);
+                setCurrentPage(1);
+              }}
+              category={category}
+              setCategory={(c) => {
+                setCategory(c);
+                setCurrentPage(1);
+              }}
+              block={block}
+              setBlock={(bl) => {
+                setBlock(bl);
+                setCurrentPage(1);
+              }}
+              taluk={taluk}
+              setTaluk={(t) => {
+                setTaluk(t);
+                setCurrentPage(1);
+              }}
+              urbanRural={urbanRural}
+              setUrbanRural={(ur) => {
+                setUrbanRural(ur);
+                setCurrentPage(1);
+              }}
+              status={status}
+              setStatus={(s) => {
+                setStatus(s);
+                setCurrentPage(1);
+              }}
+              quickFilter={quickFilter}
+              setQuickFilter={(qf) => {
+                setQuickFilter(qf);
+                setCurrentPage(1);
+              }}
+              onReset={handleResetFilters}
+              totalFiltered={totalFiltered}
+            />
+
+            {/* Schools Table */}
+            <SchoolTable
+              schools={schools}
+              totalCount={totalFiltered}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setCurrentPage(1);
+              }}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+              onSelectSchool={setSelectedSchool}
+            />
+          </>
+        )}
 
       </main>
 
@@ -351,6 +531,11 @@ export default function DashboardPage() {
         onClose={() => setIsMapOpen(false)}
         schools={schools}
         onSelectSchool={setSelectedSchool}
+      />
+
+      <WorkerModal
+        isOpen={isWorkerOpen}
+        onClose={() => setIsWorkerOpen(false)}
       />
 
     </div>

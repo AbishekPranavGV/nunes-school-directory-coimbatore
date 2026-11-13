@@ -5,3 +5,6 @@ out
 .vercel
 data/tnea_school_blocks.pdf
 .DS_Store
+
+.vercel
+.env*

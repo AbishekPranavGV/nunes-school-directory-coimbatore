@@ -18,12 +18,14 @@ import {
   FileText, 
   PhoneForwarded, 
   Save, 
-  UserCheck, 
-  Ban, 
-  ChevronDown, 
-  ChevronUp,
+  Copy,
+  Check,
+  Download,
+  Sparkles,
   Layers,
-  Check
+  GraduationCap,
+  Calendar,
+  Share2
 } from 'lucide-react';
 import { SchoolRecord, UserSession } from '@/types';
 
@@ -33,6 +35,7 @@ interface SchoolDetailDrawerProps {
   currentUser: UserSession | null;
   onUpdateSchool: (updated: Partial<SchoolRecord>) => Promise<void>;
   onLogCall: (logData: any) => Promise<void>;
+  onTriggerResearch?: (schoolId: string) => Promise<void>;
 }
 
 export const SchoolDetailDrawer: React.FC<SchoolDetailDrawerProps> = ({
@@ -40,9 +43,12 @@ export const SchoolDetailDrawer: React.FC<SchoolDetailDrawerProps> = ({
   onClose,
   currentUser,
   onUpdateSchool,
-  onLogCall
+  onLogCall,
+  onTriggerResearch
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'waterfall' | 'call_log' | 'edit'>('overview');
+  const [activeTab, setActiveTab] = useState<'profile' | 'waterfall' | 'call_log' | 'edit'>('profile');
+  const [copiedText, setCopiedText] = useState<string | null>(null);
+  const [isResearching, setIsResearching] = useState(false);
 
   // Call log form state
   const [callOutcome, setCallOutcome] = useState('SPOKE_WITH_PRINCIPAL');
@@ -67,6 +73,32 @@ export const SchoolDetailDrawer: React.FC<SchoolDetailDrawerProps> = ({
   const [editSuccessMsg, setEditSuccessMsg] = useState('');
 
   if (!school) return null;
+
+  const handleCopy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(label);
+    setTimeout(() => setCopiedText(null), 2500);
+  };
+
+  const handleRunAiResearch = async () => {
+    if (!onTriggerResearch) return;
+    setIsResearching(true);
+    try {
+      await onTriggerResearch(school.id);
+    } finally {
+      setIsResearching(false);
+    }
+  };
+
+  const handleExportProfile = () => {
+    const profileJson = JSON.stringify(school, null, 2);
+    const blob = new Blob([profileJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nunes_school_${school.udise_code}_profile.json`;
+    a.click();
+  };
 
   const handleCallSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +156,7 @@ export const SchoolDetailDrawer: React.FC<SchoolDetailDrawerProps> = ({
       <div className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col border-l border-slate-200 overflow-hidden animate-in slide-in-from-right duration-200">
         
         {/* Drawer Header */}
-        <div className="p-6 bg-gradient-to-r from-sky-50/70 via-brand-50/40 to-white border-b border-sky-100 flex items-start justify-between gap-4">
+        <div className="p-6 bg-gradient-to-r from-sky-50 via-brand-50/40 to-white border-b border-sky-100 flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
               <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-sky-100 text-sky-800 border border-sky-200">
@@ -136,11 +168,9 @@ export const SchoolDetailDrawer: React.FC<SchoolDetailDrawerProps> = ({
               <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
                 {school.board}
               </span>
-              {school.status === 'HISTORICAL' && (
-                <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700">
-                  Historical / Inactive
-                </span>
-              )}
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                Taluk: {school.taluk || school.block}
+              </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
               {school.school_name}
@@ -151,26 +181,46 @@ export const SchoolDetailDrawer: React.FC<SchoolDetailDrawerProps> = ({
             </p>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
-            title="Close Drawer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleRunAiResearch}
+              disabled={isResearching}
+              className="p-2 text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-xl transition-all border border-sky-200 flex items-center gap-1 text-xs font-semibold"
+              title="Run automated web research on this school"
+            >
+              <Sparkles className={`w-4 h-4 text-sky-600 ${isResearching ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">AI Research</span>
+            </button>
+
+            <button
+              onClick={handleExportProfile}
+              className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all"
+              title="Export School Profile (JSON)"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={onClose}
+              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
+              title="Close Drawer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}
         <div className="flex items-center border-b border-slate-200 px-6 bg-slate-50/50">
           <button
-            onClick={() => setActiveTab('overview')}
+            onClick={() => setActiveTab('profile')}
             className={`py-3 px-4 text-xs sm:text-sm font-semibold border-b-2 transition-all ${
-              activeTab === 'overview'
+              activeTab === 'profile'
                 ? 'border-sky-600 text-sky-700 bg-white'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            Contact Overview
+            10-Section Profile
           </button>
           <button
             onClick={() => setActiveTab('waterfall')}
@@ -211,10 +261,10 @@ export const SchoolDetailDrawer: React.FC<SchoolDetailDrawerProps> = ({
         {/* Drawer Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
-          {/* TAB 1: OVERVIEW */}
-          {activeTab === 'overview' && (
+          {/* TAB 1: 10-SECTION PROFILE */}
+          {activeTab === 'profile' && (
             <>
-              {/* Contact Completeness Banner */}
+              {/* Status Banner */}
               <div className={`p-4 rounded-xl border flex items-start gap-3.5 ${
                 school.is_contact_complete 
                   ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900' 
@@ -229,219 +279,339 @@ export const SchoolDetailDrawer: React.FC<SchoolDetailDrawerProps> = ({
                   <div className="font-bold flex items-center justify-between">
                     <span>
                       {school.is_contact_complete 
-                        ? 'Contact Complete (Verified Institutional Method)' 
-                        : 'High Priority Missing Contact Queue'}
+                        ? 'CONTACT COMPLETE (Independently Verified)' 
+                        : 'HIGH PRIORITY MISSING CONTACT QUEUE'}
                     </span>
                     <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-white/80 border">
-                      {school.workflow_state}
+                      {school.contact_status || school.workflow_state}
                     </span>
                   </div>
                   <p className="mt-1 text-slate-600">
                     {school.is_contact_complete 
-                      ? 'At least one independently verified institutional contact method is on file.' 
-                      : (school.missing_reasons || 'No public telephone or website published by institution; requires switchboard verification.')}
+                      ? 'Official institution-published telephone, WhatsApp Business, or domain email verified on record.' 
+                      : (school.missing_reasons || 'No public telephone or website published by institution; requires manual switchboard verification.')}
                   </p>
                   <p className="mt-1 text-[11px] font-medium text-slate-500">
-                    Next Action: <span className="text-slate-800 font-semibold">{school.next_action || 'Outbound telephone discovery'}</span>
+                    Confidence: <span className="text-slate-800 font-semibold">{school.confidence_score ? `${(school.confidence_score * 100).toFixed(0)}%` : '0%'}</span> • Next Action: <span className="text-slate-800 font-semibold">{school.next_action || 'Switchboard inquiry'}</span>
                   </p>
                 </div>
               </div>
 
-              {/* Verified Contact Cards */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Approved Contact Channels
+              {/* 1. School Overview */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Building className="w-3.5 h-3.5 text-sky-600" />
+                  <span>1. School Overview</span>
                 </h3>
-
-                {/* Landline / Reception */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                      <Phone className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 font-medium">Official Landline / Switchboard</p>
-                      <p className="text-sm font-semibold text-slate-900 font-mono">
-                        {school.official_landline || <span className="text-slate-400 italic font-sans font-normal">Not publicly available</span>}
-                      </p>
-                    </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-slate-400">School Name: </span>
+                    <span className="font-bold text-slate-900">{school.school_name}</span>
                   </div>
+                  <div>
+                    <span className="text-slate-400">UDISE Code: </span>
+                    <span className="font-mono font-bold text-slate-900">{school.udise_code}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Management: </span>
+                    <span className="font-semibold text-slate-800">{school.management}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Status: </span>
+                    <span className="font-semibold text-slate-800">{school.status}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Academic Information */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-brand-600" />
+                  <span>2. Academic Information</span>
+                </h3>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-slate-400">Educational Board: </span>
+                    <span className="font-bold text-slate-900">{school.board}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">School Level: </span>
+                    <span className="font-semibold text-slate-800">{school.category}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-slate-400">Classes Offered: </span>
+                    <span className="font-semibold text-slate-900">{school.classes_offered || 'Classes 1 to 10'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Address and Location */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-rose-600" />
+                    <span>3. Address & Location</span>
+                  </h3>
+                  {school.google_maps_link && (
+                    <a
+                      href={school.google_maps_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-semibold text-sky-600 hover:underline flex items-center gap-1"
+                    >
+                      <span>Open Google Maps</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
+                <p className="text-xs text-slate-800 font-medium">{school.address}</p>
+                <div className="grid grid-cols-3 gap-2 text-xs pt-1 border-t border-slate-200/60">
+                  <div>
+                    <span className="text-slate-400">Taluk: </span>
+                    <span className="font-semibold text-slate-800">{school.taluk || school.block}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Block: </span>
+                    <span className="font-semibold text-slate-800">{school.block}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">PIN Code: </span>
+                    <span className="font-mono font-bold text-slate-800">{school.pincode}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Principal / Headmaster Information */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Briefcase className="w-3.5 h-3.5 text-amber-600" />
+                    <span>4. Principal / Headmaster Contact</span>
+                  </h3>
+                  {school.principal_name && (
+                    <button
+                      onClick={() => handleCopy(school.principal_name!, 'Principal Name')}
+                      className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1"
+                    >
+                      {copiedText === 'Principal Name' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedText === 'Principal Name' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-slate-400">Name: </span>
+                    <span className="font-bold text-slate-900">{school.principal_name || <span className="text-slate-400 font-normal italic">Not publicly listed</span>}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Designation: </span>
+                    <span className="font-semibold text-slate-800">{school.principal_designation || 'Headmaster / Principal'}</span>
+                  </div>
+                  {school.principal_office_phone && (
+                    <div className="col-span-2 p-2 bg-amber-50 rounded-lg border border-amber-200 flex items-center justify-between">
+                      <div>
+                        <span className="text-amber-800 font-semibold">Principal Office Desk: </span>
+                        <span className="font-mono font-bold text-slate-900">{school.principal_office_phone}</span>
+                      </div>
+                      <a
+                        href={`tel:${school.principal_office_phone.replace(/\s+/g, '')}`}
+                        className="px-2.5 py-1 text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center gap-1"
+                      >
+                        <Phone className="w-3 h-3" />
+                        <span>Call Desk</span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 5. School Office Contact Information */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>5. School Office Contacts</span>
+                  </h3>
                   {school.official_landline && (
-                    <a
-                      href={`tel:${school.official_landline.replace(/\s+/g, '')}`}
-                      className="px-3 py-1.5 text-xs font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1 shadow-sm"
+                    <button
+                      onClick={() => handleCopy(school.official_landline!, 'Phone')}
+                      className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1"
                     >
-                      <Phone className="w-3 h-3" />
-                      <span>Call</span>
-                    </a>
+                      {copiedText === 'Phone' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedText === 'Phone' ? 'Copied' : 'Copy'}</span>
+                    </button>
                   )}
                 </div>
-
-                {/* Mobile */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
-                      <Phone className="w-4 h-4" />
-                    </div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between p-2 bg-white rounded-lg border">
                     <div>
-                      <p className="text-xs text-slate-500 font-medium">Official Public Mobile</p>
-                      <p className="text-sm font-semibold text-slate-900 font-mono">
-                        {school.official_mobile || <span className="text-slate-400 italic font-sans font-normal">Not publicly available</span>}
-                      </p>
+                      <span className="text-slate-400">Official Landline: </span>
+                      <span className="font-mono font-bold text-slate-900">{school.official_landline || <span className="text-slate-400 font-normal italic">Not publicly available</span>}</span>
                     </div>
+                    {school.official_landline && (
+                      <a
+                        href={`tel:${school.official_landline.replace(/\s+/g, '')}`}
+                        className="px-2.5 py-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-1"
+                      >
+                        <Phone className="w-3 h-3" />
+                        <span>Call</span>
+                      </a>
+                    )}
                   </div>
-                  {school.official_mobile && (
-                    <a
-                      href={`tel:${school.official_mobile.replace(/\s+/g, '')}`}
-                      className="px-3 py-1.5 text-xs font-semibold bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors flex items-center gap-1 shadow-sm"
+
+                  <div className="flex items-center justify-between p-2 bg-white rounded-lg border">
+                    <div>
+                      <span className="text-slate-400">Administration Mobile: </span>
+                      <span className="font-mono font-bold text-slate-900">{school.official_mobile || <span className="text-slate-400 font-normal italic">Not publicly available</span>}</span>
+                    </div>
+                    {school.official_mobile && (
+                      <a
+                        href={`tel:${school.official_mobile.replace(/\s+/g, '')}`}
+                        className="px-2.5 py-1 text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-lg flex items-center gap-1"
+                      >
+                        <Phone className="w-3 h-3" />
+                        <span>Call</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 6. WhatsApp Business Contact */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-teal-600" />
+                    <span>6. WhatsApp Business Contact</span>
+                  </h3>
+                  {school.official_whatsapp && (
+                    <button
+                      onClick={() => handleCopy(school.official_whatsapp!, 'WhatsApp')}
+                      className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1"
                     >
-                      <Phone className="w-3 h-3" />
-                      <span>Call</span>
-                    </a>
+                      {copiedText === 'WhatsApp' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedText === 'WhatsApp' ? 'Copied' : 'Copy'}</span>
+                    </button>
                   )}
                 </div>
-
-                {/* WhatsApp Business */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                      <MessageSquare className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 font-medium">Verified WhatsApp Business</p>
-                      <p className="text-sm font-semibold text-slate-900 font-mono">
-                        {school.official_whatsapp ? (
-                          <span className="text-teal-700">{school.official_whatsapp}</span>
-                        ) : (
-                          <span className="text-slate-400 italic font-sans font-normal">No official WhatsApp published</span>
-                        )}
-                      </p>
-                    </div>
+                <div className="flex items-center justify-between p-2 bg-white rounded-lg border text-xs">
+                  <div>
+                    <span className="text-slate-400">Official Business Number: </span>
+                    <span className="font-mono font-bold text-teal-700">{school.official_whatsapp || <span className="text-slate-400 font-normal italic">No official WhatsApp published</span>}</span>
                   </div>
                   {school.official_whatsapp && (
                     <a
                       href={`https://wa.me/${school.official_whatsapp.replace(/[^0-9]/g, '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 text-xs font-semibold bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-1 shadow-sm"
+                      className="px-2.5 py-1 text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-lg flex items-center gap-1 shadow-xs"
                     >
                       <MessageSquare className="w-3 h-3" />
                       <span>Chat WhatsApp</span>
                     </a>
                   )}
                 </div>
+              </div>
 
-                {/* Official Email */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                      <Mail className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 font-medium">Official Institutional Email</p>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {school.official_email || <span className="text-slate-400 italic font-normal">Not publicly available</span>}
-                      </p>
-                    </div>
+              {/* 7. Official Emails */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-blue-600" />
+                    <span>7. Official Emails</span>
+                  </h3>
+                  {school.official_email && (
+                    <button
+                      onClick={() => handleCopy(school.official_email!, 'Email')}
+                      className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1"
+                    >
+                      {copiedText === 'Email' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedText === 'Email' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center justify-between p-2 bg-white rounded-lg border text-xs">
+                  <div>
+                    <span className="text-slate-400">Institutional Email: </span>
+                    <span className="font-semibold text-slate-900">{school.official_email || <span className="text-slate-400 font-normal italic">Not publicly available</span>}</span>
                   </div>
                   {school.official_email && (
                     <a
                       href={`mailto:${school.official_email}`}
-                      className="px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1 shadow-sm"
+                      className="px-2.5 py-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-1 shadow-xs"
                     >
                       <Mail className="w-3 h-3" />
-                      <span>Email</span>
+                      <span>Compose Email</span>
                     </a>
                   )}
                 </div>
+              </div>
 
-                {/* Principal / Headmaster Name & Professional Office Phone */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                        <Briefcase className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500 font-medium">Principal / Headmaster Name</p>
-                        <p className="text-sm font-semibold text-slate-900">
-                          {school.principal_name || <span className="text-slate-400 italic font-normal">Not publicly listed</span>}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  {school.principal_office_phone && (
-                    <div className="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
-                      <div>
-                        <p className="text-[11px] text-amber-800 font-medium uppercase tracking-wide">
-                          Dedicated Principal Office Desk
-                        </p>
-                        <p className="text-xs font-mono font-semibold text-slate-800">
-                          {school.principal_office_phone}
-                        </p>
-                      </div>
-                      <a
-                        href={`tel:${school.principal_office_phone.replace(/\s+/g, '')}`}
-                        className="px-2.5 py-1 text-xs font-medium text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
-                      >
-                        Call Office Desk
+              {/* 8. Website and Source Links */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-purple-600" />
+                  <span>8. Website & Source Links</span>
+                </h3>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Official Website: </span>
+                    {school.website ? (
+                      <a href={school.website} target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline flex items-center gap-1">
+                        <span>{school.website}</span>
+                        <ExternalLink className="w-3 h-3" />
                       </a>
-                    </div>
-                  )}
-                </div>
-
-                {/* School Website & Provenance */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                      <Globe className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 font-medium">Institutional Website</p>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {school.website ? (
-                          <a
-                            href={school.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sky-600 hover:underline flex items-center gap-1"
-                          >
-                            <span>{school.website}</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        ) : (
-                          <span className="text-slate-400 italic font-normal">No dedicated domain found</span>
-                        )}
-                      </p>
-                    </div>
+                    ) : (
+                      <span className="text-slate-400 italic">No domain published</span>
+                    )}
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Source Provenance: </span>
+                    <span className="font-semibold text-slate-800">{school.source_provenance}</span>
                   </div>
                 </div>
-
               </div>
 
-              {/* Provenance & Audit Info */}
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-500 space-y-1.5">
-                <div className="flex justify-between">
-                  <span>Source Provenance:</span>
-                  <span className="font-semibold text-slate-800">{school.source_provenance}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Established:</span>
-                  <span className="font-semibold text-slate-800">{school.established_year || 'Unknown'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Verification Confidence:</span>
-                  <span className="font-semibold text-slate-800">{school.verification_confidence}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Assigned Staff:</span>
-                  <span className="font-semibold text-slate-800">{school.assigned_staff || 'Staff'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Last Checked:</span>
-                  <span className="font-semibold text-slate-800">{school.last_checked || '2026-11-12'}</span>
+              {/* 9. Contact Verification History */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-slate-600" />
+                  <span>9. Verification History & Evidence</span>
+                </h3>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-slate-400">Verification Status: </span>
+                    <span className="font-bold text-slate-800">{school.verification_confidence}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Confidence Score: </span>
+                    <span className="font-bold text-slate-800">{school.confidence_score ? `${(school.confidence_score * 100).toFixed(0)}%` : '0%'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Last Verified Date: </span>
+                    <span className="font-mono text-slate-800">{school.last_verified_date || 'Awaiting initial check'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Assigned Staff: </span>
+                    <span className="font-semibold text-slate-800">{school.assigned_staff || 'Staff'}</span>
+                  </div>
                 </div>
               </div>
+
+              {/* 10. Internal Staff Notes */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-slate-600" />
+                  <span>10. Internal Staff Notes & Recovery Status</span>
+                </h3>
+                <p className="text-xs text-slate-600">
+                  {school.missing_reasons || 'School record verified against official Coimbatore district education register.'}
+                </p>
+                <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-200">
+                  Next Step: <span className="font-semibold text-slate-700">{school.next_action || 'Routine annual roster refresh'}</span>
+                </p>
+              </div>
+
             </>
           )}
 

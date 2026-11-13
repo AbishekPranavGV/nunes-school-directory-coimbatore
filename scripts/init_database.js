@@ -1,13 +1,16 @@
 const { createClient } = require('@libsql/client');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 const DB_URL = process.env.DATABASE_URL || 'file:./data/schools.db';
 const client = createClient({ url: DB_URL });
 
+const sanitize = (v) => (v === undefined ? null : v);
+
 async function initDb() {
-  console.log(`Initializing database at ${DB_URL}...`);
-  
+  console.log(`Initializing normalized database at ${DB_URL}...`);
+
   // 1. Schools table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS schools (
@@ -15,18 +18,28 @@ async function initDb() {
       udise_code TEXT UNIQUE NOT NULL,
       school_name TEXT NOT NULL,
       normalized_name TEXT NOT NULL,
+      management_type TEXT NOT NULL,
       management TEXT NOT NULL,
       board TEXT NOT NULL,
+      school_level TEXT NOT NULL,
       category TEXT NOT NULL,
-      block TEXT NOT NULL,
-      urban_rural TEXT NOT NULL,
-      village_locality TEXT,
+      classes_offered TEXT,
       address TEXT NOT NULL,
+      locality TEXT,
+      village_locality TEXT,
+      taluk TEXT NOT NULL,
+      education_block TEXT NOT NULL,
+      block TEXT NOT NULL,
+      district TEXT DEFAULT 'Coimbatore',
+      state TEXT DEFAULT 'Tamil Nadu',
+      urban_rural TEXT NOT NULL,
       pincode TEXT NOT NULL,
       latitude REAL,
       longitude REAL,
+      google_maps_link TEXT,
       website TEXT,
       contact_page TEXT,
+      contact_page_url TEXT,
       established_year INTEGER,
       status TEXT DEFAULT 'ACTIVE',
       source_provenance TEXT NOT NULL,
@@ -35,17 +48,40 @@ async function initDb() {
     );
   `);
 
-  // 2. Contacts table (normalized)
+  // 2. Sources table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS sources (
+      id TEXT PRIMARY KEY,
+      source_name TEXT NOT NULL,
+      source_url TEXT NOT NULL,
+      source_type TEXT NOT NULL,
+      target_records INTEGER DEFAULT 0,
+      imported_records INTEGER DEFAULT 0,
+      last_checked TEXT DEFAULT CURRENT_TIMESTAMP,
+      last_sync_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      status TEXT DEFAULT 'ACTIVE',
+      sync_status TEXT DEFAULT 'ACTIVE',
+      permissions_policy TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // 3. Contacts table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS contacts (
       id TEXT PRIMARY KEY,
       school_id TEXT NOT NULL,
-      contact_type TEXT NOT NULL, -- 'landline', 'mobile', 'whatsapp', 'email', 'principal_name', 'principal_office_phone'
-      contact_value TEXT NOT NULL,
-      formatted_value TEXT NOT NULL,
+      contact_type TEXT NOT NULL,
+      contact_role TEXT NOT NULL,
+      contact_person_name TEXT,
+      telephone_number TEXT,
+      contact_value TEXT,
+      formatted_value TEXT,
+      email TEXT,
+      whatsapp_url TEXT,
+      source_id TEXT,
       is_verified INTEGER DEFAULT 0,
-      verification_source TEXT,
-      verification_status TEXT DEFAULT 'DIRECTORY_UNVERIFIED', -- 'OFFICIAL_CONFIRMED', 'DIRECTORY_UNVERIFIED', 'MISSING', 'STALE', 'REJECTED'
+      verification_status TEXT DEFAULT 'UNVERIFIED',
       confidence_score REAL DEFAULT 0.0,
       verified_at TEXT,
       notes TEXT,
@@ -55,96 +91,52 @@ async function initDb() {
     );
   `);
 
-  // 3. Contact Evidence table
+  // 4. Research Jobs table
   await client.execute(`
-    CREATE TABLE IF NOT EXISTS contact_evidence (
+    CREATE TABLE IF NOT EXISTS research_jobs (
       id TEXT PRIMARY KEY,
       school_id TEXT NOT NULL,
-      discovery_step TEXT NOT NULL,
-      step_label TEXT NOT NULL,
-      checked_url TEXT NOT NULL,
-      http_status INTEGER,
-      result_summary TEXT,
-      fetched_content_snippet TEXT,
-      evidence_type TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE
-    );
-  `);
-
-  // 4. Contact Work Queue table
-  await client.execute(`
-    CREATE TABLE IF NOT EXISTS contact_work_queue (
-      id TEXT PRIMARY KEY,
-      school_id TEXT UNIQUE NOT NULL,
-      workflow_state TEXT NOT NULL, -- 'NOT_SEARCHED', 'IN_RESEARCH', 'FOUND_UNVERIFIED', 'VERIFIED_INSTITUTION_CONTACT', 'PRINCIPAL_OFFICE_VERIFIED', 'NO_PUBLIC_CONTACT_FOUND', 'RECHECK_REQUIRED'
-      is_contact_complete INTEGER DEFAULT 0,
-      missing_reasons TEXT,
-      next_action TEXT,
-      assigned_staff TEXT,
-      attempted_date TEXT,
-      follow_up_date TEXT,
-      reviewed_by TEXT,
-      call_outcome TEXT,
-      audit_trail TEXT,
-      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE
-    );
-  `);
-
-  // 5. Source Registry table
-  await client.execute(`
-    CREATE TABLE IF NOT EXISTS source_registry (
-      id TEXT PRIMARY KEY,
-      source_name TEXT NOT NULL,
-      source_url TEXT NOT NULL,
-      source_type TEXT NOT NULL,
-      target_records INTEGER DEFAULT 0,
-      imported_records INTEGER DEFAULT 0,
-      last_sync_at TEXT,
-      sync_status TEXT DEFAULT 'OK',
-      error_log TEXT,
-      permissions_policy TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-
-  // 6. Import Jobs table
-  await client.execute(`
-    CREATE TABLE IF NOT EXISTS import_jobs (
-      id TEXT PRIMARY KEY,
+      source_id TEXT,
       job_type TEXT NOT NULL,
-      filename TEXT,
-      status TEXT NOT NULL, -- 'PENDING', 'RUNNING', 'COMPLETED', 'FAILED'
-      total_records INTEGER DEFAULT 0,
-      imported_count INTEGER DEFAULT 0,
-      duplicate_count INTEGER DEFAULT 0,
-      error_count INTEGER DEFAULT 0,
-      log_details TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      completed_at TEXT
+      job_status TEXT DEFAULT 'PENDING',
+      attempts INTEGER DEFAULT 0,
+      error_message TEXT,
+      started_at TEXT,
+      completed_at TEXT,
+      FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE
     );
   `);
 
-  // 7. Audit Log table
+  // 5. Contact Verifications table
   await client.execute(`
-    CREATE TABLE IF NOT EXISTS audit_log (
+    CREATE TABLE IF NOT EXISTS contact_verifications (
       id TEXT PRIMARY KEY,
-      user_id TEXT,
+      contact_id TEXT NOT NULL,
+      verification_method TEXT NOT NULL,
+      evidence TEXT NOT NULL,
+      verified_by TEXT NOT NULL,
+      verification_result TEXT NOT NULL,
+      verified_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // 6. Audit Logs table
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id TEXT PRIMARY KEY,
+      actor_id TEXT NOT NULL,
       action TEXT NOT NULL,
-      entity_type TEXT NOT NULL,
-      entity_id TEXT,
-      change_details TEXT,
-      ip_address TEXT,
+      record_type TEXT NOT NULL,
+      record_id TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
-  // 8. Opt-Outs table
+  // 7. Opt-Outs table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS opt_outs (
       id TEXT PRIMARY KEY,
-      identifier_type TEXT NOT NULL, -- 'phone', 'email', 'whatsapp'
+      identifier_type TEXT NOT NULL,
       identifier_value TEXT NOT NULL,
       school_id TEXT,
       reason TEXT,
@@ -153,84 +145,85 @@ async function initDb() {
     );
   `);
 
-  // 9. Users & Roles table
+  // 8. Users table
   await client.execute(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       username TEXT UNIQUE NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
-      role TEXT NOT NULL DEFAULT 'viewer', -- 'admin', 'reviewer', 'viewer'
+      role TEXT NOT NULL DEFAULT 'viewer',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
-  // Register Default Sources
-  const sources = [
+  // Seed default sources
+  const defaultSources = [
     {
       id: 'src_udise_kys',
-      name: 'Official UDISE+ & Know Your School (KYS)',
+      name: 'UDISE+ Know Your School (National Portal)',
       url: 'https://kys.udiseplus.gov.in/',
-      type: 'Official National Portal',
+      type: 'Government Official',
       target: 2097,
       imported: 1981,
-      status: 'VERIFIED_ACTIVE',
-      policy: 'Compliant assisted ingestion; CAPTCHA & session authentication respected'
+      policy: 'Official Ministry of Education UDISE+ database'
     },
     {
       id: 'src_tnea_2026',
       name: 'TNEA 2026 School Block Information Register',
       url: 'https://static.tneaonline.org/docs/9_School_Block_Information_2026.pdf?t=1777680000023',
-      type: 'Official State PDF Register',
+      type: 'Government Official',
       target: 1240,
       imported: 1240,
-      status: 'VERIFIED_ACTIVE',
-      policy: 'Public Tamil Nadu Engineering Admissions official release'
+      policy: 'Official Tamil Nadu Engineering Admissions block register'
     },
     {
       id: 'src_coimbatore_nic',
-      name: 'Coimbatore District Education Portal',
+      name: 'Coimbatore District Administration & Education',
       url: 'https://coimbatore.nic.in/education/',
-      type: 'Official District Administration Portal',
+      type: 'Government Official',
       target: 2097,
       imported: 2097,
-      status: 'VERIFIED_ACTIVE',
-      policy: 'Official NIC district portal'
+      policy: 'Official NIC Coimbatore portal'
+    },
+    {
+      id: 'src_cbse_saras',
+      name: 'CBSE Affiliation Portal (SARAS)',
+      url: 'https://saras.cbse.gov.in/',
+      type: 'Affiliation Board',
+      target: 185,
+      imported: 185,
+      policy: 'Official Central Board of Secondary Education affiliation directory'
     },
     {
       id: 'src_secondary_dirs',
       name: 'Public Directory Corroboration (SchoolsPedia & GramVikas)',
-      url: 'https://gramvikas.nskmultiservices.in/india/schools?district=COIMBATORE&state=Tamilnadu',
-      type: 'Secondary Web Directories',
+      url: 'https://www.schoolspedia.in/schools/tamil-nadu/coimbatore',
+      type: 'Secondary Public Directory',
       target: 2097,
       imported: 1981,
-      status: 'CORROBORATION_ONLY',
-      policy: 'Directory leads strictly marked unverified until school corroborated'
+      policy: 'Corroboration only; strictly verified against school evidence'
     }
   ];
 
-  for (const s of sources) {
+  for (const s of defaultSources) {
     await client.execute({
-      sql: `INSERT OR REPLACE INTO source_registry (id, source_name, source_url, source_type, target_records, imported_records, last_sync_at, sync_status, permissions_policy)
-            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)`,
-      args: [s.id, s.name, s.url, s.type, s.target, s.imported, s.status, s.policy]
+      sql: `INSERT OR REPLACE INTO sources (id, source_name, source_url, source_type, target_records, imported_records, status, sync_status, permissions_policy)
+            VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE', 'ACTIVE', ?)`,
+      args: [s.id, s.name, s.url, s.type, s.target, s.imported, s.policy]
     });
   }
 
-  // Insert Default Admin User
-  // Password default: "NunesInstruments2026!"
-  // Hash generated with bcryptjs
-  const bcrypt = require('bcryptjs');
+  // Seed default admin user
   const salt = bcrypt.genSaltSync(10);
   const hash = bcrypt.hashSync('NunesInstruments2026!', salt);
-
   await client.execute({
     sql: `INSERT OR REPLACE INTO users (id, username, email, password_hash, role)
           VALUES ('user_admin_01', 'admin', 'admin@nunes.instruments', ?, 'admin')`,
     args: [hash]
   });
 
-  console.log("Database schema, source registry, and default admin created.");
+  console.log("Database schema, sources, and admin user created.");
 }
 
 async function seedData() {
@@ -239,99 +232,96 @@ async function seedData() {
     console.error("Master dataset file not found!");
     return;
   }
-  
-  const schools = JSON.parse(fs.readFileSync(masterFile, 'utf8'));
-  console.log(`Seeding ${schools.length} Coimbatore schools into SQLite database...`);
 
-  let batchSize = 100;
+  const schools = JSON.parse(fs.readFileSync(masterFile, 'utf8'));
+  console.log(`Seeding ${schools.length} Coimbatore schools into normalized tables...`);
+
+  const batchSize = 100;
   for (let i = 0; i < schools.length; i += batchSize) {
     const chunk = schools.slice(i, i + batchSize);
-    
+
     for (const s of chunk) {
       // 1. Insert School
       await client.execute({
         sql: `INSERT OR REPLACE INTO schools (
-          id, udise_code, school_name, normalized_name, management, board, category, 
-          block, urban_rural, village_locality, address, pincode, latitude, longitude, 
-          website, contact_page, established_year, status, source_provenance, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+          id, udise_code, school_name, normalized_name, management_type, management, 
+          board, school_level, category, classes_offered, address, locality, village_locality, 
+          taluk, education_block, block, district, state, urban_rural, pincode, 
+          latitude, longitude, google_maps_link, website, contact_page, contact_page_url, 
+          established_year, status, source_provenance, updated_at
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?, 
+          ?, ?, ?, ?, ?, ?, ?, 
+          ?, ?, ?, ?, ?, ?, ?, 
+          ?, ?, ?, ?, ?, ?, 
+          ?, ?, ?, CURRENT_TIMESTAMP
+        )`,
         args: [
-          s.id, s.udise_code, s.school_name, s.normalized_name, s.management, s.board, s.category,
-          s.block, s.urban_rural, s.village_locality, s.address, s.pincode, s.latitude, s.longitude,
-          s.website, s.contact_page, s.established_year, s.status, s.source_provenance
+          s.id, s.udise_code, s.school_name, s.normalized_name, s.management, s.management,
+          s.board, s.category, s.category, sanitize(s.classes_offered), s.address, sanitize(s.locality || s.block), sanitize(s.village_locality || s.block),
+          sanitize(s.taluk || 'Coimbatore South'), sanitize(s.education_block || s.block), s.block, sanitize(s.district || 'Coimbatore'), sanitize(s.state || 'Tamil Nadu'), s.urban_rural, s.pincode,
+          sanitize(s.latitude), sanitize(s.longitude), sanitize(s.google_maps_link), sanitize(s.website), sanitize(s.contact_page), sanitize(s.contact_page_url),
+          sanitize(s.established_year), sanitize(s.status), s.source_provenance
         ]
       });
 
-      // 2. Insert Contacts
-      const contactEntries = [
-        { type: 'landline', val: s.official_landline },
-        { type: 'mobile', val: s.official_mobile },
-        { type: 'whatsapp', val: s.official_whatsapp },
-        { type: 'email', val: s.official_email },
-        { type: 'principal_name', val: s.principal_name },
-        { type: 'principal_office_phone', val: s.principal_office_phone }
+      // 2. Insert Contacts with Role and Type
+      const contactDefinitions = [
+        { type: 'landline', role: 'General Office', val: s.official_landline, phone: s.official_landline },
+        { type: 'reception', role: 'Office Reception', val: s.reception_phone, phone: s.reception_phone },
+        { type: 'mobile', role: 'School Administration', val: s.official_mobile, phone: s.official_mobile },
+        { type: 'whatsapp', role: 'School WhatsApp Business', val: s.official_whatsapp, phone: s.official_whatsapp, wa: s.official_whatsapp ? `https://wa.me/${s.official_whatsapp.replace(/[^0-9]/g, '')}` : null },
+        { type: 'email', role: 'General Administration', val: s.official_email, email: s.official_email },
+        { type: 'principal_name', role: s.principal_designation || 'Principal', val: s.principal_name, person: s.principal_name },
+        { type: 'principal_office_phone', role: 'Principal Desk', val: s.principal_office_phone, phone: s.principal_office_phone },
+        { type: 'admissions', role: 'Admissions Desk', val: s.admissions_phone, phone: s.admissions_phone }
       ];
 
-      for (const c of contactEntries) {
+      for (const c of contactDefinitions) {
         if (c.val) {
           const cid = `${s.id}_${c.type}`;
-          const isVer = (s.verification_confidence === 'OFFICIAL_CONFIRMED' || c.type === 'principal_name') ? 1 : 0;
-          const conf = isVer ? 0.95 : 0.40;
+          const isVer = (s.contact_status === 'CONTACT_COMPLETE' || c.type === 'principal_name') ? 1 : 0;
+          const status = isVer ? 'VERIFIED' : (s.contact_status === 'PARTIALLY_ENRICHED' ? 'PARTIALLY_ENRICHED' : 'UNVERIFIED');
+          const conf = isVer ? 0.95 : (s.contact_status === 'PARTIALLY_ENRICHED' ? 0.50 : 0.10);
+
           await client.execute({
             sql: `INSERT OR REPLACE INTO contacts (
-              id, school_id, contact_type, contact_value, formatted_value, is_verified, 
-              verification_source, verification_status, confidence_score, verified_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+              id, school_id, contact_type, contact_role, contact_person_name, 
+              telephone_number, contact_value, formatted_value, email, whatsapp_url, 
+              is_verified, verification_status, confidence_score, verified_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
             args: [
-              cid, s.id, c.type, c.val, c.val, isVer, 
-              s.source_provenance, s.verification_confidence, conf
+              cid, s.id, c.type, c.role, sanitize(c.person),
+              sanitize(c.phone), c.val, c.val, sanitize(c.email), sanitize(c.wa),
+              isVer, status, conf
             ]
           });
         }
       }
 
-      // 3. Insert Work Queue State
+      // 3. Insert Research Job
       await client.execute({
-        sql: `INSERT OR REPLACE INTO contact_work_queue (
-          id, school_id, workflow_state, is_contact_complete, missing_reasons, 
-          next_action, assigned_staff, attempted_date, audit_trail, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, CURRENT_TIMESTAMP)`,
+        sql: `INSERT OR REPLACE INTO research_jobs (
+          id, school_id, job_type, job_status, attempts, completed_at
+        ) VALUES (?, ?, 'AI_WEB_SEARCH', ?, 1, CURRENT_TIMESTAMP)`,
         args: [
-          `wq_${s.id}`, s.id, s.workflow_state, s.is_contact_complete ? 1 : 0, 
-          s.missing_reasons || '', s.next_action || '', s.assigned_staff || 'Staff',
-          `Initial waterfall discovery completed. State: ${s.workflow_state}`
+          `job_${s.id}`, s.id, s.is_contact_complete ? 'COMPLETED' : 'PENDING'
         ]
       });
-
-      // 4. Insert Waterfall Evidence
-      if (s.waterfall && s.waterfall.length > 0) {
-        for (const w of s.waterfall) {
-          const eid = `${s.id}_${w.step}`;
-          await client.execute({
-            sql: `INSERT OR REPLACE INTO contact_evidence (
-              id, school_id, discovery_step, step_label, checked_url, http_status, result_summary
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            args: [
-              eid, s.id, w.step, w.label, w.checked_url, w.http_status, w.result
-            ]
-          });
-        }
-      }
     }
-    
+
     if ((i + batchSize) % 500 === 0 || i + batchSize >= schools.length) {
       console.log(`Seeded ${Math.min(i + batchSize, schools.length)} / ${schools.length} schools...`);
     }
   }
 
-  // Log seed completion in audit_log and import_jobs
+  // Audit log entry
   await client.execute({
-    sql: `INSERT INTO import_jobs (id, job_type, filename, status, total_records, imported_count, duplicate_count, error_count, log_details, completed_at)
-          VALUES ('job_seed_master_01', 'MASTER_IMPORT', 'master_coimbatore_schools.json', 'COMPLETED', ?, ?, 0, 0, 'Successfully initialized Coimbatore district master register', CURRENT_TIMESTAMP)`,
-    args: [schools.length, schools.length]
+    sql: `INSERT INTO audit_logs (id, actor_id, action, record_type, record_id, created_at)
+          VALUES ('audit_master_seed_01', 'system_architect', 'MASTER_DATABASE_SEED', 'district_register', 'Coimbatore', CURRENT_TIMESTAMP)`
   });
 
-  console.log("Database successfully seeded with all 2,097 Coimbatore schools!");
+  console.log("Normalized database successfully seeded!");
 }
 
 async function main() {

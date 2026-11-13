@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, Filter, RotateCcw } from 'lucide-react';
+import { Search, X, Filter, RotateCcw, MapPin, Building, Phone, Mail, MessageSquare } from 'lucide-react';
 
 interface FilterBarProps {
   searchQuery: string;
@@ -14,6 +14,8 @@ interface FilterBarProps {
   setCategory: (c: string) => void;
   block: string;
   setBlock: (bl: string) => void;
+  taluk: string;
+  setTaluk: (t: string) => void;
   urbanRural: string;
   setUrbanRural: (ur: string) => void;
   status: string;
@@ -35,6 +37,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   setCategory,
   block,
   setBlock,
+  taluk,
+  setTaluk,
   urbanRural,
   setUrbanRural,
   status,
@@ -50,14 +54,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     'Pollachi South', 'S.S.Kulam', 'Sultanpet', 'Sulur', 'Thondamuthur', 'Valparai'
   ];
 
+  const taluksList = [
+    'Coimbatore South', 'Coimbatore North', 'Pollachi', 'Sulur',
+    'Annur', 'Mettupalayam', 'Madukkarai', 'Perur', 'Kinathukadavu',
+    'Valparai', 'Anaimalai'
+  ];
+
   const quickFilters = [
     { id: null, label: 'All Schools' },
-    { id: 'no_contact', label: 'Missing ANY Contact' },
-    { id: 'no_principal_office', label: 'Without Principal Office' },
-    { id: 'no_whatsapp', label: 'Without WhatsApp' },
-    { id: 'no_email', label: 'Without Email' },
+    { id: 'no_contact', label: 'Missing ANY Contact (Priority)' },
+    { id: 'has_phone', label: 'Official Phone Available' },
+    { id: 'has_principal_office', label: 'Principal Office Available' },
+    { id: 'has_whatsapp', label: 'WhatsApp Business Verified' },
+    { id: 'has_email', label: 'Official Email Available' },
     { id: 'complete', label: 'Contact Complete' },
-    { id: 'needs_verification', label: 'Needs Staff Verification' },
+    { id: 'needs_verification', label: 'Awaiting Research / Verification' },
   ];
 
   const hasActiveFilters = 
@@ -66,6 +77,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     Boolean(board) || 
     Boolean(category) || 
     Boolean(block) || 
+    Boolean(taluk) ||
     Boolean(urbanRural) || 
     Boolean(status) || 
     quickFilter !== null;
@@ -81,7 +93,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by school name, UDISE code (3312...), block, village locality, or PIN (e.g. 641001)..."
+            placeholder="Search by school name, UDISE code (3312...), taluk, educational block, locality, or PIN (e.g. 641001)..."
             className="w-full pl-11 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all"
           />
           {searchQuery && (
@@ -97,7 +109,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         <div className="flex items-center gap-2 justify-between sm:justify-end">
           <div className="px-3.5 py-2 bg-sky-50 text-sky-800 rounded-xl text-xs sm:text-sm font-semibold border border-sky-100 flex items-center gap-1.5 whitespace-nowrap">
             <span className="w-2 h-2 rounded-full bg-sky-500"></span>
-            <span>{totalFiltered.toLocaleString()} Schools Displayed</span>
+            <span>{totalFiltered.toLocaleString()} Schools Matching</span>
           </div>
 
           {hasActiveFilters && (
@@ -140,6 +152,39 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       {/* Multi-Dimensional Select Dropdowns */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
         
+        {/* Taluk Filter */}
+        <div>
+          <label className="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
+            <MapPin className="w-3 h-3 text-sky-500" />
+            <span>Revenue Taluk</span>
+          </label>
+          <select
+            value={taluk}
+            onChange={(e) => setTaluk(e.target.value)}
+            className="w-full text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:bg-white"
+          >
+            <option value="">All 11 Taluks</option>
+            {taluksList.map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Educational Block Filter */}
+        <div>
+          <label className="block text-[11px] font-semibold text-slate-500 mb-1">Educational Block</label>
+          <select
+            value={block}
+            onChange={(e) => setBlock(e.target.value)}
+            className="w-full text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:bg-white"
+          >
+            <option value="">All 15 Blocks</option>
+            {blocksList.map(b => (
+              <option key={b} value={b}>{b}</option>
+            ))}
+          </select>
+        </div>
+
         {/* Management Filter */}
         <div>
           <label className="block text-[11px] font-semibold text-slate-500 mb-1">Management</label>
@@ -153,7 +198,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <option value="Corporation / Local Body">Corporation / Local Body</option>
             <option value="Government Aided">Government Aided</option>
             <option value="Private Unaided">Private Unaided</option>
-            <option value="Kendriya Vidyalaya">Kendriya Vidyalaya</option>
+            <option value="Kendriya Vidyalaya">Kendriya Vidyalaya / Central</option>
             <option value="Social/Tribal Welfare">Social / Tribal Welfare</option>
           </select>
         </div>
@@ -176,9 +221,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           </select>
         </div>
 
-        {/* Category Filter */}
+        {/* Category / Level Filter */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-500 mb-1">Level / Category</label>
+          <label className="block text-[11px] font-semibold text-slate-500 mb-1">Class Level</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -190,29 +235,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <option value="Secondary">Secondary (High School)</option>
             <option value="Higher Secondary">Higher Secondary (11-12)</option>
             <option value="Nursery / Montessori / Kindergarten">Nursery / Primary</option>
-            <option value="Residential">Residential / Tribal</option>
-            <option value="Special">Special School</option>
-          </select>
-        </div>
-
-        {/* District Block Filter */}
-        <div>
-          <label className="block text-[11px] font-semibold text-slate-500 mb-1">District Block</label>
-          <select
-            value={block}
-            onChange={(e) => setBlock(e.target.value)}
-            className="w-full text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:bg-white"
-          >
-            <option value="">All 15 Blocks</option>
-            {blocksList.map(b => (
-              <option key={b} value={b}>{b}</option>
-            ))}
+            <option value="Residential">Residential</option>
+            <option value="Special">Special Education</option>
           </select>
         </div>
 
         {/* Urban / Rural Filter */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-500 mb-1">Urban / Rural</label>
+          <label className="block text-[11px] font-semibold text-slate-500 mb-1">Area Type</label>
           <select
             value={urbanRural}
             onChange={(e) => setUrbanRural(e.target.value)}
@@ -221,20 +251,6 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <option value="">All Areas</option>
             <option value="Urban">Urban</option>
             <option value="Rural">Rural</option>
-          </select>
-        </div>
-
-        {/* Status Filter */}
-        <div>
-          <label className="block text-[11px] font-semibold text-slate-500 mb-1">Status</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:bg-white"
-          >
-            <option value="">All Statuses</option>
-            <option value="ACTIVE">Active Schools</option>
-            <option value="HISTORICAL">Historical / Closed</option>
           </select>
         </div>
 

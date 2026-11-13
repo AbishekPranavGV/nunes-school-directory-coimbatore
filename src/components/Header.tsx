@@ -11,12 +11,20 @@ import {
   UserCheck, 
   LogOut, 
   CheckCircle2,
-  Activity
+  Activity,
+  Cpu,
+  AlertTriangle,
+  LayoutGrid
 } from 'lucide-react';
 import { UserSession } from '@/types';
 
 interface HeaderProps {
   user: UserSession | null;
+  currentView: 'directory' | 'missing_contacts';
+  onViewChange: (view: 'directory' | 'missing_contacts') => void;
+  missingCount: number;
+  totalCount: number;
+  onOpenWorker: () => void;
   onOpenImport: () => void;
   onOpenExport: () => void;
   onOpenSources: () => void;
@@ -28,6 +36,11 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   user,
+  currentView,
+  onViewChange,
+  missingCount,
+  totalCount,
+  onOpenWorker,
   onOpenImport,
   onOpenExport,
   onOpenSources,
@@ -42,32 +55,78 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between h-20">
           
           {/* Logo & District Branding */}
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-brand-700 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center text-white shadow-md shadow-sky-500/20 shrink-0">
               <Building2 className="w-6 h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
                   Nunes Instruments <span className="text-sky-600 font-semibold">AI School Directory</span>
                 </h1>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   Coimbatore District
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 flex items-center gap-2 mt-0.5">
+              <p className="text-xs text-slate-500 hidden sm:flex items-center gap-2 mt-0.5">
                 <span>Tamil Nadu, India</span>
                 <span className="text-slate-300">•</span>
                 <span>Authoritative UDISE+ & TNEA 2026 Master Register</span>
                 <span className="text-slate-300">•</span>
-                <span className="text-sky-700 font-medium">Urban & Rural Coverage</span>
+                <span className="text-sky-700 font-medium">Urban & Rural</span>
               </p>
             </div>
           </div>
 
+          {/* View Switcher Pills */}
+          <div className="hidden lg:flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200">
+            <button
+              onClick={() => onViewChange('directory')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                currentView === 'directory'
+                  ? 'bg-white text-sky-800 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5 text-sky-600" />
+              <span>Master Directory</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                currentView === 'directory' ? 'bg-sky-100 text-sky-800' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {totalCount.toLocaleString()}
+              </span>
+            </button>
+
+            <button
+              onClick={() => onViewChange('missing_contacts')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                currentView === 'missing_contacts'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : 'text-rose-700 hover:bg-rose-50'
+              }`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>Missing Contacts Queue</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                currentView === 'missing_contacts' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-800'
+              }`}>
+                {missingCount.toLocaleString()}
+              </span>
+            </button>
+          </div>
+
           {/* Action Buttons */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onOpenWorker}
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 hover:bg-sky-50 hover:text-sky-700 border border-slate-200 hover:border-sky-200 rounded-lg transition-all"
+              title="Ingestion Worker & Autonomous Background Scheduler"
+            >
+              <Cpu className="w-4 h-4 text-indigo-600" />
+              <span>Worker</span>
+            </button>
+
             <button
               onClick={onOpenMap}
               className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 hover:bg-sky-50 hover:text-sky-700 border border-slate-200 hover:border-sky-200 rounded-lg transition-all"
@@ -79,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={onOpenSources}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 hover:bg-sky-50 hover:text-sky-700 border border-slate-200 hover:border-sky-200 rounded-lg transition-all"
+              className="hidden xl:inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 hover:bg-sky-50 hover:text-sky-700 border border-slate-200 hover:border-sky-200 rounded-lg transition-all"
               title="Public Ingestion Adapters & Provenance"
             >
               <Database className="w-4 h-4 text-sky-600" />
@@ -89,15 +148,16 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onOpenTests}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-all"
-              title="Run 14-point Acceptance Test Suite"
+              title="Run 16-point Acceptance Test Suite"
             >
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span className="hidden md:inline">Acceptance</span> Tests
+              <span className="hidden sm:inline">16 Tests</span>
+              <span className="sm:hidden">Tests</span>
             </button>
 
             <button
               onClick={onOpenImport}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-white hover:bg-sky-50 hover:text-sky-700 border border-slate-200 hover:border-sky-300 rounded-lg transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-white hover:bg-sky-50 hover:text-sky-700 border border-slate-200 hover:border-sky-300 rounded-lg transition-all shadow-xs"
               title="Import Register (CSV / XLSX / PDF)"
             >
               <Upload className="w-4 h-4 text-sky-600" />
@@ -106,14 +166,14 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={onOpenExport}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-lg shadow-sm shadow-sky-600/20 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-lg shadow-xs shadow-sky-600/20 transition-all"
               title="Export Full District or Filtered Subset"
             >
               <Download className="w-4 h-4" />
               <span>Export</span>
             </button>
 
-            <div className="h-6 w-px bg-slate-200 mx-1"></div>
+            <div className="h-6 w-px bg-slate-200 mx-0.5"></div>
 
             {user ? (
               <div className="flex items-center gap-2">
@@ -138,7 +198,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 hover:text-sky-700 hover:bg-sky-50 border border-transparent hover:border-sky-200 rounded-lg transition-all"
               >
                 <ShieldCheck className="w-4 h-4 text-slate-500" />
-                <span>Admin Login</span>
+                <span className="hidden sm:inline">Admin Login</span>
               </button>
             )}
 

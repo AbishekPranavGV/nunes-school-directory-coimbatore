@@ -56,8 +56,8 @@ export const TestSuiteModal: React.FC<TestSuiteModalProps> = ({ isOpen, onClose 
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">14-Point Acceptance Test Suite</h3>
-              <p className="text-xs text-slate-500">Live validation of scale, duplicate UDISE, ethics, RBAC, and zero frontend secrets</p>
+              <h3 className="text-base font-bold text-slate-900">16-Point Acceptance Test Suite</h3>
+              <p className="text-xs text-slate-500">Live validation of import, duplicate UDISE, E.164 phone, wa.me, RFC email, missing queue, RBAC, and exports</p>
             </div>
           </div>
           

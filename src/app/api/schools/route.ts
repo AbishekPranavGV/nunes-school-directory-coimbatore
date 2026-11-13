@@ -12,9 +12,20 @@ export async function GET(req: NextRequest) {
     const board = searchParams.get('board');
     const category = searchParams.get('category');
     const block = searchParams.get('block');
+    const taluk = searchParams.get('taluk');
     const urban_rural = searchParams.get('urban_rural');
     const status = searchParams.get('status');
+    const contact_status = searchParams.get('contact_status');
+    const missing_queue_category = searchParams.get('missing_queue_category');
     const quick_filter = searchParams.get('quick_filter');
+
+    // Boolean filters
+    const has_phone = searchParams.get('has_phone');
+    const has_principal_office = searchParams.get('has_principal_office');
+    const has_whatsapp = searchParams.get('has_whatsapp');
+    const has_email = searchParams.get('has_email');
+    const has_missing_contact = searchParams.get('has_missing_contact');
+
     const page = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = Math.min(parseInt(searchParams.get('pageSize') || '25', 10), 500);
     const sortBy = searchParams.get('sortBy') || 'school_name';
@@ -23,14 +34,15 @@ export async function GET(req: NextRequest) {
     const allSchools = await getMasterSchoolsFromMemoryOrDb();
 
     let filtered = allSchools.filter((s: any) => {
-      // Search across name, UDISE code, locality, block, and PIN
+      // Global search across name, code, block, taluk, locality, address, PIN
       if (q) {
         const matchesName = s.school_name.toLowerCase().includes(q);
         const matchesUdise = s.udise_code.toLowerCase().includes(q);
         const matchesBlock = s.block.toLowerCase().includes(q);
-        const matchesLocality = (s.village_locality || '').toLowerCase().includes(q);
+        const matchesTaluk = (s.taluk || '').toLowerCase().includes(q);
+        const matchesLocality = (s.locality || s.village_locality || '').toLowerCase().includes(q);
         const matchesPin = s.pincode.toLowerCase().includes(q);
-        if (!matchesName && !matchesUdise && !matchesBlock && !matchesLocality && !matchesPin) {
+        if (!matchesName && !matchesUdise && !matchesBlock && !matchesTaluk && !matchesLocality && !matchesPin) {
           return false;
         }
       }
@@ -39,10 +51,22 @@ export async function GET(req: NextRequest) {
       if (board && s.board !== board) return false;
       if (category && s.category !== category) return false;
       if (block && s.block !== block) return false;
+      if (taluk && s.taluk !== taluk) return false;
       if (urban_rural && s.urban_rural !== urban_rural) return false;
       if (status && s.status !== status) return false;
 
-      // Quick filters per requirements
+      // Contact Status Filter
+      if (contact_status && s.contact_status !== contact_status) return false;
+      if (missing_queue_category && s.missing_queue_category !== missing_queue_category) return false;
+
+      // Boolean filters
+      if (has_phone === 'true' && !s.official_landline && !s.official_mobile) return false;
+      if (has_principal_office === 'true' && !s.principal_office_phone) return false;
+      if (has_whatsapp === 'true' && !s.official_whatsapp) return false;
+      if (has_email === 'true' && !s.official_email) return false;
+      if (has_missing_contact === 'true' && s.is_contact_complete) return false;
+
+      // Quick filter presets
       if (quick_filter === 'no_contact' && s.is_contact_complete) return false;
       if (quick_filter === 'no_principal_office' && s.principal_office_phone) return false;
       if (quick_filter === 'no_whatsapp' && s.official_whatsapp) return false;
@@ -90,7 +114,10 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { udise_code, school_name, management, board, category, block, address, pincode } = body;
+    const { 
+      udise_code, school_name, management, board, category, classes_offered,
+      block, taluk, address, locality, pincode, website 
+    } = body;
 
     if (!udise_code || !school_name || !block || !pincode) {
       return NextResponse.json({ error: 'Missing mandatory fields' }, { status: 400 });
@@ -99,18 +126,32 @@ export async function POST(req: NextRequest) {
     const db = getDb();
     const id = `sch_custom_${Date.now()}`;
     const norm = school_name.toLowerCase().replace(/[^a-z0-9]/g, ' ').trim();
+    const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(school_name + ' ' + block + ' Coimbatore')}`;
 
     await db.execute({
-      sql: `INSERT INTO schools (id, udise_code, school_name, normalized_name, management, board, category, block, urban_rural, address, pincode, source_provenance)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Admin Manual Entry')`,
-      args: [id, udise_code, school_name, norm, management || 'Private Unaided', board || 'Tamil Nadu State Board', category || 'Primary', block, 'Urban', address || `${school_name}, ${block}`, pincode]
+      sql: `INSERT INTO schools (
+        id, udise_code, school_name, normalized_name, management_type, management, 
+        board, school_level, category, classes_offered, address, locality, taluk, 
+        education_block, block, district, state, urban_rural, pincode, google_maps_link, 
+        website, source_provenance
+      ) VALUES (
+        ?, ?, ?, ?, ?, ?, 
+        ?, ?, ?, ?, ?, ?, ?, 
+        ?, ?, 'Coimbatore', 'Tamil Nadu', 'Urban', ?, ?, 
+        ?, 'Admin Manual Entry'
+      )`,
+      args: [
+        id, udise_code, school_name, norm, management || 'Private Unaided', management || 'Private Unaided',
+        board || 'Tamil Nadu State Board', category || 'Primary', category || 'Primary', classes_offered || 'Classes 1 to 10', address || `${school_name}, ${block}`, locality || block, taluk || 'Coimbatore South',
+        block, block, pincode, mapsLink, website || null
+      ]
     });
 
     // Record audit
     await db.execute({
-      sql: `INSERT INTO audit_log (id, user_id, action, entity_type, entity_id, change_details)
-            VALUES (?, ?, 'CREATE_SCHOOL', 'school', ?, ?)`,
-      args: [`audit_${Date.now()}`, user.id, id, `Added school ${school_name} (${udise_code})`]
+      sql: `INSERT INTO audit_logs (id, actor_id, action, record_type, record_id, created_at)
+            VALUES (?, ?, 'CREATE_SCHOOL', 'school', ?, CURRENT_TIMESTAMP)`,
+      args: [`audit_${Date.now()}`, user.username, id]
     });
 
     return NextResponse.json({ success: true, id, message: 'School created successfully' }, { status: 201 });
