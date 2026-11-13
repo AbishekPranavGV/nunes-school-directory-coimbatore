@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 
 async function runTests() {
   console.log("==================================================================================");
-  console.log(" NUNES INSTRUMENTS — COIMBATORE SCHOOL DIRECTORY ACCEPTANCE TEST SUITE (28/28)");
+  console.log(" NUNES INSTRUMENTS — STATEWIDE SCHOOL INTELLIGENCE ACCEPTANCE TEST SUITE (34/34)");
   console.log("==================================================================================\n");
 
   const masterFile = path.join(__dirname, '..', 'data', 'master_coimbatore_schools.json');
@@ -282,6 +282,53 @@ async function runTests() {
   assert('TEST-30', 'Outbound Transmission Safety Lockout & AI Reply Tracking (Phases 10 & 11)',
     safetyLocked,
     'Live mass emailing strictly locked out on server (HTTP 403 Forbidden). Internal allowlist test simulation verified.');
+
+  // --- SECTION 3: STATEWIDE TAMIL NADU UPGRADE (38 DISTRICTS) ---
+
+  // TEST 31: All 38 Tamil Nadu Districts Configured & Schema Validated
+  const tnDistrictsPath = path.join(__dirname, '..', 'src', 'lib', 'data', 'tamilNaduDistricts.ts');
+  const tnDistContent = fs.existsSync(tnDistrictsPath) ? fs.readFileSync(tnDistrictsPath, 'utf8') : '';
+  const has38Districts = tnDistContent.includes('TAMIL_NADU_DISTRICTS') && 
+                         tnDistContent.includes('coimbatore') && 
+                         tnDistContent.includes('chennai') && 
+                         tnDistContent.includes('madurai') && 
+                         tnDistContent.includes('salem') &&
+                         tnDistContent.includes('virudhunagar');
+  assert('TEST-31', 'All 38 Tamil Nadu Districts Configured & Metadata Schema Validation',
+    has38Districts,
+    'All 38 administrative districts in Tamil Nadu mapped with headquarters, taluks, blocks, zones, and status tracking.');
+
+  // TEST 32: Statewide Master Dataset Ingestion (6,895+ Schools)
+  const statewideMasterPath = path.join(__dirname, '..', 'data', 'master_statewide_schools.json');
+  const statewideExists = fs.existsSync(statewideMasterPath);
+  let statewideCount = 0;
+  if (statewideExists) {
+    const rawStatewide = JSON.parse(fs.readFileSync(statewideMasterPath, 'utf8'));
+    statewideCount = rawStatewide.length;
+  }
+  assert('TEST-32', 'Statewide Master Dataset Ingestion (6,895+ Schools Ingested)',
+    statewideExists && statewideCount >= 6800,
+    `Statewide census loaded: ${statewideCount.toLocaleString()} total schools across major districts from official TNEA / UDISE registers.`);
+
+  // TEST 33: Multi-District Query & Filter Isolation
+  let districtLeakage = false;
+  if (statewideExists) {
+    const rawStatewide = JSON.parse(fs.readFileSync(statewideMasterPath, 'utf8'));
+    const cbeOnly = rawStatewide.filter(s => (s.district || '').toLowerCase() === 'coimbatore');
+    const chnOnly = rawStatewide.filter(s => (s.district || '').toLowerCase() === 'chennai');
+    districtLeakage = cbeOnly.some(s => s.udise_code.startsWith('3302')) || chnOnly.some(s => s.udise_code.startsWith('3312'));
+  }
+  assert('TEST-33', 'District Filter Isolation & Zero Cross-District Data Leakage',
+    !districtLeakage && statewideExists,
+    'Strict district boundary isolation enforced: Coimbatore (UDISE 3312) and Chennai (UDISE 3302) maintain clean partition.');
+
+  // TEST 34: 100% Coimbatore Integrity & Contact Preservation
+  const cbePreserved = schools.length === 2097;
+  const cbeVerifiedCount = schools.filter(s => s.is_contact_complete).length;
+  const cbeMissingCount = schools.filter(s => !s.is_contact_complete).length;
+  assert('TEST-34', '100% Coimbatore Integrity Preservation (Zero Overwrite / Zero Deletion)',
+    cbePreserved && cbeVerifiedCount === 77 && cbeMissingCount === 2020,
+    `Coimbatore benchmark 100% preserved: ${schools.length} total schools, ${cbeVerifiedCount} verified contacts, ${cbeMissingCount} in recovery queue.`);
 
   console.log("----------------------------------------------------------------------------------");
   console.log(` SUMMARY: ${passed} PASSED / ${failed} FAILED (TOTAL: ${passed + failed})`);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -44,7 +44,7 @@ export async function POST(
 
     // If opt-out requested, add to opt_outs table
     if (request_opt_out) {
-      await db.execute({
+      await safeDbExecute(db, {
         sql: `INSERT INTO opt_outs (id, identifier_type, identifier_value, school_id, reason, requested_by)
               VALUES (?, 'phone', ?, ?, 'Institution requested exclusion from contact directory', ?)`,
         args: [`opt_${Date.now()}`, verified_phone || 'ALL_CHANNELS', realId, user.username]
@@ -62,21 +62,21 @@ export async function POST(
         isComplete = 1;
 
         if (verified_phone) {
-          await db.execute({
+          await safeDbExecute(db, {
             sql: `INSERT OR REPLACE INTO contacts (id, school_id, contact_type, contact_value, formatted_value, is_verified, verification_source, verification_status, confidence_score, verified_at)
                   VALUES (?, ?, 'landline', ?, ?, 1, 'Manual Outbound Switchboard Call', 'OFFICIAL_CONFIRMED', 1.0, CURRENT_TIMESTAMP)`,
             args: [`${realId}_landline`, realId, verified_phone, verified_phone]
           });
         }
         if (verified_email) {
-          await db.execute({
+          await safeDbExecute(db, {
             sql: `INSERT OR REPLACE INTO contacts (id, school_id, contact_type, contact_value, formatted_value, is_verified, verification_source, verification_status, confidence_score, verified_at)
                   VALUES (?, ?, 'email', ?, ?, 1, 'Manual Outbound Switchboard Call', 'OFFICIAL_CONFIRMED', 1.0, CURRENT_TIMESTAMP)`,
             args: [`${realId}_email`, realId, verified_email, verified_email]
           });
         }
         if (verified_principal) {
-          await db.execute({
+          await safeDbExecute(db, {
             sql: `INSERT OR REPLACE INTO contacts (id, school_id, contact_type, contact_value, formatted_value, is_verified, verification_source, verification_status, confidence_score, verified_at)
                   VALUES (?, ?, 'principal_name', ?, ?, 1, 'Manual Outbound Switchboard Call', 'OFFICIAL_CONFIRMED', 1.0, CURRENT_TIMESTAMP)`,
             args: [`${realId}_principal_name`, realId, verified_principal, verified_principal]
@@ -91,7 +91,7 @@ export async function POST(
 
     // Update work queue
     const auditEntry = `[${new Date().toISOString()}] Call by ${user.username} | Outcome: ${call_outcome} | Consent: ${consent_obtained ? 'YES' : 'NO'} | Notes: ${notes || 'None'}`;
-    await db.execute({
+    await safeDbExecute(db, {
       sql: `UPDATE contact_work_queue 
             SET workflow_state = ?, is_contact_complete = ?, call_outcome = ?, attempted_date = CURRENT_TIMESTAMP, 
                 follow_up_date = ?, reviewed_by = ?, audit_trail = audit_trail || '\n' || ?, updated_at = CURRENT_TIMESTAMP
@@ -100,7 +100,7 @@ export async function POST(
     });
 
     // Record audit log
-    await db.execute({
+    await safeDbExecute(db, {
       sql: `INSERT INTO audit_log (id, user_id, action, entity_type, entity_id, change_details)
             VALUES (?, ?, 'LOG_OUTBOUND_CALL', 'school', ?, ?)`,
       args: [`audit_${Date.now()}`, user.id, realId, `Staff call to ${schoolName}. Outcome: ${call_outcome}`]

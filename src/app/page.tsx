@@ -46,6 +46,9 @@ export default function DashboardPage() {
     status: string;
   } | null>(null);
 
+  // District state (defaults to 'coimbatore', or 'all' for statewide 38 districts)
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('coimbatore');
+
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [management, setManagement] = useState<string>('');
@@ -102,13 +105,13 @@ export default function DashboardPage() {
   // Fetch KPI
   const loadKpi = useCallback(async () => {
     try {
-      const res = await fetch('/api/kpi');
+      const res = await fetch(`/api/kpi?district=${selectedDistrict}`);
       const data = await res.json();
       setKpi(data);
     } catch (err) {
       console.error('Error fetching KPI:', err);
     }
-  }, []);
+  }, [selectedDistrict]);
 
   useEffect(() => {
     loadKpi();
@@ -117,13 +120,13 @@ export default function DashboardPage() {
   // Load missing queue schools specifically when needed
   const loadAllSchoolsForMissing = useCallback(async () => {
     try {
-      const res = await fetch('/api/schools?pageSize=2097&quick_filter=no_contact');
+      const res = await fetch(`/api/schools?pageSize=3000&quick_filter=no_contact&district=${selectedDistrict}`);
       const data = await res.json();
       setAllSchoolsForMissing(data.data || []);
     } catch (err) {
       console.error('Error loading missing schools:', err);
     }
-  }, []);
+  }, [selectedDistrict]);
 
   useEffect(() => {
     if ((currentView === 'verification' || currentView === 'dashboard') && allSchoolsForMissing.length === 0) {
@@ -136,6 +139,7 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+      if (selectedDistrict) params.set('district', selectedDistrict);
       if (searchQuery) params.set('q', searchQuery);
       if (management) params.set('management', management);
       if (board) params.set('board', board);
@@ -163,7 +167,7 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }, [
-    searchQuery, management, board, category, block, taluk, urbanRural, 
+    selectedDistrict, searchQuery, management, board, category, block, taluk, urbanRural, 
     status, quickFilter, currentPage, pageSize, sortBy, sortOrder
   ]);
 
@@ -284,8 +288,17 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSelectDistrict = (districtId: string) => {
+    setSelectedDistrict(districtId);
+    setBlock('');
+    setTaluk('');
+    setCurrentPage(1);
+    setAllSchoolsForMissing([]);
+  };
+
   // Query string for exports
   const currentFilterParams = new URLSearchParams({
+    ...(selectedDistrict && { district: selectedDistrict }),
     ...(searchQuery && { q: searchQuery }),
     ...(management && { management }),
     ...(board && { board }),
@@ -307,6 +320,8 @@ export default function DashboardPage() {
         user={currentUser}
         currentView={currentView}
         onViewChange={setCurrentView}
+        selectedDistrict={selectedDistrict}
+        onSelectDistrict={handleSelectDistrict}
         missingCount={kpi?.high_priority_missing_contacts || 2020}
         totalCount={kpi?.total_imported_schools || 2097}
         onOpenWorker={() => setIsWorkerOpen(true)}
@@ -358,6 +373,8 @@ export default function DashboardPage() {
             kpi={kpi}
             schools={schools}
             onNavigate={setCurrentView}
+            selectedDistrict={selectedDistrict}
+            onSelectDistrict={handleSelectDistrict}
             onSelectQuickFilter={(qf) => {
               if (qf === 'no_contact') {
                 setCurrentView('verification');
@@ -386,6 +403,7 @@ export default function DashboardPage() {
             onSelectSchool={setSelectedSchool}
             onTriggerResearch={handleTriggerResearch}
             onExportMissing={() => setIsExportOpen(true)}
+            selectedDistrict={selectedDistrict}
           />
         ) : currentView === 'circulars' ? (
           <CircularCenterView
@@ -421,6 +439,8 @@ export default function DashboardPage() {
                 setSearchQuery(q);
                 setCurrentPage(1);
               }}
+              selectedDistrict={selectedDistrict}
+              setSelectedDistrict={handleSelectDistrict}
               management={management}
               setManagement={(m) => {
                 setManagement(m);

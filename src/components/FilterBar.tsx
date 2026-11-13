@@ -1,11 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Search, X, Filter, RotateCcw, MapPin, Building, Phone, Mail, MessageSquare } from 'lucide-react';
+import { Search, X, Filter, RotateCcw, MapPin, Building, Phone, Mail, MessageSquare, Globe2 } from 'lucide-react';
+import { TAMIL_NADU_DISTRICTS } from '@/lib/data/tamilNaduDistricts';
 
 interface FilterBarProps {
   searchQuery: string;
   setSearchQuery: (q: string) => void;
+  selectedDistrict?: string;
+  setSelectedDistrict?: (d: string) => void;
   management: string;
   setManagement: (m: string) => void;
   board: string;
@@ -29,6 +32,8 @@ interface FilterBarProps {
 export const FilterBar: React.FC<FilterBarProps> = ({
   searchQuery,
   setSearchQuery,
+  selectedDistrict,
+  setSelectedDistrict,
   management,
   setManagement,
   board,
@@ -152,6 +157,26 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       {/* Multi-Dimensional Select Dropdowns */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
         
+        {/* District Filter */}
+        {setSelectedDistrict && (
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
+              <Globe2 className="w-3 h-3 text-emerald-600" />
+              <span>District (TN)</span>
+            </label>
+            <select
+              value={selectedDistrict || 'coimbatore'}
+              onChange={(e) => setSelectedDistrict(e.target.value)}
+              className="w-full text-xs py-2 px-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg text-emerald-950 font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white"
+            >
+              <option value="all">All Tamil Nadu (38)</option>
+              {TAMIL_NADU_DISTRICTS.map(d => (
+                <option key={d.id} value={d.id}>{d.name} ({d.total_schools})</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Taluk Filter */}
         <div>
           <label className="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">

@@ -56,12 +56,16 @@ export function getDb(): Client {
   return clientInstance;
 }
 
+let memoryCacheCoimbatore: any[] | null = null;
+let memoryCacheStatewide: any[] | null = null;
+
 export async function safeDbExecute(client: Client, stmt: any): Promise<any> {
   try {
     return await client.execute(stmt);
   } catch (err: any) {
     const isReadOnly = 
       err?.message?.includes('SQLITE_READONLY') || 
+      err?.message?.includes('readonly database') ||
       err?.code === 'SQLITE_READONLY' || 
       err?.rawCode === 8;
     if (isReadOnly) {
@@ -72,12 +76,49 @@ export async function safeDbExecute(client: Client, stmt: any): Promise<any> {
   }
 }
 
-// Helper to query all master schools with high performance
-export async function getMasterSchoolsFromMemoryOrDb() {
+// Helper to query master schools with in-memory caching and statewide multi-district filtering
+export async function getMasterSchoolsFromMemoryOrDb(district?: string): Promise<any[]> {
+  const normDistrict = (district || '').toLowerCase().trim();
+
+  // Load statewide dataset if needed
+  if (normDistrict === 'all' || normDistrict === 'statewide' || (normDistrict && normDistrict !== 'coimbatore')) {
+    if (!memoryCacheStatewide) {
+      const statewidePath = path.join(process.cwd(), 'data', 'master_statewide_schools.json');
+      if (fs.existsSync(statewidePath)) {
+        try {
+          const raw = fs.readFileSync(statewidePath, 'utf8');
+          memoryCacheStatewide = JSON.parse(raw);
+        } catch (e) {
+          console.warn('[DB] Error loading master_statewide_schools.json:', e);
+        }
+      }
+    }
+
+    if (memoryCacheStatewide && memoryCacheStatewide.length > 0) {
+      if (normDistrict === 'all' || normDistrict === 'statewide') {
+        return memoryCacheStatewide;
+      }
+      return memoryCacheStatewide.filter((s: any) => 
+        (s.district || '').toLowerCase() === normDistrict ||
+        (s.district || '').toLowerCase().replace(/\s+/g, '') === normDistrict.replace(/\s+/g, '')
+      );
+    }
+  }
+
+  // Default / Coimbatore: Return cached 2,097 schools
+  if (memoryCacheCoimbatore) {
+    return memoryCacheCoimbatore;
+  }
+
   const jsonPath = path.join(process.cwd(), 'data', 'master_coimbatore_schools.json');
   if (fs.existsSync(jsonPath)) {
-    const raw = fs.readFileSync(jsonPath, 'utf8');
-    return JSON.parse(raw);
+    try {
+      const raw = fs.readFileSync(jsonPath, 'utf8');
+      memoryCacheCoimbatore = JSON.parse(raw);
+      return memoryCacheCoimbatore!;
+    } catch (e) {
+      console.warn('[DB] Error loading master_coimbatore_schools.json:', e);
+    }
   }
   
   // Fallback to SQLite DB query with join on normalized contacts
@@ -98,8 +139,10 @@ export async function getMasterSchoolsFromMemoryOrDb() {
     GROUP BY s.id
   `);
 
-  return rs.rows.map((row: any) => ({
+  memoryCacheCoimbatore = rs.rows.map((row: any) => ({
     ...row,
     is_contact_complete: Boolean(row.official_landline || row.official_mobile || row.official_whatsapp || row.official_email)
   }));
+
+  return memoryCacheCoimbatore;
 }

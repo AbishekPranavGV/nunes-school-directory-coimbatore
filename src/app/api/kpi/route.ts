@@ -1,11 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getMasterSchoolsFromMemoryOrDb } from '@/lib/db';
+import { getDistrictById, getStatewideTotals } from '@/lib/data/tamilNaduDistricts';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const schools = await getMasterSchoolsFromMemoryOrDb();
+    const { searchParams } = new URL(req.url);
+    const district = searchParams.get('district') || 'coimbatore';
+    const isStatewide = district.toLowerCase() === 'all' || district.toLowerCase() === 'statewide';
+
+    const schools = await getMasterSchoolsFromMemoryOrDb(isStatewide ? 'all' : district);
     const total = schools.length;
 
     let verified_any = 0;
@@ -34,8 +39,13 @@ export async function GET() {
       }
     }
 
+    const distMeta = !isStatewide ? getDistrictById(district) : null;
+    const target = isStatewide ? total : (distMeta?.total_schools || 2097);
+
     const metrics = {
-      target_source_records: 2097, // Benchmark target
+      district: isStatewide ? 'All Tamil Nadu (38 Districts)' : (distMeta?.name || 'Coimbatore'),
+      is_statewide: isStatewide,
+      target_source_records: target,
       total_schools_discovered: total,
       total_imported_schools: total,
       verified_schools: verified_any,
@@ -50,7 +60,7 @@ export async function GET() {
       records_awaiting_verification: records_awaiting,
       pending_staff_review: records_awaiting,
       recently_updated_contacts: recently_updated,
-      coverage_percentage: Number(((verified_any / total) * 100).toFixed(1)),
+      coverage_percentage: total > 0 ? Number(((verified_any / total) * 100).toFixed(1)) : 0,
       last_refresh_timestamp: new Date().toISOString()
     };
 

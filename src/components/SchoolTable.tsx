@@ -170,10 +170,10 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
                     <td className="py-3.5 px-3 max-w-[160px]">
                       <div className="font-semibold text-slate-800 truncate flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-sky-500 flex-shrink-0" />
-                        <span>{s.taluk || s.block}</span>
+                        <span>{s.district && s.district !== 'Coimbatore' ? `${s.district} • ` : ''}{s.taluk || s.block}</span>
                       </div>
                       <div className="text-[11px] text-slate-400 truncate">
-                        {s.block} • {s.pincode}
+                        {s.district ? `${s.district} • ` : ''}{s.block} • {s.pincode}
                       </div>
                     </td>
 

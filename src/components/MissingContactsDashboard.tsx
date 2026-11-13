@@ -22,13 +22,15 @@ interface MissingContactsDashboardProps {
   onSelectSchool: (school: SchoolRecord) => void;
   onTriggerResearch: (schoolId: string) => Promise<void>;
   onExportMissing: () => void;
+  selectedDistrict?: string;
 }
 
 export const MissingContactsDashboard: React.FC<MissingContactsDashboardProps> = ({
   schools,
   onSelectSchool,
   onTriggerResearch,
-  onExportMissing
+  onExportMissing,
+  selectedDistrict = 'coimbatore'
 }) => {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [search, setSearch] = useState<string>('');
@@ -105,7 +107,7 @@ export const MissingContactsDashboard: React.FC<MissingContactsDashboardProps> =
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
-            Schools in Coimbatore district without verified institutional telephone or email. Records are retained in this actionable work queue; **never deleted, never fabricated**. Run automated AI research or dispatch staff manual switchboard inquiries.
+            Schools in {selectedDistrict === 'all' ? 'Tamil Nadu (38 districts)' : `${selectedDistrict.charAt(0).toUpperCase() + selectedDistrict.slice(1)} district`} without verified institutional telephone or email. Records are retained in this actionable work queue; **never deleted, never fabricated**. Run automated AI research or dispatch staff manual switchboard inquiries.
           </p>
         </div>
 
@@ -181,7 +183,7 @@ export const MissingContactsDashboard: React.FC<MissingContactsDashboardProps> =
                       {s.udise_code}
                     </span>
                     <span>•</span>
-                    <span className="truncate">{s.taluk || s.block}</span>
+                    <span className="truncate">{s.district ? `${s.district} • ` : ''}{s.taluk || s.block}</span>
                     <span>•</span>
                     <span className="truncate">{s.board}</span>
                   </div>

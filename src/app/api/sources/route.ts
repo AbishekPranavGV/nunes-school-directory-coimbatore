@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const { source_id } = body;
     const db = getDb();
 
-    await db.execute({
+    await safeDbExecute(db, {
       sql: `UPDATE source_registry 
             SET last_sync_at = CURRENT_TIMESTAMP, sync_status = 'VERIFIED_ACTIVE', error_log = NULL 
             WHERE id = ?`,

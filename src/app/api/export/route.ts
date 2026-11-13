@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get('type') || 'filtered'; // 'all', 'filtered', 'missing', 'verified', 'single'
     const format = searchParams.get('format') || 'csv';   // 'csv', 'xlsx', 'json'
     const school_id = searchParams.get('school_id');
+    const district = searchParams.get('district');
     const q = (searchParams.get('q') || '').toLowerCase().trim();
     const management = searchParams.get('management');
     const board = searchParams.get('board');
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
     const taluk = searchParams.get('taluk');
     const quick_filter = searchParams.get('quick_filter');
 
-    const allSchools = await getMasterSchoolsFromMemoryOrDb();
+    const allSchools = await getMasterSchoolsFromMemoryOrDb(district || undefined);
 
     // Single school export
     if (type === 'single' && school_id) {
@@ -52,6 +53,12 @@ export async function GET(req: NextRequest) {
                           (s.village_locality || '').toLowerCase().includes(q) ||
                           s.pincode.toLowerCase().includes(q);
           if (!matches) return false;
+        }
+        if (district && district.toLowerCase() !== 'all' && district.toLowerCase() !== 'statewide') {
+          if ((s.district || '').toLowerCase() !== district.toLowerCase() && 
+              (s.district || '').toLowerCase().replace(/\s+/g, '') !== district.toLowerCase().replace(/\s+/g, '')) {
+            return false;
+          }
         }
         if (management && s.management !== management) return false;
         if (board && s.board !== board) return false;

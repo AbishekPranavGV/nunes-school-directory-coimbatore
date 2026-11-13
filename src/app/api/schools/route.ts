@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMasterSchoolsFromMemoryOrDb, getDb } from '@/lib/db';
+import { getMasterSchoolsFromMemoryOrDb, getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const q = (searchParams.get('q') || '').toLowerCase().trim();
+    const district = searchParams.get('district');
     const management = searchParams.get('management');
     const board = searchParams.get('board');
     const category = searchParams.get('category');
@@ -31,9 +32,16 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'school_name';
     const sortOrder = searchParams.get('sortOrder') === 'desc' ? -1 : 1;
 
-    const allSchools = await getMasterSchoolsFromMemoryOrDb();
+    const allSchools = await getMasterSchoolsFromMemoryOrDb(district || undefined);
 
     let filtered = allSchools.filter((s: any) => {
+      // District filter
+      if (district && district.toLowerCase() !== 'all' && district.toLowerCase() !== 'statewide') {
+        if ((s.district || '').toLowerCase() !== district.toLowerCase() && 
+            (s.district || '').toLowerCase().replace(/\s+/g, '') !== district.toLowerCase().replace(/\s+/g, '')) {
+          return false;
+        }
+      }
       // Global search across name, code, block, taluk, locality, address, PIN
       if (q) {
         const matchesName = s.school_name.toLowerCase().includes(q);
@@ -128,7 +136,7 @@ export async function POST(req: NextRequest) {
     const norm = school_name.toLowerCase().replace(/[^a-z0-9]/g, ' ').trim();
     const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(school_name + ' ' + block + ' Coimbatore')}`;
 
-    await db.execute({
+    await safeDbExecute(db, {
       sql: `INSERT INTO schools (
         id, udise_code, school_name, normalized_name, management_type, management, 
         board, school_level, category, classes_offered, address, locality, taluk, 
@@ -148,7 +156,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Record audit
-    await db.execute({
+    await safeDbExecute(db, {
       sql: `INSERT INTO audit_logs (id, actor_id, action, record_type, record_id, created_at)
             VALUES (?, ?, 'CREATE_SCHOOL', 'school', ?, CURRENT_TIMESTAMP)`,
       args: [`audit_${Date.now()}`, user.username, id]

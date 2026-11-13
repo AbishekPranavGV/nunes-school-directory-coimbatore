@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { getDb, safeDbExecute } from '@/lib/db';
 import { ProviderReport, ContactCandidate, StaffCallingLogItem, PriorityQueueItem } from './types';
 import dns from 'dns';
 
@@ -149,7 +149,7 @@ export async function incrementProviderStats(
 ) {
   const db = getDb();
   try {
-    await db.execute({
+    await safeDbExecute(db, {
       sql: `UPDATE provider_registry 
             SET search_attempts = search_attempts + ?,
                 schools_matched = schools_matched + ?,
