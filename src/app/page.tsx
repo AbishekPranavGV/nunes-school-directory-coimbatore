@@ -8,6 +8,12 @@ import { SchoolTable } from '@/components/SchoolTable';
 import { SchoolDetailDrawer } from '@/components/SchoolDetailDrawer';
 import { MissingContactsDashboard } from '@/components/MissingContactsDashboard';
 import { StaffVerificationWorkspace } from '@/components/StaffVerificationWorkspace';
+import { DashboardView } from '@/components/DashboardView';
+import { ContactDiscoveryView } from '@/components/ContactDiscoveryView';
+import { CircularCenterView } from '@/components/CircularCenterView';
+import { CommunicationsView } from '@/components/CommunicationsView';
+import { ReportsView } from '@/components/ReportsView';
+import { SettingsView } from '@/components/SettingsView';
 import { ImportModal } from '@/components/ImportModal';
 import { ExportModal } from '@/components/ExportModal';
 import { SourceMonitoringModal } from '@/components/SourceMonitoringModal';
@@ -15,12 +21,12 @@ import { TestSuiteModal } from '@/components/TestSuiteModal';
 import { LoginModal } from '@/components/LoginModal';
 import { MapViewModal } from '@/components/MapViewModal';
 import { WorkerModal } from '@/components/WorkerModal';
-import { SchoolRecord, KPIMetrics, UserSession } from '@/types';
+import { SchoolRecord, KPIMetrics, UserSession, WorkspaceView } from '@/types';
 import { LayoutGrid, AlertTriangle, Sparkles, X, PhoneCall } from 'lucide-react';
 
 export default function DashboardPage() {
-  // Navigation view state
-  const [currentView, setCurrentView] = useState<'directory' | 'missing_contacts' | 'staff_calling'>('directory');
+  // Navigation view state (9 Primary Workspaces)
+  const [currentView, setCurrentView] = useState<WorkspaceView>('dashboard');
 
   // Data states
   const [schools, setSchools] = useState<SchoolRecord[]>([]);
@@ -108,7 +114,7 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (currentView === 'missing_contacts' && allSchoolsForMissing.length === 0) {
+    if ((currentView === 'verification' || currentView === 'dashboard') && allSchoolsForMissing.length === 0) {
       loadAllSchoolsForMissing();
     }
   }, [currentView, allSchoolsForMissing.length, loadAllSchoolsForMissing]);
@@ -334,92 +340,68 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* KPI Summary Cards */}
-        <KPICards
-          kpi={kpi}
-          activeQuickFilter={quickFilter}
-          onSelectQuickFilter={(qf) => {
-            if (qf === 'no_contact') {
-              setCurrentView('missing_contacts');
-            } else {
-              setCurrentView('directory');
-              setQuickFilter(qf ? qf : null);
-              setCurrentPage(1);
-            }
-          }}
-        />
-
-        {/* View Switcher Tabs (Visible on all viewports) */}
-        <div className="flex items-center justify-between gap-3 mb-5 border-b border-slate-200 pb-3">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <button
-              onClick={() => setCurrentView('directory')}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all whitespace-nowrap ${
-                currentView === 'directory'
-                  ? 'bg-sky-700 text-white shadow-xs'
-                  : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-              <span>Coimbatore Master Register</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-mono ${
-                currentView === 'directory' ? 'bg-sky-800 text-white' : 'bg-slate-100 text-slate-600'
-              }`}>
-                {(kpi?.total_imported_schools || 2097).toLocaleString()}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setCurrentView('missing_contacts')}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all whitespace-nowrap ${
-                currentView === 'missing_contacts'
-                  ? 'bg-rose-600 text-white shadow-xs'
-                  : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <AlertTriangle className="w-4 h-4 text-rose-500" />
-              <span>Missing Contacts Recovery</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-mono ${
-                currentView === 'missing_contacts' ? 'bg-rose-700 text-white' : 'bg-rose-100 text-rose-800'
-              }`}>
-                {(kpi?.high_priority_missing_contacts || 2020).toLocaleString()}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setCurrentView('staff_calling')}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all whitespace-nowrap ${
-                currentView === 'staff_calling'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <PhoneCall className="w-4 h-4 text-indigo-500" />
-              <span>Staff Verification Workspace</span>
-            </button>
-          </div>
-
-          <div className="hidden xl:flex items-center gap-2 text-xs text-slate-500">
-            <span>District Status:</span>
-            <span className="font-semibold text-emerald-700">All 15 Blocks & 11 Taluks Sourced</span>
-          </div>
-        </div>
-
-        {/* View Content Conditional */}
-        {currentView === 'staff_calling' ? (
-          <StaffVerificationWorkspace
-            currentUser={currentUser}
-            onSelectSchoolForDrawer={setSelectedSchool}
+        {/* Conditional Workspace View (9 Primary Workspaces) */}
+        {currentView === 'dashboard' ? (
+          <DashboardView
+            kpi={kpi}
+            schools={schools}
+            onNavigate={setCurrentView}
+            onSelectQuickFilter={(qf) => {
+              if (qf === 'no_contact') {
+                setCurrentView('verification');
+              } else {
+                setCurrentView('directory');
+                setQuickFilter(qf || null);
+                setCurrentPage(1);
+              }
+            }}
+            activeQuickFilter={quickFilter}
+            onSelectSchool={setSelectedSchool}
           />
-        ) : currentView === 'missing_contacts' ? (
+        ) : currentView === 'discovery' ? (
+          <ContactDiscoveryView
+            kpi={kpi}
+            onRefreshData={async () => {
+              await loadSchools();
+              await loadKpi();
+              await loadAllSchoolsForMissing();
+            }}
+            onSelectSchool={setSelectedSchool}
+          />
+        ) : currentView === 'verification' ? (
           <MissingContactsDashboard
             schools={missingSchoolsList}
             onSelectSchool={setSelectedSchool}
             onTriggerResearch={handleTriggerResearch}
             onExportMissing={() => setIsExportOpen(true)}
           />
+        ) : currentView === 'circulars' ? (
+          <CircularCenterView
+            schools={allSchoolsForMissing.length > 0 ? allSchoolsForMissing : schools}
+            onNavigateToCommunications={() => setCurrentView('communications')}
+          />
+        ) : currentView === 'communications' ? (
+          <CommunicationsView
+            onNavigateToCirculars={() => setCurrentView('circulars')}
+          />
+        ) : currentView === 'staff' ? (
+          <StaffVerificationWorkspace
+            currentUser={currentUser}
+            onSelectSchoolForDrawer={setSelectedSchool}
+          />
+        ) : currentView === 'reports' ? (
+          <ReportsView
+            kpi={kpi}
+            schools={schools}
+            onExport={() => setIsExportOpen(true)}
+          />
+        ) : currentView === 'settings' ? (
+          <SettingsView
+            currentUser={currentUser}
+          />
         ) : (
-          <>
+          /* Master School Directory Table View ('directory') */
+          <div className="space-y-4">
             {/* Filter Bar */}
             <FilterBar
               searchQuery={searchQuery}
@@ -488,7 +470,7 @@ export default function DashboardPage() {
               onSort={handleSort}
               onSelectSchool={setSelectedSchool}
             />
-          </>
+          </div>
         )}
 
       </main>

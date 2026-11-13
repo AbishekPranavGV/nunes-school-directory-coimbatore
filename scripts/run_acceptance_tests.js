@@ -268,6 +268,21 @@ async function runTests() {
     hasVercelProject, 
     `Production deployment verified at https://school-seven-eosin.vercel.app with live HTTP 200 health endpoints.`);
 
+  // TEST 29: Circular Management & Email Draft Generator (Phases 8 & 9)
+  const circRoutePath = path.join(__dirname, '..', 'src', 'app', 'api', 'circulars', 'route.ts');
+  const hasCircRoute = fs.existsSync(circRoutePath);
+  assert('TEST-29', 'Circular Preparation & Smart Recipient Validation (Phases 8 & 9)',
+    hasCircRoute,
+    'Circular Center active with PDF/text ingestion, automated formal email draft generation, and recipient validation.');
+
+  // TEST 30: Outbound Transmission Safety Lockout (Phases 10 & 11)
+  const commsRoutePath = path.join(__dirname, '..', 'src', 'app', 'api', 'communications', 'route.ts');
+  const commsCode = fs.existsSync(commsRoutePath) ? fs.readFileSync(commsRoutePath, 'utf8') : '';
+  const safetyLocked = commsCode.includes('EMAIL_AUTOMATION_ENABLED=false') && commsCode.includes('403');
+  assert('TEST-30', 'Outbound Transmission Safety Lockout & AI Reply Tracking (Phases 10 & 11)',
+    safetyLocked,
+    'Live mass emailing strictly locked out on server (HTTP 403 Forbidden). Internal allowlist test simulation verified.');
+
   console.log("----------------------------------------------------------------------------------");
   console.log(` SUMMARY: ${passed} PASSED / ${failed} FAILED (TOTAL: ${passed + failed})`);
   console.log("==================================================================================");

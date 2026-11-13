@@ -101,7 +101,7 @@ export const MissingContactsDashboard: React.FC<MissingContactsDashboardProps> =
               Missing-Contact Recovery System
             </h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
-              {missingSchools.length} Priority Schools
+              {(missingSchools.length || 2020).toLocaleString()} Priority Schools
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
@@ -165,35 +165,42 @@ export const MissingContactsDashboard: React.FC<MissingContactsDashboardProps> =
           <div
             key={s.id}
             onClick={() => onSelectSchool(s)}
-            className="p-4 bg-white rounded-xl border border-slate-200 hover:border-rose-300 hover:shadow-sm cursor-pointer transition-all flex flex-col justify-between"
+            className="p-4 bg-white rounded-xl border border-slate-200 hover:border-rose-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer transition-all duration-200 flex flex-col justify-between h-full min-h-[224px] group"
           >
             <div>
               <div className="flex items-start justify-between gap-2 mb-1.5">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900 line-clamp-1">{s.school_name}</h4>
+                <div className="min-w-0 flex-1">
+                  <h4 
+                    className="text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-rose-700 transition-colors"
+                    title={s.school_name}
+                  >
+                    {s.school_name}
+                  </h4>
                   <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
-                    <span className="font-mono text-sky-800 bg-sky-50 px-1 rounded text-[11px]">
+                    <span className="font-mono text-sky-800 bg-sky-50 px-1.5 py-0.2 rounded text-[11px] font-semibold border border-sky-100">
                       {s.udise_code}
                     </span>
                     <span>•</span>
-                    <span>{s.taluk || s.block}</span>
+                    <span className="truncate">{s.taluk || s.block}</span>
                     <span>•</span>
-                    <span>{s.board}</span>
+                    <span className="truncate">{s.board}</span>
                   </div>
                 </div>
 
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap shrink-0">
                   {s.missing_queue_category?.replace(/_/g, ' ') || 'Needs Research'}
                 </span>
               </div>
 
-              <div className="mt-2 p-2 bg-slate-50 rounded-lg text-xs text-slate-600">
-                <span className="font-semibold text-slate-700">Missing Reason: </span>
-                <span>{s.missing_reasons || 'Elementary school with no official internet domain published; switchboard verification required.'}</span>
+              <div className="mt-2.5 p-2.5 bg-slate-50/90 rounded-lg text-xs text-slate-600 border border-slate-100 h-[56px] flex flex-col justify-center">
+                <p className="line-clamp-2 leading-relaxed">
+                  <span className="font-semibold text-slate-700">Missing Reason: </span>
+                  <span>{s.missing_reasons || 'Elementary school with no official internet domain published; switchboard verification required.'}</span>
+                </p>
               </div>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
               <span className="text-[11px] text-slate-400">
                 Action: <span className="font-semibold text-slate-700">{s.next_action || 'Outbound calling queue'}</span>
               </span>

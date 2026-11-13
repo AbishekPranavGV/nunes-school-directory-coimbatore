@@ -193,3 +193,72 @@ export interface UserSession {
   email: string;
   role: 'admin' | 'reviewer' | 'viewer';
 }
+
+export type WorkspaceView = 
+  | 'dashboard'
+  | 'directory'
+  | 'discovery'
+  | 'verification'
+  | 'circulars'
+  | 'communications'
+  | 'staff'
+  | 'reports'
+  | 'settings';
+
+export interface CircularItem {
+  id: string;
+  title: string;
+  reference_number: string;
+  circular_date: string;
+  subject: string;
+  body_text: string;
+  extracted_text?: string;
+  attachment_name?: string;
+  attachment_type?: string;
+  attachment_size_kb?: number;
+  generated_email_subject: string;
+  generated_email_body: string;
+  status: 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'ARCHIVED';
+  created_at: string;
+  approved_by?: string;
+  approved_at?: string;
+  target_group: string;
+  eligible_count: number;
+  email_ready_count: number;
+}
+
+export interface OutboundCommunication {
+  id: string;
+  circular_id: string;
+  circular_title: string;
+  school_id: string;
+  school_name: string;
+  recipient_email: string;
+  sender_email: string;
+  status: 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'SCHEDULED' | 'SENT' | 'DELIVERED' | 'FAILED' | 'REPLIED' | 'NEEDS_FOLLOW_UP';
+  subject: string;
+  message_id?: string;
+  thread_id?: string;
+  sent_at?: string;
+  delivered_at?: string;
+  failure_reason?: string;
+  reply_count: number;
+  last_reply_at?: string;
+  response_classification?: string;
+}
+
+export interface InboundReply {
+  id: string;
+  communication_id: string;
+  school_id: string;
+  school_name: string;
+  sender_email: string;
+  sender_name?: string;
+  subject: string;
+  body_text: string;
+  received_at: string;
+  classification: 'Acknowledged' | 'Interested' | 'Information Requested' | 'Document Requested' | 'Not Interested' | 'Wrong Contact' | 'Needs Follow-Up' | 'Unclassified';
+  assigned_staff?: string;
+  status: 'UNREAD' | 'REVIEWED' | 'REPLIED' | 'RESOLVED';
+  internal_notes?: string;
+}

@@ -143,13 +143,13 @@ export const KPICards: React.FC<KPICardsProps> = ({
             <button
               key={c.id}
               onClick={() => onSelectQuickFilter(c.filterValue)}
-              className={`text-left p-3.5 bg-white rounded-xl border transition-all duration-200 hover:shadow-md cursor-pointer flex flex-col justify-between ${c.borderColor} ${
-                isSelected ? 'bg-sky-50/40 shadow-sm' : 'hover:border-slate-300'
+              className={`text-left p-3.5 bg-white rounded-xl border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between h-full min-h-[124px] ${c.borderColor} ${
+                isSelected ? 'bg-sky-50/50 shadow-sm ring-2 ring-sky-500' : 'hover:border-slate-300'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`w-8 h-8 rounded-lg ${c.iconBg} flex items-center justify-center ${c.iconColor}`}>
+                  <div className={`w-8 h-8 rounded-lg ${c.iconBg} flex items-center justify-center ${c.iconColor} shadow-2xs`}>
                     <Icon className="w-4 h-4" />
                   </div>
                   {c.badge && (
@@ -158,11 +158,11 @@ export const KPICards: React.FC<KPICardsProps> = ({
                     </span>
                   )}
                 </div>
-                <p className="text-xs font-semibold text-slate-500 tracking-tight">{c.title}</p>
+                <p className="text-xs font-semibold text-slate-500 tracking-tight leading-tight">{c.title}</p>
                 <p className="text-xl font-bold text-slate-900 mt-0.5">{c.value}</p>
               </div>
               <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-[11px] text-slate-400 truncate">{c.subtext}</span>
+                <span className="text-[11px] text-slate-400 truncate" title={c.subtext}>{c.subtext}</span>
               </div>
             </button>
           );
