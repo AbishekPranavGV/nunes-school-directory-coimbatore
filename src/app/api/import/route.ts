@@ -138,30 +138,44 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Execute Import into SQLite DB
+    // Execute Non-Destructive Import Merge into SQLite DB
     const db = getDb();
     let imported = 0;
     for (const v of validRows) {
       const id = `sch_imp_${v.udise_code}`;
       const norm = v.school_name.toLowerCase().replace(/[^a-z0-9]/g, ' ').trim();
 
+      // Check existing school to preserve higher-trust verified contacts
+      const existingRes = await db.execute({
+        sql: 'SELECT id, official_landline, official_email, official_whatsapp, principal_name FROM schools WHERE udise_code = ?',
+        args: [v.udise_code]
+      });
+
+      const existing: any = existingRes.rows[0];
+      const finalPhone = existing?.official_landline || v.official_landline;
+      const finalEmail = existing?.official_email || v.official_email;
+      const finalWa = existing?.official_whatsapp || v.official_whatsapp;
+      const finalPrinc = existing?.principal_name || v.principal_name;
+
       await db.execute({
         sql: `INSERT OR REPLACE INTO schools (
           id, udise_code, school_name, normalized_name, management, board, category, 
-          block, urban_rural, address, pincode, source_provenance, status, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Urban', ?, ?, ?, 'ACTIVE', CURRENT_TIMESTAMP)`,
+          block, urban_rural, address, pincode, source_provenance, status, 
+          official_landline, official_email, official_whatsapp, principal_name, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Urban', ?, ?, ?, 'ACTIVE', ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
         args: [
           id, v.udise_code, v.school_name, norm, v.management, v.board, v.category,
           v.block, `${v.school_name}, ${v.block}, Coimbatore - ${v.pincode}`, v.pincode,
-          `Batch Import: ${file.name}`
+          `Batch Import: ${file.name}`,
+          finalPhone, finalEmail, finalWa, finalPrinc
         ]
       });
 
-      if (v.official_landline) {
+      if (finalPhone) {
         await db.execute({
-          sql: `INSERT OR REPLACE INTO contacts (id, school_id, contact_type, contact_value, formatted_value, is_verified, verification_source, verification_status, confidence_score)
-                VALUES (?, ?, 'landline', ?, ?, 1, 'Batch Import', 'OFFICIAL_CONFIRMED', 0.9)`,
-          args: [`${id}_landline`, id, v.official_landline, v.official_landline]
+          sql: `INSERT OR REPLACE INTO contacts (id, school_id, contact_type, contact_role, contact_value, formatted_value, is_verified, verification_status, confidence_score)
+                VALUES (?, ?, 'landline', 'General Office', ?, ?, 1, 'OFFICIAL_CONFIRMED', 0.9)`,
+          args: [`${id}_landline`, id, finalPhone, finalPhone]
         });
       }
 

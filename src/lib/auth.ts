@@ -9,6 +9,15 @@ const JWT_SECRET = new TextEncoder().encode(
 
 const COOKIE_NAME = 'nunes_auth_session';
 
+export const FORBIDDEN_PASSWORDS = [
+  'NunesInstruments2026!',
+  'admin',
+  'password',
+  '123456',
+  'nunes',
+  'admin123'
+];
+
 export interface AuthUser {
   id: string;
   username: string;

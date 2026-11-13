@@ -12,7 +12,7 @@ interface LoginModalProps {
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
   const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('NunesInstruments2026!');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -77,10 +77,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
             </div>
           )}
 
-          <div className="p-3 bg-sky-50/70 border border-sky-200 rounded-xl text-xs text-sky-900">
-            <p className="font-semibold">Reviewer & Admin Credentials:</p>
-            <p className="text-[11px] text-sky-700 mt-0.5">
-              User: <span className="font-mono font-bold">admin</span> | Pass: <span className="font-mono font-bold">NunesInstruments2026!</span>
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
+            <p className="font-semibold text-slate-800">Secure Access Controls:</p>
+            <p className="text-[11px] text-slate-600 mt-0.5">
+              Default legacy credentials have been permanently disabled. Enter your verified institutional administrator credentials.
             </p>
           </div>
 

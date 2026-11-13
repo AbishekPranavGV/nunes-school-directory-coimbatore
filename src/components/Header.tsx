@@ -20,8 +20,8 @@ import { UserSession } from '@/types';
 
 interface HeaderProps {
   user: UserSession | null;
-  currentView: 'directory' | 'missing_contacts';
-  onViewChange: (view: 'directory' | 'missing_contacts') => void;
+  currentView: 'directory' | 'missing_contacts' | 'staff_calling';
+  onViewChange: (view: 'directory' | 'missing_contacts' | 'staff_calling') => void;
   missingCount: number;
   totalCount: number;
   onOpenWorker: () => void;
@@ -107,12 +107,24 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <AlertTriangle className="w-3.5 h-3.5" />
-              <span>Missing Contacts Queue</span>
+              <span>Missing Contacts</span>
               <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
                 currentView === 'missing_contacts' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-800'
               }`}>
                 {missingCount.toLocaleString()}
               </span>
+            </button>
+
+            <button
+              onClick={() => onViewChange('staff_calling')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                currentView === 'staff_calling'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-indigo-700 hover:bg-indigo-50'
+              }`}
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span>Staff Workspace</span>
             </button>
           </div>
 
@@ -148,10 +160,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onOpenTests}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-all"
-              title="Run 16-point Acceptance Test Suite"
+              title="Run 28-point Acceptance Test Suite"
             >
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span className="hidden sm:inline">16 Tests</span>
+              <span className="hidden sm:inline">28 Tests</span>
               <span className="sm:hidden">Tests</span>
             </button>
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { checkPassword, createToken, COOKIE_NAME } from '@/lib/auth';
+import { checkPassword, createToken, COOKIE_NAME, FORBIDDEN_PASSWORDS } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +10,12 @@ export async function POST(req: NextRequest) {
 
     if (!username || !password) {
       return NextResponse.json({ error: 'Username and password required' }, { status: 400 });
+    }
+
+    if (FORBIDDEN_PASSWORDS.includes(password)) {
+      return NextResponse.json({ 
+        error: 'Default administrator credentials have been permanently disabled for security. Please use the configured secure administrator password.' 
+      }, { status: 401 });
     }
 
     const db = getDb();
