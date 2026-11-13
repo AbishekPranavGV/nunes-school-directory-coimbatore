@@ -99,6 +99,26 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Support Statewide High-Speed Multi-Source Harvester Action
+    if (action === 'fast_harvester') {
+      const { harvestBatchContacts } = await import('@/lib/research/harvester');
+      const count = Math.min(body.count || 25, 100);
+      const districtFilter = body.district;
+      
+      let candidates = allSchools.filter((s: any) => !s.is_contact_complete);
+      if (districtFilter && districtFilter !== 'all' && districtFilter !== 'statewide') {
+        candidates = candidates.filter((s: any) => (s.district || '').toLowerCase() === districtFilter.toLowerCase());
+      }
+      
+      const { results, telemetry } = await harvestBatchContacts(candidates, count);
+      return NextResponse.json({
+        success: true,
+        harvested_count: results.length,
+        telemetry,
+        results
+      });
+    }
+
     const school = allSchools.find((s: any) => s.id === school_id || s.udise_code === school_id);
 
     if (!school) {
