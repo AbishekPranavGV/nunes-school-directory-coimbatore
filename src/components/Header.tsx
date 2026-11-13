@@ -198,7 +198,7 @@ export const Header: React.FC<HeaderProps> = ({
                             <Globe2 className="w-4 h-4 text-sky-600 shrink-0" />
                             <div>
                               <p className="font-bold text-slate-900 text-xs">All Tamil Nadu (38 Districts)</p>
-                              <p className="text-[10px] text-slate-500">Statewide Master Census • 6,895+ Schools</p>
+                              <p className="text-[10px] text-slate-500">Statewide Master Census • 16,300 Schools</p>
                             </div>
                           </div>
                           {isStatewide && <Check className="w-4 h-4 text-sky-600 shrink-0" />}

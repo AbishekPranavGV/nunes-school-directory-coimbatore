@@ -34,6 +34,7 @@ interface SchoolTableProps {
   onSort: (column: string) => void;
   onSelectSchool: (school: SchoolRecord) => void;
   onTriggerResearch?: (schoolId: string) => void;
+  selectedDistrict?: string;
 }
 
 export const SchoolTable: React.FC<SchoolTableProps> = ({
@@ -48,8 +49,15 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
   sortOrder,
   onSort,
   onSelectSchool,
-  onTriggerResearch
+  onTriggerResearch,
+  selectedDistrict
 }) => {
+  const districtLabel = selectedDistrict === 'all' || selectedDistrict === 'statewide'
+    ? 'Tamil Nadu (All 38 Districts)'
+    : selectedDistrict 
+    ? `${selectedDistrict.charAt(0).toUpperCase() + selectedDistrict.slice(1)} District`
+    : 'Coimbatore District';
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
       
@@ -66,7 +74,7 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
           </span>
           <span> of </span>
           <span className="font-bold text-slate-900">{totalCount.toLocaleString()}</span>
-          <span> schools in Coimbatore District</span>
+          <span> schools in {districtLabel}</span>
         </div>
 
         <div className="flex items-center gap-2">

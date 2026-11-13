@@ -1064,71 +1064,71 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
                     </div>
                   ) : (
                     /* ========================================================= */
-                    /* PREVIEW MODE: Sleek Modern macOS / Enterprise Email Frame */
+                    /* PREVIEW MODE: Light Modern Enterprise Email Frame (Image 2 Match) */
                     /* ========================================================= */
                     <div className={`mx-auto transition-all duration-300 ${previewDevice === 'mobile' ? 'max-w-md' : 'w-full'}`}>
-                      <div className="bg-slate-950 text-slate-100 rounded-2xl shadow-xl overflow-hidden border border-slate-800">
+                      <div className="bg-white text-slate-800 rounded-2xl shadow-xl overflow-hidden border-2 border-sky-300 ring-4 ring-sky-50/50">
                         
                         {/* Email Client Window Header with Window Dots */}
-                        <div className="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
-                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
-                            <span className="text-[11px] font-mono text-slate-400 ml-2">
+                        <div className="px-4 py-3 bg-gradient-to-r from-sky-50/80 via-slate-50 to-sky-50/80 border-b border-sky-200/80 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            <span className="text-xs font-semibold font-mono text-slate-700 ml-2">
                               {previewDevice === 'mobile' ? 'Mobile Viewport (375px)' : 'Nunes Mail Dispatch Console'}
                             </span>
                           </div>
 
-                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/70 border border-emerald-800 px-2 py-0.5 rounded-full">
-                            DKIM & SPF Verified
+                          <span className="text-[10px] font-mono font-semibold text-emerald-700 bg-emerald-50 border border-emerald-300/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                            ✓ DKIM & SPF Verified
                           </span>
                         </div>
 
                         {/* Email Envelope Fields */}
-                        <div className="p-4 sm:p-5 space-y-2 border-b border-slate-800/80 text-xs font-mono">
+                        <div className="p-4 sm:p-5 space-y-2.5 border-b border-sky-100 bg-sky-50/30 text-xs font-mono">
                           
                           <div className="flex items-baseline gap-2">
-                            <span className="text-slate-500 w-24 shrink-0">Subject:</span>
-                            <span className="text-sky-300 font-bold leading-snug">
+                            <span className="text-slate-500 font-semibold w-24 shrink-0">Subject:</span>
+                            <span className="text-sky-700 font-bold leading-snug text-sm">
                               {getInterpolatedSubject(activeCircular.generated_email_subject)}
                             </span>
                           </div>
 
                           <div className="flex items-baseline gap-2">
-                            <span className="text-slate-500 w-24 shrink-0">From:</span>
-                            <span className="text-emerald-300 truncate">
-                              Nunes Instruments Educational Liaison &lt;educational.liaison@nunesinstruments.com&gt;
+                            <span className="text-slate-500 font-semibold w-24 shrink-0">From:</span>
+                            <span className="text-slate-700 truncate font-medium">
+                              Nunes Instruments Educational Liaison &lt;<span className="text-emerald-700">educational.liaison@nunesinstruments.com</span>&gt;
                             </span>
                           </div>
 
                           <div className="flex items-baseline gap-2">
-                            <span className="text-slate-500 w-24 shrink-0">To:</span>
-                            <span className="text-slate-300 font-semibold truncate">
-                              {activeRecipient.principal} &lt;{activeRecipient.email}&gt;
+                            <span className="text-slate-500 font-semibold w-24 shrink-0">To:</span>
+                            <span className="text-slate-800 font-semibold truncate">
+                              {activeRecipient.principal} &lt;<span className="text-sky-600">{activeRecipient.email}</span>&gt;
                             </span>
                           </div>
 
                           <div className="flex items-baseline gap-2">
-                            <span className="text-slate-500 w-24 shrink-0">Attachment:</span>
-                            <span className="text-amber-300 flex items-center gap-1 bg-amber-950/40 border border-amber-900/60 px-2 py-0.5 rounded text-[11px]">
-                              <Paperclip className="w-3 h-3 text-amber-400" />
+                            <span className="text-slate-500 font-semibold w-24 shrink-0">Attachment:</span>
+                            <span className="text-amber-800 flex items-center gap-1.5 bg-amber-50 border border-amber-300/80 px-2.5 py-0.5 rounded text-xs font-medium">
+                              <Paperclip className="w-3.5 h-3.5 text-amber-600" />
                               <span>{activeCircular.attachment_name}</span>
-                              <span className="text-slate-500">(340 KB)</span>
+                              <span className="text-amber-600 font-normal">(340 KB)</span>
                             </span>
                           </div>
 
                         </div>
 
                         {/* Rendered Email Body */}
-                        <div className="p-4 sm:p-6 text-slate-200 font-sans text-xs leading-relaxed whitespace-pre-line bg-slate-900/40">
+                        <div className="p-5 sm:p-7 text-slate-800 font-sans text-xs leading-relaxed whitespace-pre-line bg-white selection:bg-sky-100">
                           {getInterpolatedBody(activeCircular.generated_email_body)}
                         </div>
 
                         {/* Email Client Footer */}
-                        <div className="px-4 py-2 bg-slate-900/90 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500 font-mono">
-                          <span>Merging fields for: <strong className="text-sky-400">{activeRecipient.name}</strong></span>
-                          <span>Ref: {activeCircular.reference_number}</span>
+                        <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500 font-sans">
+                          <span>Merging fields for: <strong className="text-sky-700 font-bold">{activeRecipient.name}</strong></span>
+                          <span className="font-mono text-[11px] text-slate-400">Ref: {activeCircular.reference_number}</span>
                         </div>
 
                       </div>

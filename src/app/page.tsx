@@ -501,6 +501,7 @@ export default function DashboardPage() {
               sortOrder={sortOrder}
               onSort={handleSort}
               onSelectSchool={setSelectedSchool}
+              selectedDistrict={selectedDistrict}
             />
           </div>
         )}
@@ -568,6 +569,7 @@ export default function DashboardPage() {
         onClose={() => setIsMapOpen(false)}
         schools={schools}
         onSelectSchool={setSelectedSchool}
+        selectedDistrict={selectedDistrict}
       />
 
       <WorkerModal
