@@ -20,6 +20,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { SchoolRecord } from '@/types';
+import { getDistrictById } from '@/lib/data/tamilNaduDistricts';
 
 interface SchoolTableProps {
   schools: SchoolRecord[];
@@ -52,8 +53,11 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
   onTriggerResearch,
   selectedDistrict
 }) => {
+  const districtObj = selectedDistrict ? getDistrictById(selectedDistrict) : undefined;
   const districtLabel = selectedDistrict === 'all' || selectedDistrict === 'statewide'
     ? 'Tamil Nadu (All 38 Districts)'
+    : districtObj
+    ? `${districtObj.name} District`
     : selectedDistrict 
     ? `${selectedDistrict.charAt(0).toUpperCase() + selectedDistrict.slice(1)} District`
     : 'Coimbatore District';

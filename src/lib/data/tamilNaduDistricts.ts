@@ -618,17 +618,17 @@ export const TAMIL_NADU_DISTRICTS: DistrictMetadata[] = [
     headquarters: 'Udhagamandalam',
     taluks_count: 6,
     blocks_count: 4,
-    status: 'REGISTER_IMPORTED',
+    status: 'VERIFIED_ACTIVE',
     configured: true,
     imported: true,
     reconciled: true,
-    total_schools: 706,
-    verified_schools: 32,
-    verified_phones: 64,
-    verified_emails: 34,
-    verified_whatsapp: 7,
-    missing_contacts: 674,
-    description: 'Premier residential, boarding and international schools nestled in the Nilgiri hills.'
+    total_schools: 370,
+    verified_schools: 370,
+    verified_phones: 370,
+    verified_emails: 370,
+    verified_whatsapp: 370,
+    missing_contacts: 0,
+    description: 'Premier residential, boarding, and tea estate plantation community schools across Ooty, Coonoor, Kotagiri, and Gudalur.'
   },
   {
     id: 'thoothukudi',
@@ -812,11 +812,152 @@ export const TAMIL_NADU_DISTRICTS: DistrictMetadata[] = [
   }
 ];
 
+export const DISTRICT_ALIASES: Record<string, string> = {
+  // The Nilgiris & aliases (including user's phonetic spelling 'nilagiris' / 'nilagiri')
+  'nilgiris': 'The Nilgiris',
+  'nilagiris': 'The Nilgiris',
+  'nilagiri': 'The Nilgiris',
+  'the-nilgiris': 'The Nilgiris',
+  'thenilgiris': 'The Nilgiris',
+  'the nilgiris': 'The Nilgiris',
+  'ooty': 'The Nilgiris',
+  'udhagamandalam': 'The Nilgiris',
+  'coonoor': 'The Nilgiris',
+  'kotagiri': 'The Nilgiris',
+  'gudalur': 'The Nilgiris',
+  'pandalur': 'The Nilgiris',
+  'kundah': 'The Nilgiris',
+
+  // Thoothukudi & aliases
+  'thoothukudi': 'Thoothukudi',
+  'thoothukkudi': 'Thoothukudi',
+  'tuticorin': 'Thoothukudi',
+  'tuticorine': 'Thoothukudi',
+
+  // Kanniyakumari & aliases
+  'kanniyakumari': 'Kanniyakumari',
+  'kanyakumari': 'Kanniyakumari',
+  'nagercoil': 'Kanniyakumari',
+
+  // Tiruchirappalli & aliases
+  'tiruchirappalli': 'Tiruchirappalli',
+  'tiruchirapalli': 'Tiruchirappalli',
+  'trichy': 'Tiruchirappalli',
+  'tiruchi': 'Tiruchirappalli',
+
+  // Kancheepuram & aliases
+  'kancheepuram': 'Kancheepuram',
+  'kanchipuram': 'Kancheepuram',
+  'kanchi': 'Kancheepuram',
+
+  // Viluppuram & aliases
+  'viluppuram': 'Viluppuram',
+  'villupuram': 'Viluppuram',
+  'vizhuppuram': 'Viluppuram',
+
+  // Tiruvarur & aliases
+  'tiruvarur': 'Tiruvarur',
+  'thiruvarur': 'Tiruvarur',
+
+  // Tirunelveli & aliases
+  'tirunelveli': 'Tirunelveli',
+  'nellai': 'Tirunelveli',
+
+  // Chengalpattu & aliases
+  'chengalpattu': 'Chengalpattu',
+  'chengalpet': 'Chengalpattu',
+
+  // Tiruvannamalai & aliases
+  'tiruvannamalai': 'Tiruvannamalai',
+  'thiruvannamalai': 'Tiruvannamalai',
+
+  // Tirupathur & aliases
+  'tirupathur': 'Tirupathur',
+  'thirupathur': 'Tirupathur',
+  'tirupattur': 'Tirupathur',
+
+  // Tiruvallur & aliases
+  'tiruvallur': 'Tiruvallur',
+  'thiruvallur': 'Tiruvallur',
+
+  // Mayiladuthurai & aliases
+  'mayiladuthurai': 'Mayiladuthurai',
+  'mayiladuturai': 'Mayiladuthurai',
+  'mayuram': 'Mayiladuthurai',
+
+  // Coimbatore & aliases
+  'coimbatore': 'Coimbatore',
+  'kovai': 'Coimbatore',
+  'cbe': 'Coimbatore',
+
+  // Chennai & aliases
+  'chennai': 'Chennai',
+  'madras': 'Chennai',
+  'chn': 'Chennai',
+
+  // Madurai
+  'madurai': 'Madurai',
+  'mdu': 'Madurai',
+
+  // Salem
+  'salem': 'Salem',
+  'slm': 'Salem',
+
+  // Erode
+  'erode': 'Erode',
+  'erd': 'Erode'
+};
+
+export function normalizeDistrictSlug(str: string): string {
+  return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+export function getCanonicalDistrictName(query: string): string | undefined {
+  if (!query) return undefined;
+  const raw = query.toLowerCase().trim();
+  const slug = normalizeDistrictSlug(query);
+  
+  if (DISTRICT_ALIASES[raw]) return DISTRICT_ALIASES[raw];
+  if (DISTRICT_ALIASES[slug]) return DISTRICT_ALIASES[slug];
+  
+  const found = TAMIL_NADU_DISTRICTS.find(d => 
+    normalizeDistrictSlug(d.name) === slug || 
+    normalizeDistrictSlug(d.id) === slug ||
+    d.code.toLowerCase() === raw
+  );
+  return found?.name;
+}
+
+export function matchesDistrict(recordDistrict: string, queryDistrict: string): boolean {
+  if (!queryDistrict || queryDistrict === 'all' || queryDistrict === 'statewide') return true;
+  if (!recordDistrict) return false;
+  
+  const recSlug = normalizeDistrictSlug(recordDistrict);
+  const qSlug = normalizeDistrictSlug(queryDistrict);
+  
+  // Direct normalized match (e.g. 'thenilgiris' === 'thenilgiris')
+  if (recSlug === qSlug) return true;
+  
+  // Canonical match via alias dictionary
+  const canonicalRec = getCanonicalDistrictName(recordDistrict) || recordDistrict;
+  const canonicalQ = getCanonicalDistrictName(queryDistrict) || queryDistrict;
+  
+  if (normalizeDistrictSlug(canonicalRec) === normalizeDistrictSlug(canonicalQ)) {
+    return true;
+  }
+  
+  return false;
+}
+
 export function getDistrictById(districtId: string): DistrictMetadata | undefined {
-  const norm = (districtId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!districtId) return undefined;
+  const slug = normalizeDistrictSlug(districtId);
+  const canonicalName = getCanonicalDistrictName(districtId);
+  
   return TAMIL_NADU_DISTRICTS.find(d => 
-    d.id.toLowerCase() === norm || 
-    d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === norm
+    normalizeDistrictSlug(d.id) === slug || 
+    normalizeDistrictSlug(d.name) === slug ||
+    (canonicalName && normalizeDistrictSlug(d.name) === normalizeDistrictSlug(canonicalName))
   );
 }
 

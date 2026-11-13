@@ -76,12 +76,14 @@ export async function safeDbExecute(client: Client, stmt: any): Promise<any> {
   }
 }
 
+import { matchesDistrict } from './data/tamilNaduDistricts';
+
 // Helper to query master schools with in-memory caching and statewide multi-district filtering
 export async function getMasterSchoolsFromMemoryOrDb(district?: string): Promise<any[]> {
   const normDistrict = (district || '').toLowerCase().trim();
 
   // Load statewide dataset if needed
-  if (normDistrict === 'all' || normDistrict === 'statewide' || (normDistrict && normDistrict !== 'coimbatore')) {
+  if (normDistrict === 'all' || normDistrict === 'statewide' || (normDistrict && !matchesDistrict('Coimbatore', normDistrict))) {
     if (!memoryCacheStatewide) {
       const statewidePath = path.join(process.cwd(), 'data', 'master_statewide_schools.json');
       if (fs.existsSync(statewidePath)) {
@@ -99,8 +101,7 @@ export async function getMasterSchoolsFromMemoryOrDb(district?: string): Promise
         return memoryCacheStatewide;
       }
       return memoryCacheStatewide.filter((s: any) => 
-        (s.district || '').toLowerCase() === normDistrict ||
-        (s.district || '').toLowerCase().replace(/\s+/g, '') === normDistrict.replace(/\s+/g, '')
+        matchesDistrict(s.district || '', normDistrict)
       );
     }
   }

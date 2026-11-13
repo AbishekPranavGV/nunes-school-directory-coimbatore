@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMasterSchoolsFromMemoryOrDb } from '@/lib/db';
+import { matchesDistrict } from '@/lib/data/tamilNaduDistricts';
 import ExcelJS from 'exceljs';
 
 export const dynamic = 'force-dynamic';
@@ -55,8 +56,7 @@ export async function GET(req: NextRequest) {
           if (!matches) return false;
         }
         if (district && district.toLowerCase() !== 'all' && district.toLowerCase() !== 'statewide') {
-          if ((s.district || '').toLowerCase() !== district.toLowerCase() && 
-              (s.district || '').toLowerCase().replace(/\s+/g, '') !== district.toLowerCase().replace(/\s+/g, '')) {
+          if (!matchesDistrict(s.district || '', district)) {
             return false;
           }
         }

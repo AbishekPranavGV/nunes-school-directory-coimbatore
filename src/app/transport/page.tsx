@@ -7,12 +7,23 @@ import { TransportFilterBar } from '@/components/transport/TransportFilterBar';
 import { TransportTable } from '@/components/transport/TransportTable';
 import { TransportDetailDrawer } from '@/components/transport/TransportDetailDrawer';
 import { TransportMapViewModal } from '@/components/transport/TransportMapViewModal';
+import { Transport2DGoogleMapModal } from '@/components/transport/Transport2DGoogleMapModal';
 import { TransportDispatchModal } from '@/components/transport/TransportDispatchModal';
 import { TransportExportModal } from '@/components/transport/TransportExportModal';
 import { TransportWorkerModal } from '@/components/transport/TransportWorkerModal';
 import { TransportReportsView } from '@/components/transport/TransportReportsView';
 import { TransportMissingContactsView } from '@/components/transport/TransportMissingContactsModal';
-import { TransportRecord, TransportKPI, TransportWorkspaceView } from '@/types/transport';
+import { TransportCircularsHubView } from '@/components/transport/TransportCircularsHubView';
+import { TransportBranchesView } from '@/components/transport/TransportBranchesView';
+import { TransportCircularPreviewModal } from '@/components/transport/TransportCircularPreviewModal';
+import { TransportCircularEditModal } from '@/components/transport/TransportCircularEditModal';
+import { TransportEditOperatorModal } from '@/components/transport/TransportEditOperatorModal';
+import { 
+  TransportRecord, 
+  TransportKPI, 
+  TransportWorkspaceView, 
+  TransportCircular 
+} from '@/types/transport';
 
 export default function TransportDashboardPage() {
   const [currentView, setCurrentView] = useState<TransportWorkspaceView>('dashboard');
@@ -40,12 +51,26 @@ export default function TransportDashboardPage() {
   const [sortBy, setSortBy] = useState<string>('company_name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // Modals & Selected Operator
+  // Modals & Selected Operator / Circular States
   const [selectedOperator, setSelectedOperator] = useState<TransportRecord | null>(null);
-  const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
-  const [isMapOpen, setIsMapOpen] = useState<boolean>(false);
-  const [isWorkerOpen, setIsWorkerOpen] = useState<boolean>(false);
+  const [editingOperator, setEditingOperator] = useState<TransportRecord | null>(null);
   const [dispatchOperator, setDispatchOperator] = useState<TransportRecord | null>(null);
+
+  // Circular Modals
+  const [selectedCircularForPreview, setSelectedCircularForPreview] = useState<TransportCircular | null>(null);
+  const [editingCircular, setEditingCircular] = useState<TransportCircular | null>(null);
+  const [isCircularEditOpen, setIsCircularEditOpen] = useState<boolean>(false);
+
+  // General Action Modals
+  const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
+  const [is2DMapOpen, setIs2DMapOpen] = useState<boolean>(false);
+  const [isLeafletMapOpen, setIsLeafletMapOpen] = useState<boolean>(false);
+  const [isWorkerOpen, setIsWorkerOpen] = useState<boolean>(false);
+
+  // Set document title dynamically
+  useEffect(() => {
+    document.title = 'Nunes Instruments — Tamil Nadu Transport & Logistics Fleet Intelligence';
+  }, []);
 
   // Fetch KPI
   const loadKpi = useCallback(async () => {
@@ -106,15 +131,19 @@ export default function TransportDashboardPage() {
     quickFilter,
   ]);
 
-  // Load all operators for reports and map
-  useEffect(() => {
-    fetch('/api/transport?limit=100')
+  // Load all operators for reports, branch aggregations and map
+  const loadAllOperators = useCallback(() => {
+    fetch('/api/transport?limit=200')
       .then(r => r.json())
       .then(d => {
-        if (d.success) setAllOperators(d.data);
+        if (d.success) setAllOperators(d.data || []);
       })
       .catch(console.error);
   }, []);
+
+  useEffect(() => {
+    loadAllOperators();
+  }, [loadAllOperators]);
 
   useEffect(() => {
     loadKpi();
@@ -145,6 +174,38 @@ export default function TransportDashboardPage() {
     setCurrentPage(1);
   };
 
+  // When an operator is edited via modal
+  const handleOperatorSaved = (updated: TransportRecord) => {
+    setOperators(prev => prev.map(op => op.id === updated.id ? updated : op));
+    setAllOperators(prev => prev.map(op => op.id === updated.id ? updated : op));
+    if (selectedOperator && selectedOperator.id === updated.id) {
+      setSelectedOperator(updated);
+    }
+    loadKpi();
+  };
+
+  // Dispatch circular directly from preview
+  const handleSendCircularOutbound = async (cir: TransportCircular) => {
+    try {
+      const res = await fetch('/api/transport/circulars', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_circular',
+          ...cir,
+          send_now: true
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`Circular "${cir.title}" dispatched successfully to ${cir.recipient_count || 320} transport fleets across Tamil Nadu.`);
+        loadKpi();
+      }
+    } catch (err: any) {
+      alert(`Error sending circular: ${err.message}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50/60 flex flex-col font-sans">
       
@@ -153,7 +214,7 @@ export default function TransportDashboardPage() {
         currentView={currentView}
         onViewChange={(v) => {
           if (v === 'map') {
-            setIsMapOpen(true);
+            setIs2DMapOpen(true);
           } else {
             setCurrentView(v);
           }
@@ -171,7 +232,7 @@ export default function TransportDashboardPage() {
         totalFleets={totalFiltered}
         onOpenWorker={() => setIsWorkerOpen(true)}
         onOpenExport={() => setIsExportOpen(true)}
-        onOpenMap={() => setIsMapOpen(true)}
+        onOpenMap={() => setIs2DMapOpen(true)}
       />
 
       {/* Main Container */}
@@ -195,7 +256,7 @@ export default function TransportDashboardPage() {
           }}
         />
 
-        {/* WORKSPACE VIEW: DASHBOARD */}
+        {/* WORKSPACE VIEW 1: FLEET REGISTER & TABLE */}
         {currentView === 'dashboard' && (
           <div className="space-y-4">
             
@@ -235,7 +296,7 @@ export default function TransportDashboardPage() {
               totalFiltered={totalFiltered}
             />
 
-            {/* Main Interactive Fleet Table */}
+            {/* Main Interactive Fleet Table with Edit & Branch Capabilities */}
             <TransportTable
               operators={operators}
               totalCount={totalFiltered}
@@ -252,12 +313,37 @@ export default function TransportDashboardPage() {
               onSort={handleSort}
               onSelectOperator={setSelectedOperator}
               onQuickWhatsApp={(op) => setDispatchOperator(op)}
+              onEditOperator={(op) => setEditingOperator(op)}
             />
 
           </div>
         )}
 
-        {/* WORKSPACE VIEW: MISSING CONTACTS / ENRICHMENT */}
+        {/* WORKSPACE VIEW 2: CIRCULARS & DELIVERABILITY HUB */}
+        {currentView === 'circulars' && (
+          <TransportCircularsHubView
+            operators={allOperators.length > 0 ? allOperators : operators}
+            onOpenCircularPreview={(cir) => setSelectedCircularForPreview(cir)}
+            onOpenCircularEdit={(cir) => {
+              setEditingCircular(cir);
+              setIsCircularEditOpen(true);
+            }}
+            onComposeNewCircular={() => {
+              setEditingCircular(null);
+              setIsCircularEditOpen(true);
+            }}
+          />
+        )}
+
+        {/* WORKSPACE VIEW 3: REGIONAL BRANCHES & DEPOTS ACROSS TAMIL NADU */}
+        {currentView === 'branches' && (
+          <TransportBranchesView
+            operators={allOperators.length > 0 ? allOperators : operators}
+            onSelectOperator={(op) => setSelectedOperator(op)}
+          />
+        )}
+
+        {/* WORKSPACE VIEW 4: MISSING CONTACTS / ENRICHMENT QUEUE */}
         {currentView === 'missing' && (
           <TransportMissingContactsView
             operators={allOperators.length > 0 ? allOperators : operators}
@@ -266,11 +352,20 @@ export default function TransportDashboardPage() {
           />
         )}
 
-        {/* WORKSPACE VIEW: DISPATCHER */}
+        {/* WORKSPACE VIEW 5: DISPATCHER */}
         {currentView === 'dispatch' && (
           <div className="space-y-4">
-            <div className="p-4 bg-white rounded-2xl border border-slate-200">
-              <h3 className="font-bold text-slate-900 text-sm">Select an operator from below to dispatch WhatsApp or Email inquiries:</h3>
+            <div className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+              <div>
+                <h3 className="font-bold text-slate-900 text-sm">Official WhatsApp & Email Inquiries Dispatcher</h3>
+                <p className="text-xs text-slate-500">Select any fleet operator below to preview pre-filled template messages and trigger live wa.me dispatch.</p>
+              </div>
+              <button
+                onClick={() => setCurrentView('circulars')}
+                className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-bold transition-all"
+              >
+                Switch to Circulars Hub →
+              </button>
             </div>
             <TransportMissingContactsView
               operators={allOperators.length > 0 ? allOperators : operators}
@@ -280,7 +375,7 @@ export default function TransportDashboardPage() {
           </div>
         )}
 
-        {/* WORKSPACE VIEW: ANALYTICS & REPORTS */}
+        {/* WORKSPACE VIEW 6: ANALYTICS & REPORTS */}
         {currentView === 'reports' && (
           <TransportReportsView
             operators={allOperators.length > 0 ? allOperators : operators}
@@ -298,14 +393,61 @@ export default function TransportDashboardPage() {
           setSelectedOperator(null);
           setDispatchOperator(op);
         }}
+        onOpenEditModal={(op) => {
+          setEditingOperator(op);
+        }}
       />
 
-      {/* Geocoded Map Modal */}
+      {/* 2D Google Maps Style Live Geographic Modal */}
+      <Transport2DGoogleMapModal
+        isOpen={is2DMapOpen}
+        onClose={() => setIs2DMapOpen(false)}
+        operators={allOperators.length > 0 ? allOperators : operators}
+        onSelectOperator={(op) => {
+          setIs2DMapOpen(false);
+          setSelectedOperator(op);
+        }}
+      />
+
+      {/* Leaflet/Interactive Map Alternative */}
       <TransportMapViewModal
-        isOpen={isMapOpen}
-        onClose={() => setIsMapOpen(false)}
+        isOpen={isLeafletMapOpen}
+        onClose={() => setIsLeafletMapOpen(false)}
         operators={allOperators.length > 0 ? allOperators : operators}
         onSelectOperator={setSelectedOperator}
+      />
+
+      {/* Operator Edit & Branch Office Management Modal */}
+      <TransportEditOperatorModal
+        operator={editingOperator}
+        isOpen={Boolean(editingOperator)}
+        onClose={() => setEditingOperator(null)}
+        onSave={handleOperatorSaved}
+      />
+
+      {/* Circular Official Letterhead Preview Modal */}
+      <TransportCircularPreviewModal
+        circular={selectedCircularForPreview}
+        onClose={() => setSelectedCircularForPreview(null)}
+        onEdit={(cir) => {
+          setSelectedCircularForPreview(null);
+          setEditingCircular(cir);
+          setIsCircularEditOpen(true);
+        }}
+        onSendNow={handleSendCircularOutbound}
+      />
+
+      {/* Circular Compose / Edit Modal */}
+      <TransportCircularEditModal
+        isOpen={isCircularEditOpen}
+        circular={editingCircular}
+        onClose={() => {
+          setIsCircularEditOpen(false);
+          setEditingCircular(null);
+        }}
+        onSaveSuccess={(updatedCir) => {
+          setSelectedCircularForPreview(updatedCir);
+        }}
       />
 
       {/* Dispatcher Modal */}
@@ -330,6 +472,7 @@ export default function TransportDashboardPage() {
         onRefreshData={() => {
           loadKpi();
           loadOperators();
+          loadAllOperators();
         }}
       />
 
@@ -337,7 +480,7 @@ export default function TransportDashboardPage() {
       <footer className="mt-auto border-t border-slate-200/80 bg-white py-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p>© {new Date().getFullYear()} Nunes Instruments — Tamil Nadu Transport Intelligence Platform</p>
-          <p className="text-slate-400">Omni Bus Owners Association (TOBOA) & State Lorry Owners Federation (SLOF) Certified</p>
+          <p className="text-slate-400">Tamil Nadu Omni Bus Owners Association (TOBOA) & State Lorry Owners Federation (SLOF) Certified</p>
         </div>
       </footer>
 

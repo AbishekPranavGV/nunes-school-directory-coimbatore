@@ -30,7 +30,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { UserSession, WorkspaceView } from '@/types';
-import { TAMIL_NADU_DISTRICTS, DistrictMetadata } from '@/lib/data/tamilNaduDistricts';
+import { TAMIL_NADU_DISTRICTS, DistrictMetadata, getDistrictById, getCanonicalDistrictName, matchesDistrict } from '@/lib/data/tamilNaduDistricts';
 
 interface HeaderProps {
   user: UserSession | null;
@@ -85,14 +85,17 @@ export const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDistrictMenuOpen]);
 
-  const currentDistrictObj = TAMIL_NADU_DISTRICTS.find(d => d.id === selectedDistrict);
+  const currentDistrictObj = getDistrictById(selectedDistrict);
   const isStatewide = selectedDistrict === 'all' || selectedDistrict === 'statewide';
 
   const filteredDistricts = TAMIL_NADU_DISTRICTS.filter(d => {
     if (selectedZone !== 'ALL' && d.zone !== selectedZone) return false;
     if (districtSearch) {
       const q = districtSearch.toLowerCase();
-      return d.name.toLowerCase().includes(q) || d.headquarters.toLowerCase().includes(q) || d.code.toLowerCase().includes(q);
+      const canonical = getCanonicalDistrictName(q);
+      const matchesDirect = d.name.toLowerCase().includes(q) || d.headquarters.toLowerCase().includes(q) || d.code.toLowerCase().includes(q);
+      const matchesCanonical = canonical ? matchesDistrict(d.name, canonical) : false;
+      return matchesDirect || matchesCanonical;
     }
     return true;
   });

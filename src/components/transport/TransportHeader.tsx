@@ -25,7 +25,8 @@ import {
   Check,
   Globe2,
   GraduationCap,
-  ArrowRight
+  ArrowRight,
+  Building2
 } from 'lucide-react';
 import { TransportWorkspaceView } from '@/types/transport';
 
@@ -97,8 +98,10 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
 
   const workspaces: { id: TransportWorkspaceView; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string; badgeColor?: string }[] = [
     { id: 'dashboard', label: 'Fleet Register & Table', icon: LayoutDashboard },
-    { id: 'map', label: 'Interactive Hubs & Routes Map', icon: MapPin },
-    { id: 'dispatch', label: 'WhatsApp & Email Dispatcher', icon: Send, badge: 'Live Wa.me', badgeColor: 'bg-emerald-100 text-emerald-800' },
+    { id: 'circulars', label: 'Circulars & Deliverability Hub', icon: Send, badge: '2.8% Bounce • 97% Delivered', badgeColor: 'bg-emerald-100 text-emerald-800' },
+    { id: 'branches', label: 'Regional Branches & Depots', icon: Building2, badge: '50+ Branches Across TN', badgeColor: 'bg-amber-100 text-amber-900' },
+    { id: 'map', label: '2D Google Maps Live', icon: MapPin },
+    { id: 'dispatch', label: 'WhatsApp & Email Dispatcher', icon: Mail, badge: 'Live Wa.me', badgeColor: 'bg-emerald-100 text-emerald-800' },
     { id: 'missing', label: 'Owner Contact Queue', icon: PhoneCall, badge: '100% Verified', badgeColor: 'bg-sky-100 text-sky-800' },
     { id: 'reports', label: 'Fleet & Route Analytics', icon: BarChart3 }
   ];
@@ -258,11 +261,11 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
 
             <button
               onClick={onOpenMap}
-              className="hidden md:inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-amber-50 hover:text-amber-800 border border-slate-200 hover:border-amber-200 rounded-lg transition-all"
-              title="Geocoded Transport Depots Map"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-sky-50 hover:text-sky-700 border border-slate-300 hover:border-sky-300 rounded-lg transition-all shadow-2xs"
+              title="2D Google Maps Style Geographic View"
             >
-              <MapPin className="w-3.5 h-3.5 text-amber-600" />
-              <span>Hubs Map</span>
+              <MapPin className="w-3.5 h-3.5 text-rose-500" />
+              <span>2D Google Map</span>
             </button>
 
             <button

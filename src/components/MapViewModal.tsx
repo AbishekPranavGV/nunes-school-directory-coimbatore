@@ -26,6 +26,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { SchoolRecord } from '@/types';
+import { getCanonicalDistrictName, matchesDistrict } from '@/lib/data/tamilNaduDistricts';
 
 interface MapViewModalProps {
   isOpen: boolean;
@@ -336,13 +337,15 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
     setIsSearching(true);
     setSearchStatusMessage(`Searching live locations for "${searchQuery}"...`);
 
-    // 1. Search in locally loaded schools
+    // 1. Search in locally loaded schools with canonical district alias resolution
+    const canonicalDistrict = getCanonicalDistrictName(q);
     let match = allLoadedSchools.find(s => 
-      s.school_name.toLowerCase().includes(q) ||
-      s.udise_code.includes(q) ||
+      (s.school_name || '').toLowerCase().includes(q) ||
+      (s.udise_code || '').includes(q) ||
       (s.locality || '').toLowerCase().includes(q) ||
       (s.block || '').toLowerCase().includes(q) ||
-      (s.district || '').toLowerCase().includes(q)
+      (s.district || '').toLowerCase().includes(q) ||
+      (canonicalDistrict && matchesDistrict(s.district || '', canonicalDistrict))
     );
 
     // 2. If not found in loaded array, query server /api/schools

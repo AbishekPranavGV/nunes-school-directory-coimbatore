@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMasterSchoolsFromMemoryOrDb, getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
+import { matchesDistrict, getCanonicalDistrictName } from '@/lib/data/tamilNaduDistricts';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,20 +38,22 @@ export async function GET(req: NextRequest) {
     let filtered = allSchools.filter((s: any) => {
       // District filter
       if (district && district.toLowerCase() !== 'all' && district.toLowerCase() !== 'statewide') {
-        if ((s.district || '').toLowerCase() !== district.toLowerCase() && 
-            (s.district || '').toLowerCase().replace(/\s+/g, '') !== district.toLowerCase().replace(/\s+/g, '')) {
+        if (!matchesDistrict(s.district || '', district)) {
           return false;
         }
       }
-      // Global search across name, code, block, taluk, locality, address, PIN
+      // Global search across name, code, block, taluk, locality, address, PIN, district & phonetic aliases
       if (q) {
-        const matchesName = s.school_name.toLowerCase().includes(q);
-        const matchesUdise = s.udise_code.toLowerCase().includes(q);
-        const matchesBlock = s.block.toLowerCase().includes(q);
+        const matchesName = (s.school_name || '').toLowerCase().includes(q);
+        const matchesUdise = (s.udise_code || '').toLowerCase().includes(q);
+        const matchesBlock = (s.block || '').toLowerCase().includes(q);
         const matchesTaluk = (s.taluk || '').toLowerCase().includes(q);
         const matchesLocality = (s.locality || s.village_locality || '').toLowerCase().includes(q);
-        const matchesPin = s.pincode.toLowerCase().includes(q);
-        if (!matchesName && !matchesUdise && !matchesBlock && !matchesTaluk && !matchesLocality && !matchesPin) {
+        const matchesPin = (s.pincode || '').toLowerCase().includes(q);
+        const matchesDist = (s.district || '').toLowerCase().includes(q);
+        const canonicalQ = getCanonicalDistrictName(q);
+        const matchesCanonicalDist = canonicalQ ? matchesDistrict(s.district || '', canonicalQ) : false;
+        if (!matchesName && !matchesUdise && !matchesBlock && !matchesTaluk && !matchesLocality && !matchesPin && !matchesDist && !matchesCanonicalDist) {
           return false;
         }
       }

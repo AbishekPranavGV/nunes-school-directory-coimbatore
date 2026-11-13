@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { KPIMetrics, SchoolRecord, WorkspaceView } from '@/types';
 import { KPICards } from '@/components/KPICards';
-import { TAMIL_NADU_DISTRICTS, TAMIL_NADU_CENSUS_SUMMARY, getStatewideTotals } from '@/lib/data/tamilNaduDistricts';
+import { TAMIL_NADU_DISTRICTS, TAMIL_NADU_CENSUS_SUMMARY, getStatewideTotals, getDistrictById, getCanonicalDistrictName, matchesDistrict } from '@/lib/data/tamilNaduDistricts';
 
 interface DashboardViewProps {
   kpi: KPIMetrics | null;
@@ -110,7 +110,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     if (activeZone !== 'ALL' && d.zone !== activeZone) return false;
     if (districtSearch) {
       const q = districtSearch.toLowerCase();
-      return d.name.toLowerCase().includes(q) || d.headquarters.toLowerCase().includes(q) || d.code.toLowerCase().includes(q);
+      const canonical = getCanonicalDistrictName(q);
+      const matchesDirect = d.name.toLowerCase().includes(q) || d.headquarters.toLowerCase().includes(q) || d.code.toLowerCase().includes(q);
+      const matchesCanonical = canonical ? matchesDistrict(d.name, canonical) : false;
+      return matchesDirect || matchesCanonical;
     }
     return true;
   });
@@ -369,7 +372,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </span>
           <div>
             <h3 className="text-sm font-bold text-slate-900">
-              {isStatewide ? 'Tamil Nadu Statewide Operations' : `${selectedDistrict.charAt(0).toUpperCase() + selectedDistrict.slice(1)} Operational Launchpad`}
+              {isStatewide ? 'Tamil Nadu Statewide Operations' : `${getDistrictById(selectedDistrict)?.name || selectedDistrict.charAt(0).toUpperCase() + selectedDistrict.slice(1)} Operational Launchpad`}
             </h3>
             <p className="text-xs text-slate-500">Autonomous contact enrichment, official circulars, and verified switchboard operations</p>
           </div>

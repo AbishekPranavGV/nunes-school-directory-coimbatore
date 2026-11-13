@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { TRANSPORT_OPERATORS } from '@/lib/data/transportData';
 import { TransportRecord } from '@/types/transport';
 
+// In-memory mutable cache so edits persist during session
+let operatorsCache: TransportRecord[] = [...TRANSPORT_OPERATORS];
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -13,13 +16,14 @@ export async function GET(request: NextRequest) {
     const permitType = searchParams.get('permit_type')?.trim() || '';
     const status = searchParams.get('status')?.trim() || '';
     const quickFilter = searchParams.get('quick')?.toLowerCase().trim() || '';
+    const branchCity = searchParams.get('branch_city')?.toLowerCase().trim() || '';
 
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '25', 10);
     const sortBy = searchParams.get('sortBy') || 'company_name';
     const sortOrder = searchParams.get('sortOrder') || 'asc';
 
-    let filtered: TransportRecord[] = [...TRANSPORT_OPERATORS];
+    let filtered: TransportRecord[] = [...operatorsCache];
 
     // Service type filter (bus, lorry, logistics)
     if (serviceType && serviceType !== 'all') {
@@ -37,7 +41,18 @@ export async function GET(request: NextRequest) {
 
     // District filter
     if (district && district !== 'all' && district !== 'statewide') {
-      filtered = filtered.filter(item => item.district.toLowerCase() === district);
+      filtered = filtered.filter(item => 
+        item.district.toLowerCase() === district ||
+        item.branches?.some(b => b.district.toLowerCase() === district)
+      );
+    }
+
+    // Branch City filter
+    if (branchCity && branchCity !== 'all') {
+      filtered = filtered.filter(item => 
+        item.city_hub.toLowerCase().includes(branchCity) ||
+        item.branches?.some(b => b.city.toLowerCase() === branchCity)
+      );
     }
 
     // Permit Type filter
@@ -61,11 +76,20 @@ export async function GET(request: NextRequest) {
       } else if (quickFilter === 'lorry_services') {
         filtered = filtered.filter(item => item.service_type === 'lorry' || item.service_type === 'logistics');
       } else if (quickFilter === 'namakkal_hub') {
-        filtered = filtered.filter(item => item.district.toLowerCase() === 'namakkal' || item.city_hub.toLowerCase().includes('namakkal'));
+        filtered = filtered.filter(item => 
+          item.district.toLowerCase() === 'namakkal' || 
+          item.city_hub.toLowerCase().includes('namakkal') ||
+          item.branches?.some(b => b.city.toLowerCase().includes('namakkal'))
+        );
       } else if (quickFilter === 'coimbatore_hub') {
-        filtered = filtered.filter(item => item.district.toLowerCase() === 'coimbatore');
+        filtered = filtered.filter(item => 
+          item.district.toLowerCase() === 'coimbatore' ||
+          item.branches?.some(b => b.city.toLowerCase().includes('coimbatore'))
+        );
       } else if (quickFilter === 'national_permit') {
         filtered = filtered.filter(item => item.permit_type.includes('National') || item.permit_type.includes('All India'));
+      } else if (quickFilter === 'has_branches') {
+        filtered = filtered.filter(item => Boolean(item.branches && item.branches.length > 0));
       }
     }
 
@@ -83,7 +107,13 @@ export async function GET(request: NextRequest) {
           item.address.toLowerCase().includes(query) ||
           item.routes.some(r => r.toLowerCase().includes(query)) ||
           item.vehicle_types.some(v => v.toLowerCase().includes(query)) ||
-          (item.gstin && item.gstin.toLowerCase().includes(query))
+          (item.gstin && item.gstin.toLowerCase().includes(query)) ||
+          item.branches?.some(b => 
+            b.branch_name.toLowerCase().includes(query) || 
+            b.city.toLowerCase().includes(query) || 
+            b.manager_name.toLowerCase().includes(query) ||
+            b.phone.toLowerCase().includes(query)
+          )
         );
       });
     }
@@ -118,5 +148,58 @@ export async function GET(request: NextRequest) {
   } catch (err: any) {
     console.error('Error in /api/transport:', err);
     return NextResponse.json({ error: 'Failed to fetch transport data', details: err.message }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { action, operator } = body;
+
+    if (action === 'edit_operator' && operator && operator.id) {
+      const idx = operatorsCache.findIndex(o => o.id === operator.id);
+      if (idx !== -1) {
+        operatorsCache[idx] = {
+          ...operatorsCache[idx],
+          ...operator,
+          updated_at: new Date().toISOString()
+        };
+
+        return NextResponse.json({
+          success: true,
+          message: `Operator ${operator.company_name} updated successfully`,
+          operator: operatorsCache[idx]
+        });
+      }
+      return NextResponse.json({ error: 'Operator not found' }, { status: 404 });
+    }
+
+    if (action === 'add_branch' && body.operator_id && body.branch) {
+      const idx = operatorsCache.findIndex(o => o.id === body.operator_id);
+      if (idx !== -1) {
+        const newBranch = {
+          id: `BR-${Date.now().toString().slice(-6)}`,
+          ...body.branch
+        };
+        if (!operatorsCache[idx].branches) {
+          operatorsCache[idx].branches = [];
+        }
+        operatorsCache[idx].branches.push(newBranch);
+        operatorsCache[idx].updated_at = new Date().toISOString();
+
+        return NextResponse.json({
+          success: true,
+          message: 'Branch added successfully',
+          branch: newBranch,
+          operator: operatorsCache[idx]
+        });
+      }
+      return NextResponse.json({ error: 'Operator not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ error: 'Invalid action specified' }, { status: 400 });
+  } catch (err: any) {
+    console.error('Error in /api/transport POST:', err);
+    return NextResponse.json({ error: 'Failed to update transport data', details: err.message }, { status: 500 });
   }
 }
