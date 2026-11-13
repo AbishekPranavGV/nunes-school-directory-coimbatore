@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     const has_missing_contact = searchParams.get('has_missing_contact');
 
     const page = parseInt(searchParams.get('page') || '1', 10);
-    const pageSize = Math.min(parseInt(searchParams.get('pageSize') || '25', 10), 500);
+    const pageSize = Math.min(parseInt(searchParams.get('pageSize') || '25', 10), 3000);
     const sortBy = searchParams.get('sortBy') || 'school_name';
     const sortOrder = searchParams.get('sortOrder') === 'desc' ? -1 : 1;
 

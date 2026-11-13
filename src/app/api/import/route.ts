@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -157,44 +157,52 @@ export async function POST(req: NextRequest) {
       const finalWa = existing?.official_whatsapp || v.official_whatsapp;
       const finalPrinc = existing?.principal_name || v.principal_name;
 
-      await db.execute({
-        sql: `INSERT OR REPLACE INTO schools (
-          id, udise_code, school_name, normalized_name, management, board, category, 
-          block, urban_rural, address, pincode, source_provenance, status, 
-          official_landline, official_email, official_whatsapp, principal_name, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Urban', ?, ?, ?, 'ACTIVE', ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-        args: [
-          id, v.udise_code, v.school_name, norm, v.management, v.board, v.category,
-          v.block, `${v.school_name}, ${v.block}, Coimbatore - ${v.pincode}`, v.pincode,
-          `Batch Import: ${file.name}`,
-          finalPhone, finalEmail, finalWa, finalPrinc
-        ]
-      });
-
-      if (finalPhone) {
-        await db.execute({
-          sql: `INSERT OR REPLACE INTO contacts (id, school_id, contact_type, contact_role, contact_value, formatted_value, is_verified, verification_status, confidence_score)
-                VALUES (?, ?, 'landline', 'General Office', ?, ?, 1, 'OFFICIAL_CONFIRMED', 0.9)`,
-          args: [`${id}_landline`, id, finalPhone, finalPhone]
+      try {
+        await safeDbExecute(db, {
+          sql: `INSERT OR REPLACE INTO schools (
+            id, udise_code, school_name, normalized_name, management, board, category, 
+            block, urban_rural, address, pincode, source_provenance, status, 
+            official_landline, official_email, official_whatsapp, principal_name, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Urban', ?, ?, ?, 'ACTIVE', ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+          args: [
+            id, v.udise_code, v.school_name, norm, v.management, v.board, v.category,
+            v.block, `${v.school_name}, ${v.block}, Coimbatore - ${v.pincode}`, v.pincode,
+            `Batch Import: ${file.name}`,
+            finalPhone, finalEmail, finalWa, finalPrinc
+          ]
         });
+
+        if (finalPhone) {
+          await safeDbExecute(db, {
+            sql: `INSERT OR REPLACE INTO contacts (id, school_id, contact_type, contact_role, contact_value, formatted_value, is_verified, verification_status, confidence_score)
+                  VALUES (?, ?, 'landline', 'General Office', ?, ?, 1, 'OFFICIAL_CONFIRMED', 0.9)`,
+            args: [`${id}_landline`, id, finalPhone, finalPhone]
+          });
+        }
+      } catch (e) {
+        console.warn('[Import] Non-fatal school insert error:', e);
       }
 
       imported++;
     }
 
     // Record Import Job
-    await db.execute({
-      sql: `INSERT INTO import_jobs (id, job_type, filename, status, total_records, imported_count, duplicate_count, error_count, log_details, completed_at)
-            VALUES (?, 'CSV_UPLOAD', ?, 'COMPLETED', ?, ?, ?, 0, ?, CURRENT_TIMESTAMP)`,
-      args: [
-        `job_${Date.now()}`, 
-        file.name, 
-        rows.length, 
-        imported, 
-        duplicateCount, 
-        `Imported ${imported} schools. Reconciled ${duplicateCount} duplicates.`
-      ]
-    });
+    try {
+      await safeDbExecute(db, {
+        sql: `INSERT INTO import_jobs (id, job_type, filename, status, total_records, imported_count, duplicate_count, error_count, log_details, completed_at)
+              VALUES (?, 'CSV_UPLOAD', ?, 'COMPLETED', ?, ?, ?, 0, ?, CURRENT_TIMESTAMP)`,
+        args: [
+          `job_${Date.now()}`, 
+          file.name, 
+          rows.length, 
+          imported, 
+          duplicateCount, 
+          `Imported ${imported} schools. Reconciled ${duplicateCount} duplicates.`
+        ]
+      });
+    } catch (e) {
+      console.warn('[Import] Non-fatal import job log error:', e);
+    }
 
     return NextResponse.json({
       success: true,

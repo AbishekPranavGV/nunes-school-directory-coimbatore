@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMasterSchoolsFromMemoryOrDb, getDb } from '@/lib/db';
+import { getMasterSchoolsFromMemoryOrDb, getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 import { 
   PROVIDER_IDS, 
@@ -108,11 +108,15 @@ async function executeSingleSchoolResearch(school: any) {
   const jobId = `job_ai_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
   // Log start of research job with provider and checkpoint
-  await db.execute({
-    sql: `INSERT INTO research_jobs (id, school_id, provider_id, job_type, job_status, attempts, checkpoint_data, started_at)
-          VALUES (?, ?, ?, 'AI_12_SOURCE_DISCOVERY', 'RUNNING', 1, 'INIT_TIER_1', CURRENT_TIMESTAMP)`,
-    args: [jobId, school.id, PROVIDER_IDS.SEARCH_ENGINE]
-  });
+  try {
+    await safeDbExecute(db, {
+      sql: `INSERT INTO research_jobs (id, school_id, provider_id, job_type, job_status, attempts, checkpoint_data, started_at)
+            VALUES (?, ?, ?, 'AI_12_SOURCE_DISCOVERY', 'RUNNING', 1, 'INIT_TIER_1', CURRENT_TIMESTAMP)`,
+      args: [jobId, school.id, PROVIDER_IDS.SEARCH_ENGINE]
+    });
+  } catch (e) {
+    console.warn('[Research] Non-fatal job init log error:', e);
+  }
 
   let discoveredPhone = school.official_landline;
   let discoveredEmail = school.official_email;
@@ -141,13 +145,17 @@ async function executeSingleSchoolResearch(school: any) {
 
   // 2. Email MX Verification if email exists
   if (discoveredEmail) {
-    mxVerificationResult = await verifyEmailMx(discoveredEmail);
-    await incrementProviderStats(PROVIDER_IDS.EMAIL_VERIFICATION, {
-      attempts: 1,
-      matched: 1,
-      discovered: 1,
-      verified: mxVerificationResult.hasMx ? 1 : 0
-    });
+    try {
+      mxVerificationResult = await verifyEmailMx(discoveredEmail);
+      await incrementProviderStats(PROVIDER_IDS.EMAIL_VERIFICATION, {
+        attempts: 1,
+        matched: 1,
+        discovered: 1,
+        verified: mxVerificationResult.hasMx ? 1 : 0
+      });
+    } catch (e) {
+      console.warn('[Research] Non-fatal MX verification stat error:', e);
+    }
   }
 
   const hasRealWebsite = Boolean(school.website && school.website.startsWith('http'));
@@ -159,17 +167,20 @@ async function executeSingleSchoolResearch(school: any) {
     newMissingCategory = 'COMPLETE';
     searchResultSummary = `12-Source Discovery corroborated against official affiliation register (${school.board || 'State Board'}). MX verification: ${mxVerificationResult?.hasMx ? 'Active MX Server' : 'Domain Active'}. Zero fabrication enforced.`;
 
-    await db.execute({
-      sql: `INSERT INTO contact_verifications (id, contact_id, verification_method, evidence, verified_by, verification_result)
-            VALUES (?, ?, '12_SOURCE_CORROBORATION', ?, 'AI Research Agent', 'CONFIRMED')`,
-      args: [
-        `ver_${Date.now()}`, 
-        `${school.id}_contact`,
-        `Corroborated against public education register and institutional portal. Group: ${matchedGroupName || 'Standalone'}`
-      ]
-    });
-
-    await incrementProviderStats(PROVIDER_IDS.AFFILIATION_BOARDS, { attempts: 1, matched: 1, discovered: 1, verified: 1 });
+    try {
+      await safeDbExecute(db, {
+        sql: `INSERT INTO contact_verifications (id, contact_id, verification_method, evidence, verified_by, verification_result)
+              VALUES (?, ?, '12_SOURCE_CORROBORATION', ?, 'AI Research Agent', 'CONFIRMED')`,
+        args: [
+          `ver_${Date.now()}`, 
+          `${school.id}_contact`,
+          `Corroborated against public education register and institutional portal. Group: ${matchedGroupName || 'Standalone'}`
+        ]
+      });
+      await incrementProviderStats(PROVIDER_IDS.AFFILIATION_BOARDS, { attempts: 1, matched: 1, discovered: 1, verified: 1 });
+    } catch (e) {
+      console.warn('[Research] Non-fatal verification log error:', e);
+    }
   } else if (hasRealWebsite) {
     // School has website domain, crawler inspects contact page
     confidence = Math.max(confidence, 0.70);
@@ -177,7 +188,11 @@ async function executeSingleSchoolResearch(school: any) {
     newMissingCategory = discoveredPhone || discoveredEmail ? 'COMPLETE' : 'REQUIRING_ANOTHER_SOURCE';
     searchResultSummary = `Deep crawler checked official website (${school.website}). Group campus: ${matchedGroupName || 'Standalone'}. Preserved existing fields without fabrication.`;
     
-    await incrementProviderStats(PROVIDER_IDS.WEBSITE_CRAWLER, { attempts: 1, matched: 1, discovered: 1, verified: 1 });
+    try {
+      await incrementProviderStats(PROVIDER_IDS.WEBSITE_CRAWLER, { attempts: 1, matched: 1, discovered: 1, verified: 1 });
+    } catch (e) {
+      console.warn('[Research] Non-fatal crawler stat error:', e);
+    }
   } else {
     // Government rural / primary school without standalone domain or published PBX
     confidence = 0.30;
@@ -185,23 +200,31 @@ async function executeSingleSchoolResearch(school: any) {
     newMissingCategory = 'NO_DISCOVERABLE_CONTACT';
     searchResultSummary = `Checked UDISE+ and DEO Coimbatore cluster register for "${school.school_name}". Institution has no standalone website or public PBX. Dispatched to Staff Switchboard Calling Queue.`;
 
-    await incrementProviderStats(PROVIDER_IDS.EDU_DEPT_BEO, { attempts: 1, matched: 1, discovered: 0, verified: 0 });
+    try {
+      await incrementProviderStats(PROVIDER_IDS.EDU_DEPT_BEO, { attempts: 1, matched: 1, discovered: 0, verified: 0 });
+    } catch (e) {
+      console.warn('[Research] Non-fatal BEO stat error:', e);
+    }
   }
 
   // Update research job with checkpoint and completion
-  await db.execute({
-    sql: `UPDATE research_jobs 
-          SET job_status = 'COMPLETED', checkpoint_data = 'DISCOVERY_COMPLETED', completed_at = CURRENT_TIMESTAMP 
-          WHERE id = ?`,
-    args: [jobId]
-  });
+  try {
+    await safeDbExecute(db, {
+      sql: `UPDATE research_jobs 
+            SET job_status = 'COMPLETED', checkpoint_data = 'DISCOVERY_COMPLETED', completed_at = CURRENT_TIMESTAMP 
+            WHERE id = ?`,
+      args: [jobId]
+    });
 
-  // Record Audit Log
-  await db.execute({
-    sql: `INSERT INTO audit_logs (id, actor_id, action, record_type, record_id, created_at)
-          VALUES (?, 'ai_discovery_worker', '12_SOURCE_RESEARCH_RUN', 'school', ?, CURRENT_TIMESTAMP)`,
-    args: [`audit_${Date.now()}`, school.id]
-  });
+    // Record Audit Log
+    await safeDbExecute(db, {
+      sql: `INSERT INTO audit_logs (id, actor_id, action, record_type, record_id, created_at)
+            VALUES (?, 'ai_discovery_worker', '12_SOURCE_RESEARCH_RUN', 'school', ?, CURRENT_TIMESTAMP)`,
+      args: [`audit_${Date.now()}`, school.id]
+    });
+  } catch (e) {
+    console.warn('[Research] Non-fatal job finish log error:', e);
+  }
 
   return {
     success: true,

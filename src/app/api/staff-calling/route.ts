@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMasterSchoolsFromMemoryOrDb, getDb } from '@/lib/db';
+import { getMasterSchoolsFromMemoryOrDb, getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 import { incrementProviderStats, PROVIDER_IDS } from '@/lib/discovery/providers';
 
@@ -122,19 +122,23 @@ export async function POST(req: NextRequest) {
     const logId = `call_${Date.now()}`;
 
     // 1. Insert into staff_calling_logs
-    await db.execute({
-      sql: `INSERT INTO staff_calling_logs (
-        id, school_id, staff_name, called_phone, call_outcome,
-        headmaster_confirmed, principal_desk_phone, whatsapp_confirmed, email_confirmed,
-        notes, opt_out_requested, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-      args: [
-        logId, school_id, staffName, called_phone, call_outcome,
-        headmaster_confirmed || null, principal_desk_phone || null,
-        whatsapp_confirmed || null, email_confirmed || null,
-        notes || null, opt_out_requested ? 1 : 0
-      ]
-    });
+    try {
+      await safeDbExecute(db, {
+        sql: `INSERT INTO staff_calling_logs (
+          id, school_id, staff_name, called_phone, call_outcome,
+          headmaster_confirmed, principal_desk_phone, whatsapp_confirmed, email_confirmed,
+          notes, opt_out_requested, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+        args: [
+          logId, school_id, staffName, called_phone, call_outcome,
+          headmaster_confirmed || null, principal_desk_phone || null,
+          whatsapp_confirmed || null, email_confirmed || null,
+          notes || null, opt_out_requested ? 1 : 0
+        ]
+      });
+    } catch (e) {
+      console.warn('[StaffCalling] Non-fatal log insert error:', e);
+    }
 
     // 2. If outcome is VERIFIED_OFFICIAL_OFFICE, update school and contacts
     if (call_outcome === 'VERIFIED_OFFICIAL_OFFICE') {
@@ -166,56 +170,80 @@ export async function POST(req: NextRequest) {
       updates.push(school_id);
 
       if (setClauses.length > 2) {
-        await db.execute({
-          sql: `UPDATE schools SET ${setClauses.join(', ')} WHERE id = ?`,
-          args: updates
-        });
+        try {
+          await safeDbExecute(db, {
+            sql: `UPDATE schools SET ${setClauses.join(', ')} WHERE id = ?`,
+            args: updates
+          });
+        } catch (e) {
+          console.warn('[StaffCalling] Non-fatal school update error:', e);
+        }
       }
 
       // Record Contact Verification
-      await db.execute({
-        sql: `INSERT INTO contact_verifications (id, contact_id, verification_method, evidence, verified_by, verification_result)
-              VALUES (?, ?, 'STAFF_SWITCHBOARD_CALL', ?, ?, 'CONFIRMED')`,
-        args: [
-          `ver_staff_${Date.now()}`,
-          `${school_id}_phone`,
-          `Verified via outbound telephone call to ${called_phone}. Staff: ${staffName}. Outcome: ${call_outcome}. Notes: ${notes || 'Verified official school contact'}`,
-          staffName
-        ]
-      });
+      try {
+        await safeDbExecute(db, {
+          sql: `INSERT INTO contact_verifications (id, contact_id, verification_method, evidence, verified_by, verification_result)
+                VALUES (?, ?, 'STAFF_SWITCHBOARD_CALL', ?, ?, 'CONFIRMED')`,
+          args: [
+            `ver_staff_${Date.now()}`,
+            `${school_id}_phone`,
+            `Verified via outbound telephone call to ${called_phone}. Staff: ${staffName}. Outcome: ${call_outcome}. Notes: ${notes || 'Verified official school contact'}`,
+            staffName
+          ]
+        });
+      } catch (e) {
+        console.warn('[StaffCalling] Non-fatal verification log error:', e);
+      }
 
       // Update provider stats for src_staff_switchboard
-      await incrementProviderStats(PROVIDER_IDS.STAFF_SWITCHBOARD, {
-        attempts: 1,
-        matched: 1,
-        discovered: 1,
-        verified: 1
-      });
+      try {
+        await incrementProviderStats(PROVIDER_IDS.STAFF_SWITCHBOARD, {
+          attempts: 1,
+          matched: 1,
+          discovered: 1,
+          verified: 1
+        });
+      } catch (e) {
+        console.warn('[StaffCalling] Non-fatal provider stat error:', e);
+      }
     } else {
       // Unsuccessful call outcome logged
-      await incrementProviderStats(PROVIDER_IDS.STAFF_SWITCHBOARD, {
-        attempts: 1,
-        matched: 1,
-        discovered: 0,
-        verified: 0
-      });
+      try {
+        await incrementProviderStats(PROVIDER_IDS.STAFF_SWITCHBOARD, {
+          attempts: 1,
+          matched: 1,
+          discovered: 0,
+          verified: 0
+        });
+      } catch (e) {
+        console.warn('[StaffCalling] Non-fatal provider stat error:', e);
+      }
     }
 
     // 3. If opt-out requested, record in opt_outs
     if (opt_out_requested) {
-      await db.execute({
-        sql: `INSERT INTO opt_outs (id, identifier_type, identifier_value, school_id, reason, requested_by)
-              VALUES (?, 'phone', ?, ?, 'Staff switchboard call opt-out request', ?)`,
-        args: [`opt_${Date.now()}`, called_phone, school_id, staffName]
-      });
+      try {
+        await safeDbExecute(db, {
+          sql: `INSERT INTO opt_outs (id, identifier_type, identifier_value, school_id, reason, requested_by)
+                VALUES (?, 'phone', ?, ?, 'Staff switchboard call opt-out request', ?)`,
+          args: [`opt_${Date.now()}`, called_phone, school_id, staffName]
+        });
+      } catch (e) {
+        console.warn('[StaffCalling] Non-fatal opt-out log error:', e);
+      }
     }
 
     // 4. Audit Log
-    await db.execute({
-      sql: `INSERT INTO audit_logs (id, actor_id, action, record_type, record_id, created_at)
-            VALUES (?, ?, 'STAFF_TELEPHONE_CALL_LOGGED', 'school', ?, CURRENT_TIMESTAMP)`,
-      args: [`audit_${Date.now()}`, staffName, school_id]
-    });
+    try {
+      await safeDbExecute(db, {
+        sql: `INSERT INTO audit_logs (id, actor_id, action, record_type, record_id, created_at)
+              VALUES (?, ?, 'STAFF_TELEPHONE_CALL_LOGGED', 'school', ?, CURRENT_TIMESTAMP)`,
+        args: [`audit_${Date.now()}`, staffName, school_id]
+      });
+    } catch (e) {
+      console.warn('[StaffCalling] Non-fatal audit log error:', e);
+    }
 
     return NextResponse.json({
       success: true,

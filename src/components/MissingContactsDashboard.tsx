@@ -33,6 +33,7 @@ export const MissingContactsDashboard: React.FC<MissingContactsDashboardProps> =
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [search, setSearch] = useState<string>('');
   const [researchingId, setResearchingId] = useState<string | null>(null);
+  const [visibleLimit, setVisibleLimit] = useState<number>(40);
 
   // Filter missing schools
   const missingSchools = schools.filter(s => !s.is_contact_complete);
@@ -160,7 +161,7 @@ export const MissingContactsDashboard: React.FC<MissingContactsDashboardProps> =
 
       {/* Recovery Queue List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        {filtered.slice(0, 40).map((s) => (
+        {filtered.slice(0, visibleLimit).map((s) => (
           <div
             key={s.id}
             onClick={() => onSelectSchool(s)}
@@ -226,6 +227,20 @@ export const MissingContactsDashboard: React.FC<MissingContactsDashboardProps> =
           </div>
         ))}
       </div>
+
+      {/* Pagination / Load More Controls */}
+      {filtered.length > visibleLimit && (
+        <div className="flex items-center justify-center pt-2 pb-4">
+          <button
+            onClick={() => setVisibleLimit(prev => Math.min(prev + 40, filtered.length))}
+            className="px-6 py-2.5 bg-white border border-slate-300 hover:border-rose-400 text-slate-700 hover:text-rose-700 font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-all flex items-center gap-2"
+          >
+            <span>Showing {visibleLimit} of {filtered.length.toLocaleString()} schools</span>
+            <span className="text-slate-400">•</span>
+            <span className="text-rose-600 font-bold">Load 40 More</span>
+          </button>
+        </div>
+      )}
 
     </div>
   );

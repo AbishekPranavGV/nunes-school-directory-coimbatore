@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMasterSchoolsFromMemoryOrDb, getDb } from '@/lib/db';
+import { getMasterSchoolsFromMemoryOrDb, getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -65,19 +65,27 @@ export async function PATCH(
       if (c.val !== undefined) {
         if (c.val) {
           hasAnyContact = true;
-          await db.execute({
-            sql: `INSERT OR REPLACE INTO contacts (
-              id, school_id, contact_type, contact_value, formatted_value, is_verified, 
-              verification_source, verification_status, confidence_score, verified_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, 1, 'Staff Verified Contact Update', 'OFFICIAL_CONFIRMED', 0.95, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-            args: [`${schoolId}_${c.type}`, schoolId, c.type, c.val, c.val]
-          });
+          try {
+            await safeDbExecute(db, {
+              sql: `INSERT OR REPLACE INTO contacts (
+                id, school_id, contact_type, contact_value, formatted_value, is_verified, 
+                verification_source, verification_status, confidence_score, verified_at, updated_at
+              ) VALUES (?, ?, ?, ?, ?, 1, 'Staff Verified Contact Update', 'OFFICIAL_CONFIRMED', 0.95, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+              args: [`${schoolId}_${c.type}`, schoolId, c.type, c.val, c.val]
+            });
+          } catch (e) {
+            console.warn('[SchoolUpdate] Non-fatal contact save error:', e);
+          }
         } else {
           // Empty string / null means remove
-          await db.execute({
-            sql: 'DELETE FROM contacts WHERE school_id = ? AND contact_type = ?',
-            args: [schoolId, c.type]
-          });
+          try {
+            await safeDbExecute(db, {
+              sql: 'DELETE FROM contacts WHERE school_id = ? AND contact_type = ?',
+              args: [schoolId, c.type]
+            });
+          } catch (e) {
+            console.warn('[SchoolUpdate] Non-fatal contact delete error:', e);
+          }
         }
       }
     }
@@ -85,33 +93,41 @@ export async function PATCH(
     // Update work queue state
     const newState = body.workflow_state || (hasAnyContact ? 'VERIFIED_INSTITUTION_CONTACT' : undefined);
     if (newState) {
-      await db.execute({
-        sql: `UPDATE contact_work_queue 
-              SET workflow_state = ?, is_contact_complete = ?, missing_reasons = ?, next_action = ?, assigned_staff = ?, reviewed_by = ?, updated_at = CURRENT_TIMESTAMP
-              WHERE school_id = ?`,
-        args: [
-          newState, 
-          (newState === 'VERIFIED_INSTITUTION_CONTACT' || newState === 'PRINCIPAL_OFFICE_VERIFIED') ? 1 : 0,
-          body.missing_reasons || '', 
-          body.next_action || 'Review completed', 
-          user.username, 
-          user.username,
-          schoolId
-        ]
-      });
+      try {
+        await safeDbExecute(db, {
+          sql: `UPDATE contact_work_queue 
+                SET workflow_state = ?, is_contact_complete = ?, missing_reasons = ?, next_action = ?, assigned_staff = ?, reviewed_by = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE school_id = ?`,
+          args: [
+            newState, 
+            (newState === 'VERIFIED_INSTITUTION_CONTACT' || newState === 'PRINCIPAL_OFFICE_VERIFIED') ? 1 : 0,
+            body.missing_reasons || '', 
+            body.next_action || 'Review completed', 
+            user.username, 
+            user.username,
+            schoolId
+          ]
+        });
+      } catch (e) {
+        console.warn('[SchoolUpdate] Non-fatal queue state update error:', e);
+      }
     }
 
     // Record audit log
-    await db.execute({
-      sql: `INSERT INTO audit_log (id, user_id, action, entity_type, entity_id, change_details)
-            VALUES (?, ?, 'UPDATE_SCHOOL_CONTACTS', 'school', ?, ?)`,
-      args: [
-        `audit_${Date.now()}`, 
-        user.id, 
-        schoolId, 
-        `Updated contact details for ${schoolName}. State: ${newState || 'Updated'}`
-      ]
-    });
+    try {
+      await safeDbExecute(db, {
+        sql: `INSERT INTO audit_log (id, user_id, action, entity_type, entity_id, change_details)
+              VALUES (?, ?, 'UPDATE_SCHOOL_CONTACTS', 'school', ?, ?)`,
+        args: [
+          `audit_${Date.now()}`, 
+          user.id, 
+          schoolId, 
+          `Updated contact details for ${schoolName}. State: ${newState || 'Updated'}`
+        ]
+      });
+    } catch (e) {
+      console.warn('[SchoolUpdate] Non-fatal audit log error:', e);
+    }
 
     return NextResponse.json({
       success: true,

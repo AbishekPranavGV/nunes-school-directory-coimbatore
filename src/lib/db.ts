@@ -4,18 +4,72 @@ import fs from 'fs';
 
 let clientInstance: Client | null = null;
 
+function resolveDatabaseUrl(): string {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
+  }
+
+  const bundledDbPath = path.join(process.cwd(), 'data', 'schools.db');
+
+  // Check if we are running in a serverless environment (Vercel, AWS Lambda, or Linux in production)
+  const isServerless = Boolean(
+    process.env.VERCEL || 
+    process.env.AWS_LAMBDA_FUNCTION_NAME || 
+    (process.platform === 'linux' && process.env.NODE_ENV === 'production')
+  );
+
+  if (isServerless) {
+    const tmpDbPath = path.join('/tmp', 'schools.db');
+    try {
+      const needCopy = !fs.existsSync(tmpDbPath) || (fs.existsSync(bundledDbPath) && fs.statSync(tmpDbPath).size === 0);
+      if (needCopy && fs.existsSync(bundledDbPath)) {
+        fs.copyFileSync(bundledDbPath, tmpDbPath);
+        if (fs.existsSync(`${bundledDbPath}-wal`)) {
+          try { fs.copyFileSync(`${bundledDbPath}-wal`, `${tmpDbPath}-wal`); } catch (_) {}
+        }
+        if (fs.existsSync(`${bundledDbPath}-shm`)) {
+          try { fs.copyFileSync(`${bundledDbPath}-shm`, `${tmpDbPath}-shm`); } catch (_) {}
+        }
+      }
+      if (fs.existsSync(tmpDbPath)) {
+        return `file:${tmpDbPath}`;
+      }
+    } catch (err) {
+      console.warn('[DB] Failed copying to /tmp, falling back to bundled db:', err);
+    }
+  }
+
+  return `file:${bundledDbPath}`;
+}
+
 export function getDb(): Client {
   if (clientInstance) {
     return clientInstance;
   }
 
-  const dbUrl = process.env.DATABASE_URL || `file:${path.join(process.cwd(), 'data', 'schools.db')}`;
+  const dbUrl = resolveDatabaseUrl();
 
   clientInstance = createClient({
     url: dbUrl,
   });
 
   return clientInstance;
+}
+
+export async function safeDbExecute(client: Client, stmt: any): Promise<any> {
+  try {
+    return await client.execute(stmt);
+  } catch (err: any) {
+    const isReadOnly = 
+      err?.message?.includes('SQLITE_READONLY') || 
+      err?.code === 'SQLITE_READONLY' || 
+      err?.rawCode === 8;
+    if (isReadOnly) {
+      console.warn('[DB safeDbExecute] Suppressed SQLITE_READONLY in serverless environment:', err.message);
+      return { rows: [], columns: [], rowsAffected: 0, lastInsertRowid: undefined };
+    }
+    throw err;
+  }
 }
 
 // Helper to query all master schools with high performance

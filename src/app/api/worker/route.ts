@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -65,11 +65,15 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getDb();
-    await db.execute({
-      sql: `INSERT INTO audit_logs (id, actor_id, action, record_type, record_id, created_at)
-            VALUES (?, ?, ?, 'worker_schedule', 'coimbatore_scheduler', CURRENT_TIMESTAMP)`,
-      args: [`audit_${Date.now()}`, user.username, `WORKER_ACTION_${action?.toUpperCase()}`]
-    });
+    try {
+      await safeDbExecute(db, {
+        sql: `INSERT INTO audit_logs (id, actor_id, action, record_type, record_id, created_at)
+              VALUES (?, ?, ?, 'worker_schedule', 'coimbatore_scheduler', CURRENT_TIMESTAMP)`,
+        args: [`audit_${Date.now()}`, user.username, `WORKER_ACTION_${action?.toUpperCase()}`]
+      });
+    } catch (e) {
+      console.warn('[Worker] Non-fatal audit log error:', e);
+    }
 
     return NextResponse.json({
       success: true,
