@@ -264,25 +264,35 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
 
               {/* 3. Secondary City & Local Roads (Crisp White #ffffff with subtle outline) */}
               {/* Gandhipuram - Thudiyalur - Mettupalayam connector */}
-              <path d="M 460,200 L 460,390" stroke="#ffffff" strokeWidth="4" />
-              <path d="M 460,200 L 460,390" stroke="#e0dedb" strokeWidth="5" style={{ zIndex: -1 }} />
+              <path d="M 460,200 L 460,390" fill="none" stroke="#e0dedb" strokeWidth="6" />
+              <path d="M 460,200 L 460,390" fill="none" stroke="#ffffff" strokeWidth="4" />
 
               {/* Gandhipuram - Kalapatti - Neelambur connector */}
-              <path d="M 460,340 Q 560,290 680,260 T 800,280" stroke="#ffffff" strokeWidth="3.5" />
+              <path d="M 460,340 Q 560,290 680,260 T 800,280" fill="none" stroke="#e0dedb" strokeWidth="5.5" />
+              <path d="M 460,340 Q 560,290 680,260 T 800,280" fill="none" stroke="#ffffff" strokeWidth="3.5" />
 
               {/* Kovaipudur - Malumichampatti cross street */}
-              <path d="M 410,480 Q 480,510 560,520" stroke="#ffffff" strokeWidth="3.5" />
+              <path d="M 410,480 Q 480,510 560,520" fill="none" stroke="#e0dedb" strokeWidth="5" />
+              <path d="M 410,480 Q 480,510 560,520" fill="none" stroke="#ffffff" strokeWidth="3" />
 
               {/* Sulur - Somanur network */}
-              <path d="M 870,360 L 980,260" stroke="#ffffff" strokeWidth="3" />
-              <path d="M 870,420 L 1050,490" stroke="#ffffff" strokeWidth="3" />
-              <path d="M 560,520 L 760,590 T 960,650" stroke="#ffffff" strokeWidth="3" />
-              <path d="M 280,390 L 460,390" stroke="#ffffff" strokeWidth="3" />
-              <path d="M 380,450 L 420,530" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 870,360 L 980,260" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
+              <path d="M 870,360 L 980,260" fill="none" stroke="#ffffff" strokeWidth="3" />
+
+              <path d="M 870,420 L 1050,490" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
+              <path d="M 870,420 L 1050,490" fill="none" stroke="#ffffff" strokeWidth="3" />
+
+              <path d="M 560,520 L 760,590 T 960,650" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
+              <path d="M 560,520 L 760,590 T 960,650" fill="none" stroke="#ffffff" strokeWidth="3" />
+
+              <path d="M 280,390 L 460,390" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
+              <path d="M 280,390 L 460,390" fill="none" stroke="#ffffff" strokeWidth="3" />
+
+              <path d="M 380,450 L 420,530" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
+              <path d="M 380,450 L 420,530" fill="none" stroke="#ffffff" strokeWidth="3" />
 
               {/* 4. Major Arterial National Highways (Google Maps Golden Yellow #fbbc04 with #e5a108 border) */}
               {/* NH 544 (Salem - Coimbatore - Walayar - Palakkad Corridor) */}
-              {/* Yellow road casing */}
               <path 
                 d="M 1080,120 Q 920,220 800,280 T 640,360 T 480,430 T 360,530 T 200,640 T 120,680" 
                 fill="none" 
@@ -315,9 +325,11 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
               <path d="M 540,490 L 580,620 T 620,800" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
 
               {/* SH 167 / Avinashi Road Core City Spine */}
-              <path d="M 460,340 L 640,320 T 800,280" fill="none" stroke="#fbbc04" strokeWidth="4.5" />
+              <path d="M 460,340 L 640,320 T 800,280" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 460,340 L 640,320 T 800,280" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
               {/* SH 162 / Trichy Road */}
-              <path d="M 490,390 L 680,420 T 870,430" fill="none" stroke="#fbbc04" strokeWidth="4.5" />
+              <path d="M 490,390 L 680,420 T 870,430" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 490,390 L 680,420 T 870,430" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
 
               {/* 5. Coimbatore City Corporation Municipal Boundary (Red Dashed Line - Exact match to Image 1) */}
               <path 
@@ -567,7 +579,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
                   >
                     {/* Google Maps Authentic Teardrop Pin */}
                     <div className="relative group">
-                      <svg width="24" height="32" viewBox="0 0 24 32" fill="none">
+                      <svg width={isSelected ? "22" : isHovered ? "20" : "15"} height={isSelected ? "29" : isHovered ? "26" : "20"} viewBox="0 0 24 32" fill="none" className="drop-shadow-xs">
                         {/* Teardrop Body */}
                         <path 
                           d="M12 0C5.37258 0 0 5.37258 0 12C0 19.5 12 32 12 32C12 32 24 19.5 24 12C24 5.37258 18.6274 0 12 0Z" 
