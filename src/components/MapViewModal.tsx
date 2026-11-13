@@ -264,76 +264,78 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
 
               {/* 3. Secondary City & Local Roads (Crisp White #ffffff with subtle outline) */}
               {/* Gandhipuram - Thudiyalur - Mettupalayam connector */}
-              <path d="M 460,200 L 460,390" fill="none" stroke="#e0dedb" strokeWidth="6" />
-              <path d="M 460,200 L 460,390" fill="none" stroke="#ffffff" strokeWidth="4" />
+              <path d="M 460,200 L 460,390" fill="none" stroke="#e0dedb" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 460,200 L 460,390" fill="none" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" />
 
               {/* Gandhipuram - Kalapatti - Neelambur connector */}
-              <path d="M 460,340 Q 560,290 680,260 T 800,280" fill="none" stroke="#e0dedb" strokeWidth="5.5" />
-              <path d="M 460,340 Q 560,290 680,260 T 800,280" fill="none" stroke="#ffffff" strokeWidth="3.5" />
+              <path d="M 460,340 L 640,280 L 800,280" fill="none" stroke="#e0dedb" strokeWidth="5.5" strokeLinecap="round" />
+              <path d="M 460,340 L 640,280 L 800,280" fill="none" stroke="#ffffff" strokeWidth="3.5" strokeLinecap="round" />
 
               {/* Kovaipudur - Malumichampatti cross street */}
-              <path d="M 410,480 Q 480,510 560,520" fill="none" stroke="#e0dedb" strokeWidth="5" />
-              <path d="M 410,480 Q 480,510 560,520" fill="none" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 410,480 L 480,510 L 560,520" fill="none" stroke="#e0dedb" strokeWidth="5" strokeLinecap="round" />
+              <path d="M 410,480 L 480,510 L 560,520" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
 
               {/* Sulur - Somanur network */}
-              <path d="M 870,360 L 980,260" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
-              <path d="M 870,360 L 980,260" fill="none" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 870,360 L 980,260" fill="none" stroke="#e0dedb" strokeWidth="4.5" strokeLinecap="round" />
+              <path d="M 870,360 L 980,260" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
 
-              <path d="M 870,420 L 1050,490" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
-              <path d="M 870,420 L 1050,490" fill="none" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 870,420 L 1050,490" fill="none" stroke="#e0dedb" strokeWidth="4.5" strokeLinecap="round" />
+              <path d="M 870,420 L 1050,490" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
 
-              <path d="M 560,520 L 760,590 T 960,650" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
-              <path d="M 560,520 L 760,590 T 960,650" fill="none" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 560,520 L 760,590 L 960,650" fill="none" stroke="#e0dedb" strokeWidth="4.5" strokeLinecap="round" />
+              <path d="M 560,520 L 760,590 L 960,650" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
 
-              <path d="M 280,390 L 460,390" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
-              <path d="M 280,390 L 460,390" fill="none" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 280,390 L 460,390" fill="none" stroke="#e0dedb" strokeWidth="4.5" strokeLinecap="round" />
+              <path d="M 280,390 L 460,390" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
 
-              <path d="M 380,450 L 420,530" fill="none" stroke="#e0dedb" strokeWidth="4.5" />
-              <path d="M 380,450 L 420,530" fill="none" stroke="#ffffff" strokeWidth="3" />
+              <path d="M 380,450 L 420,530" fill="none" stroke="#e0dedb" strokeWidth="4.5" strokeLinecap="round" />
+              <path d="M 380,450 L 420,530" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
 
               {/* 4. Major Arterial National Highways (Google Maps Golden Yellow #fbbc04 with #e5a108 border) */}
               {/* NH 544 (Salem - Coimbatore - Walayar - Palakkad Corridor) */}
               <path 
-                d="M 1080,120 Q 920,220 800,280 T 640,360 T 480,430 T 360,530 T 200,640 T 120,680" 
+                d="M 1080,120 L 800,280 L 640,360 L 480,430 L 360,530 L 200,640 L 120,680" 
                 fill="none" 
                 stroke="#e5a108" 
                 strokeWidth="7" 
                 strokeLinecap="round" 
+                strokeLinejoin="round"
               />
               <path 
-                d="M 1080,120 Q 920,220 800,280 T 640,360 T 480,430 T 360,530 T 200,640 T 120,680" 
+                d="M 1080,120 L 800,280 L 640,360 L 480,430 L 360,530 L 200,640 L 120,680" 
                 fill="none" 
                 stroke="#fbbc04" 
                 strokeWidth="5" 
                 strokeLinecap="round" 
+                strokeLinejoin="round"
               />
 
               {/* NH 948 (Annur - Saravanampatti - Gandhipuram) */}
-              <path d="M 640,0 L 580,180 T 500,320" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
-              <path d="M 640,0 L 580,180 T 500,320" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+              <path d="M 600,0 L 560,180 L 500,320" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 600,0 L 560,180 L 500,320" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
 
               {/* NH 181 (Mettupalayam - Thudiyalur - Coimbatore) */}
-              <path d="M 430,0 L 440,160 T 460,340" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
-              <path d="M 430,0 L 440,160 T 460,340" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+              <path d="M 430,0 L 440,160 L 460,340" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 430,0 L 440,160 L 460,340" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
 
               {/* NH 81 (Coimbatore East to Sulur & Karur) */}
-              <path d="M 500,360 Q 680,390 880,410 T 1120,440" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
-              <path d="M 500,360 Q 680,390 880,410 T 1120,440" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+              <path d="M 500,360 L 680,390 L 880,410 L 1120,440" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 500,360 L 680,390 L 880,410 L 1120,440" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
 
               {/* Pollachi Road / SH (South from Malumichampatti through Kinathukadavu) */}
-              <path d="M 540,490 L 580,620 T 620,800" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
-              <path d="M 540,490 L 580,620 T 620,800" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+              <path d="M 540,490 L 580,620 L 620,800" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 540,490 L 580,620 L 620,800" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
 
               {/* SH 167 / Avinashi Road Core City Spine */}
-              <path d="M 460,340 L 640,320 T 800,280" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
-              <path d="M 460,340 L 640,320 T 800,280" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+              <path d="M 460,340 L 640,320 L 800,280" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 460,340 L 640,320 L 800,280" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
               {/* SH 162 / Trichy Road */}
-              <path d="M 490,390 L 680,420 T 870,430" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
-              <path d="M 490,390 L 680,420 T 870,430" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
+              <path d="M 490,390 L 680,420 L 870,430" fill="none" stroke="#e5a108" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 490,390 L 680,420 L 870,430" fill="none" stroke="#fbbc04" strokeWidth="4" strokeLinecap="round" />
 
               {/* 5. Coimbatore City Corporation Municipal Boundary (Red Dashed Line - Exact match to Image 1) */}
               <path 
-                d="M 410,215 Q 480,205 580,215 T 670,240 T 730,300 T 720,380 T 660,450 T 570,490 T 450,510 T 380,460 T 360,360 T 380,260 Z" 
+                d="M 410,215 L 480,205 L 580,215 L 670,240 L 730,300 L 720,380 L 660,450 L 570,490 L 450,510 L 380,460 L 360,360 L 380,260 Z" 
                 fill="none" 
                 stroke="#ea4335" 
                 strokeWidth="1.8" 
