@@ -26,7 +26,14 @@ import {
   Radio, 
   Check, 
   Eye, 
-  RotateCcw
+  RotateCcw,
+  Pin,
+  PinOff,
+  Lock,
+  Unlock,
+  Crosshair,
+  LocateFixed,
+  AlertCircle
 } from 'lucide-react';
 import { TransportRecord, BranchOffice } from '@/types/transport';
 
@@ -35,6 +42,17 @@ interface Transport2DGoogleMapModalProps {
   onClose: () => void;
   operators: TransportRecord[];
   onSelectOperator: (operator: TransportRecord) => void;
+}
+
+export interface PinnedMapLocation {
+  id: string;
+  name: string;
+  subtitle?: string;
+  lat: number;
+  lng: number;
+  category?: string;
+  source: 'operator' | 'branch' | 'hub' | 'custom' | 'gps';
+  operatorId?: string;
 }
 
 // Web Mercator Math for Live Google Maps Slippy Tiles
@@ -97,6 +115,13 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
   const [showTraffic, setShowTraffic] = useState<boolean>(false);
   const [showBranches, setShowBranches] = useState<boolean>(true);
 
+  // Location Pinning & Camera Lock State (User Request Feature)
+  const [pinnedLocation, setPinnedLocation] = useState<PinnedMapLocation | null>(null);
+  const [isCameraLocked, setIsCameraLocked] = useState<boolean>(false);
+  const [isDropPinMode, setIsDropPinMode] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Filters & Selected Pin
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'bus' | 'lorry' | 'logistics' | 'govt'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -107,17 +132,38 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
     lng: number;
   } | null>(null);
 
-  // Pan / Dragging interaction state
+  // Pan / Dragging interaction state with deadband threshold & pointer capture
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [dragCenterStart, setDragCenterStart] = useState<{ px: number; py: number }>({ px: 0, py: 0 });
+  const isPointerDownRef = useRef<boolean>(false);
+  const pointerIdRef = useRef<number | null>(null);
+  const dragStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const dragCenterStartRef = useRef<{ px: number; py: number }>({ px: 0, py: 0 });
+  const hasExceededDeadbandRef = useRef<boolean>(false);
+  const rafIdRef = useRef<number | null>(null);
+
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   // Viewport dimensions
   const [viewportSize, setViewportSize] = useState<{ width: number; height: number }>({ width: 1000, height: 600 });
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  // Measure container dimensions
+  const showToast = (msg: string) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setToastMessage(msg);
+    toastTimeoutRef.current = setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // 1. Prevent background page scrolling completely when map modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = origOverflow;
+    };
+  }, [isOpen]);
+
+  // 2. Measure container dimensions
   useEffect(() => {
     if (!isOpen) return;
     const updateSize = () => {
@@ -132,6 +178,29 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
   }, [isOpen, isFullscreen]);
+
+  // 3. Isolated non-passive Wheel zoom listener to prevent parent page bounce/scrolling
+  useEffect(() => {
+    if (!isOpen) return;
+    const container = mapContainerRef.current;
+    if (!container) return;
+
+    const onWheelNative = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const zoomDelta = e.deltaY < 0 ? 1 : -1;
+      setZoom(prev => {
+        const nextZoom = Math.min(16, Math.max(6, prev + zoomDelta));
+        return nextZoom;
+      });
+    };
+
+    container.addEventListener('wheel', onWheelNative, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', onWheelNative);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -244,83 +313,183 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
     });
   }
 
-  // Mouse pan / drag handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Pointer Down (Mouse or Touch) with Deadband to Prevent Click Jitter
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // If clicked inside an interactive button, marker, or popup, do not initiate map pan
     if ((e.target as HTMLElement).closest('.interactive-control')) return;
-    setIsDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
-    setDragCenterStart({ px: centerPixelX, py: centerPixelY });
+
+    // Handle Drop Pin Mode: place pin at exact clicked point
+    if (isDropPinMode) {
+      if (mapContainerRef.current) {
+        const rect = mapContainerRef.current.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        const worldPx = centerPixelX + (clickX - halfW);
+        const worldPy = centerPixelY + (clickY - halfH);
+        const clickedLng = pixelToLng(worldPx, zoom);
+        const clickedLat = pixelToLat(worldPy, zoom);
+
+        // Determine nearest transport corridor
+        let corridor = 'South India Freight Corridor';
+        if (Math.abs(clickedLng - 78.16) < 0.3) corridor = 'NH 44 (Truck Corridor)';
+        else if (Math.abs(clickedLat - 11.1) < 0.3) corridor = 'NH 544 (Industrial Corridor)';
+        else if (clickedLng < 76.5) corridor = 'NH 66 (Kerala Coastal Corridor)';
+
+        setPinnedLocation({
+          id: `custom-${Date.now()}`,
+          name: `Custom Waypoint (${clickedLat.toFixed(4)}°N, ${clickedLng.toFixed(4)}°E)`,
+          subtitle: corridor,
+          lat: clickedLat,
+          lng: clickedLng,
+          category: 'custom',
+          source: 'custom'
+        });
+        setIsDropPinMode(false);
+        showToast(`📌 Custom Location Pinned at ${clickedLat.toFixed(4)}°N, ${clickedLng.toFixed(4)}°E`);
+      }
+      return;
+    }
+
+    // If Camera is locked, do not allow panning
+    if (isCameraLocked) {
+      showToast('🔒 Camera is locked on pinned location. Click "Unlock Pan" to move freely.');
+      return;
+    }
+
+    isPointerDownRef.current = true;
+    pointerIdRef.current = e.pointerId;
+    dragStartPosRef.current = { x: e.clientX, y: e.clientY };
+    dragCenterStartRef.current = { px: centerPixelX, py: centerPixelY };
+    hasExceededDeadbandRef.current = false;
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
-    const newPx = dragCenterStart.px - dx;
-    const newPy = dragCenterStart.py - dy;
-    setCenterLng(pixelToLng(newPx, zoom));
-    setCenterLat(pixelToLat(newPy, zoom));
+  // Pointer Move with 5px Deadband & requestAnimationFrame Throttling
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDownRef.current || isCameraLocked) return;
+
+    const dx = e.clientX - dragStartPosRef.current.x;
+    const dy = e.clientY - dragStartPosRef.current.y;
+
+    // 5px deadband to prevent accidental dragging during pin click
+    if (!hasExceededDeadbandRef.current) {
+      if (Math.hypot(dx, dy) >= 5) {
+        hasExceededDeadbandRef.current = true;
+        setIsDragging(true);
+      } else {
+        return;
+      }
+    }
+
+    // Schedule coordinate update on next animation frame
+    if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    rafIdRef.current = requestAnimationFrame(() => {
+      const newPx = dragCenterStartRef.current.px - dx;
+      const newPy = dragCenterStartRef.current.py - dy;
+      setCenterLng(pixelToLng(newPx, zoom));
+      setCenterLat(pixelToLat(newPy, zoom));
+    });
   };
 
-  const handleMouseUp = () => {
+  // Pointer Up / Cancel
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    isPointerDownRef.current = false;
     setIsDragging(false);
-  };
-
-  // Wheel zoom centered on cursor
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomDelta = e.deltaY < 0 ? 1 : -1;
-    const newZoom = Math.min(16, Math.max(6, zoom + zoomDelta));
-    if (newZoom === zoom) return;
-
-    if (mapContainerRef.current) {
-      const rect = mapContainerRef.current.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      const mouseWorldPx = centerPixelX + (mouseX - halfW);
-      const mouseWorldPy = centerPixelY + (mouseY - halfH);
-
-      const mouseLng = pixelToLng(mouseWorldPx, zoom);
-      const mouseLat = pixelToLat(mouseWorldPy, zoom);
-
-      setZoom(newZoom);
-      setCenterLng(mouseLng);
-      setCenterLat(mouseLat);
-    } else {
-      setZoom(newZoom);
+    hasExceededDeadbandRef.current = false;
+    if (pointerIdRef.current !== null) {
+      try {
+        e.currentTarget.releasePointerCapture(pointerIdRef.current);
+      } catch {}
+      pointerIdRef.current = null;
     }
   };
 
-  // Touch handlers for mobile pan
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('.interactive-control')) return;
-    if (e.touches.length === 1) {
-      setIsDragging(true);
-      setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-      setDragCenterStart({ px: centerPixelX, py: centerPixelY });
+  // Quick Fly-To
+  const flyToCoordinates = (lat: number, lng: number, targetZoom?: number) => {
+    setCenterLat(lat);
+    setCenterLng(lng);
+    if (targetZoom) setZoom(targetZoom);
+  };
+
+  // Pinning Handlers
+  const handlePinOperator = (operator: TransportRecord) => {
+    const lat = operator.latitude || 11.0;
+    const lng = operator.longitude || 77.0;
+    setPinnedLocation({
+      id: `op-${operator.id}`,
+      name: operator.company_name,
+      subtitle: `${operator.category} • ${operator.city_hub}, ${operator.district} (${operator.state})`,
+      lat,
+      lng,
+      category: operator.service_type,
+      source: 'operator',
+      operatorId: operator.id
+    });
+    flyToCoordinates(lat, lng, Math.max(zoom, 12));
+    showToast(`📌 Pinned: ${operator.company_name}`);
+  };
+
+  const handlePinBranch = (operator: TransportRecord, branch: BranchOffice) => {
+    const lat = branch.latitude || 11.0;
+    const lng = branch.longitude || 77.0;
+    setPinnedLocation({
+      id: `branch-${branch.id}`,
+      name: `${operator.company_name} — ${branch.branch_name}`,
+      subtitle: `Depot: ${branch.city}, ${branch.district} (Mgr: ${branch.manager_name})`,
+      lat,
+      lng,
+      category: 'depot',
+      source: 'branch',
+      operatorId: operator.id
+    });
+    flyToCoordinates(lat, lng, Math.max(zoom, 13));
+    showToast(`📌 Pinned Depot: ${branch.branch_name}`);
+  };
+
+  const handlePinHub = (hub: typeof SOUTH_INDIA_HUBS[0]) => {
+    setPinnedLocation({
+      id: `hub-${hub.id}`,
+      name: hub.name,
+      subtitle: hub.desc,
+      lat: hub.lat,
+      lng: hub.lng,
+      category: 'hub',
+      source: 'hub'
+    });
+    flyToCoordinates(hub.lat, hub.lng, hub.zoom);
+    showToast(`📌 Pinned Hub: ${hub.name}`);
+  };
+
+  const handlePinMyLocation = () => {
+    if (!navigator.geolocation) {
+      showToast('❌ Geolocation is not supported by your browser');
+      return;
     }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || e.touches.length !== 1) return;
-    const dx = e.touches[0].clientX - dragStart.x;
-    const dy = e.touches[0].clientY - dragStart.y;
-    const newPx = dragCenterStart.px - dx;
-    const newPy = dragCenterStart.py - dy;
-    setCenterLng(pixelToLng(newPx, zoom));
-    setCenterLat(pixelToLat(newPy, zoom));
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
-
-  // Quick Hub Fly-To
-  const flyToHub = (hub: typeof SOUTH_INDIA_HUBS[0]) => {
-    setCenterLat(hub.lat);
-    setCenterLng(hub.lng);
-    setZoom(hub.zoom);
+    showToast('🛰️ Acquiring live GPS position...');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setPinnedLocation({
+          id: 'gps-my-location',
+          name: 'My Live GPS Location',
+          subtitle: `${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E (Accuracy: ±${Math.round(pos.coords.accuracy)}m)`,
+          lat,
+          lng,
+          category: 'gps',
+          source: 'gps'
+        });
+        flyToCoordinates(lat, lng, 13);
+        showToast('📍 Live GPS Location Pinned!');
+      },
+      (err) => {
+        showToast(`⚠️ GPS Notice: ${err.message}`);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
   };
 
   // Get style & icon for Pin
@@ -368,7 +537,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-1 sm:p-3 animate-in fade-in duration-150">
       <div 
-        className={`w-full bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 relative select-none transition-all ${
+        className={`w-full bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 relative select-none ${
           isFullscreen ? 'h-full max-w-none rounded-none' : 'max-w-7xl h-[95vh]'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -396,14 +565,14 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
               title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Map'}
             >
               {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
               title="Close Map"
             >
               <X className="w-5 h-5" />
@@ -411,7 +580,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
           </div>
         </div>
 
-        {/* TOP BAR 2: Live Controls, Search & Filter Bar */}
+        {/* TOP BAR 2: Live Controls, Search & Filter Bar + Pinning Controls */}
         <div className="px-3 sm:px-4 py-2 bg-white border-b border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 z-20 shrink-0">
           
           {/* Search Box */}
@@ -427,7 +596,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -448,57 +617,101 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
             </button>
             <button
               onClick={() => setCategoryFilter('bus')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 categoryFilter === 'bus'
                   ? 'bg-sky-600 text-white shadow-xs'
-                  : 'bg-sky-50 text-sky-800 hover:bg-sky-100 border border-sky-200'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              <Bus className="w-3 h-3" />
-              <span>Omni Buses</span>
+              Omni Buses
             </button>
             <button
               onClick={() => setCategoryFilter('lorry')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 categoryFilter === 'lorry'
                   ? 'bg-amber-600 text-white shadow-xs'
-                  : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              <Truck className="w-3 h-3" />
-              <span>Heavy Lorries</span>
+              Lorries
             </button>
             <button
               onClick={() => setCategoryFilter('logistics')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 categoryFilter === 'logistics'
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              <Package className="w-3 h-3" />
-              <span>3PL Logistics</span>
+              3PL Logistics
             </button>
             <button
               onClick={() => setCategoryFilter('govt')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 categoryFilter === 'govt'
                   ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              <Landmark className="w-3 h-3" />
-              <span>Govt STU</span>
+              Govt STU
             </button>
           </div>
 
-          {/* Layer & Traffic Toggles */}
-          <div className="flex items-center gap-1.5 self-end md:self-auto">
-            {/* Google Maps Layer Switcher */}
-            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs">
+          {/* Pin Tools & Map Layers Switcher */}
+          <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+            
+            {/* Drop Pin Mode Toggle Button */}
+            <button
+              onClick={() => {
+                setIsDropPinMode(!isDropPinMode);
+                if (!isDropPinMode) {
+                  showToast('🎯 Drop Pin Mode Active: Click anywhere on the map to pin that location!');
+                }
+              }}
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                isDropPinMode
+                  ? 'bg-amber-500 border-amber-600 text-slate-950 shadow-sm animate-pulse'
+                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              }`}
+              title="Click anywhere on the map to drop a custom GPS pin"
+            >
+              <Crosshair className="w-3.5 h-3.5" />
+              <span>{isDropPinMode ? 'Click Map to Pin' : 'Drop Pin'}</span>
+            </button>
+
+            {/* GPS My Location Pin */}
+            <button
+              onClick={handlePinMyLocation}
+              className="px-2 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
+              title="Pin my current GPS location on the map"
+            >
+              <LocateFixed className="w-3.5 h-3.5 text-blue-600" />
+              <span className="hidden sm:inline">My GPS</span>
+            </button>
+
+            {/* Camera Lock / Freeze View Toggle */}
+            <button
+              onClick={() => {
+                const nextLocked = !isCameraLocked;
+                setIsCameraLocked(nextLocked);
+                showToast(nextLocked ? '🔒 View Locked: Pan is frozen to prevent jitter' : '🔓 View Unlocked: Free pan enabled');
+              }}
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                isCameraLocked
+                  ? 'bg-rose-50 border-rose-300 text-rose-800 shadow-2xs'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+              }`}
+              title={isCameraLocked ? 'Camera is locked (click to unlock pan)' : 'Lock view on this location'}
+            >
+              {isCameraLocked ? <Lock className="w-3.5 h-3.5 text-rose-600" /> : <Unlock className="w-3.5 h-3.5 text-slate-500" />}
+              <span>{isCameraLocked ? 'Locked' : 'Lock View'}</span>
+            </button>
+
+            {/* Map Type Switcher */}
+            <div className="flex bg-slate-100 p-0.5 rounded-lg text-xs">
               <button
                 onClick={() => setMapType('roadmap')}
-                className={`px-2.5 py-1 rounded-md font-bold transition-all ${
+                className={`px-2 py-1 rounded-md font-bold transition-all cursor-pointer ${
                   mapType === 'roadmap' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -506,7 +719,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
               </button>
               <button
                 onClick={() => setMapType('satellite')}
-                className={`px-2.5 py-1 rounded-md font-bold transition-all ${
+                className={`px-2 py-1 rounded-md font-bold transition-all cursor-pointer ${
                   mapType === 'satellite' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -514,7 +727,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
               </button>
               <button
                 onClick={() => setMapType('terrain')}
-                className={`px-2.5 py-1 rounded-md font-bold transition-all ${
+                className={`px-2 py-1 rounded-md font-bold transition-all cursor-pointer ${
                   mapType === 'terrain' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -525,7 +738,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
             {/* Show Branches Checkbox Toggle */}
             <button
               onClick={() => setShowBranches(!showBranches)}
-              className={`px-2 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1 transition-all ${
+              className={`px-2 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
                 showBranches ? 'bg-teal-50 border-teal-300 text-teal-800' : 'bg-slate-50 border-slate-200 text-slate-500'
               }`}
               title="Toggle Regional Branch Depots"
@@ -537,40 +750,116 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
 
         </div>
 
-        {/* TOP BAR 3: Quick Hub Jumps */}
+        {/* TOP BAR 3: Quick Hub Jumps with 1-Click Fly & Pin */}
         <div className="px-3 sm:px-4 py-1.5 bg-slate-50 border-b border-slate-200 flex items-center gap-1.5 overflow-x-auto scrollbar-none z-10 shrink-0 text-xs">
           <span className="text-[10px] font-bold uppercase text-slate-400 whitespace-nowrap">
-            Fly to Hub:
+            Fly & Pin Hub:
           </span>
-          {SOUTH_INDIA_HUBS.map(hub => (
-            <button
-              key={hub.id}
-              onClick={() => flyToHub(hub)}
-              className="px-2 py-0.5 rounded-full bg-white hover:bg-amber-50 hover:border-amber-300 hover:text-amber-900 text-slate-700 text-[11px] font-medium border border-slate-200 whitespace-nowrap transition-all shadow-2xs"
-            >
-              {hub.name}
-            </button>
-          ))}
+          {SOUTH_INDIA_HUBS.map(hub => {
+            const isThisHubPinned = pinnedLocation?.id === `hub-${hub.id}`;
+            return (
+              <button
+                key={hub.id}
+                onClick={() => handlePinHub(hub)}
+                className={`px-2 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap transition-all shadow-2xs cursor-pointer flex items-center gap-1 ${
+                  isThisHubPinned
+                    ? 'bg-amber-500 border-amber-600 text-slate-950 font-bold'
+                    : 'bg-white hover:bg-amber-50 hover:border-amber-300 hover:text-amber-900 text-slate-700 border-slate-200'
+                }`}
+                title={`Fly to & pin ${hub.name}`}
+              >
+                {isThisHubPinned && <Pin className="w-2.5 h-2.5 fill-slate-950" />}
+                <span>{hub.name}</span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* ACTIVE PINNED LOCATION STATUS STRIP (When a location is pinned) */}
+        {pinnedLocation && (
+          <div className="px-4 py-2 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border-b border-amber-300/40 flex items-center justify-between gap-3 text-xs z-15 shrink-0">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <span className="p-1 rounded-lg bg-amber-500 text-slate-950 shadow-sm shrink-0">
+                <Pin className="w-3.5 h-3.5 fill-slate-950" />
+              </span>
+              <div className="truncate">
+                <span className="font-bold text-slate-900 mr-2">
+                  Pinned Location: {pinnedLocation.name}
+                </span>
+                <span className="text-slate-500 text-[11px] font-mono">
+                  ({pinnedLocation.lat.toFixed(4)}°N, {pinnedLocation.lng.toFixed(4)}°E)
+                </span>
+                {pinnedLocation.subtitle && (
+                  <span className="hidden md:inline text-slate-600 text-[11px] ml-2">
+                    • {pinnedLocation.subtitle}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Recenter / Focus button */}
+              <button
+                onClick={() => flyToCoordinates(pinnedLocation.lat, pinnedLocation.lng, Math.max(zoom, 12))}
+                className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-800 rounded-lg border border-slate-200 font-semibold text-xs flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+                title="Center camera on pinned location"
+              >
+                <Crosshair className="w-3 h-3 text-amber-600" />
+                <span>Focus</span>
+              </button>
+
+              {/* Lock / Unlock Camera Toggle */}
+              <button
+                onClick={() => {
+                  const nextLocked = !isCameraLocked;
+                  setIsCameraLocked(nextLocked);
+                  showToast(nextLocked ? '🔒 View Locked on Pinned Location' : '🔓 Pan Unlocked');
+                }}
+                className={`px-2.5 py-1 rounded-lg border font-semibold text-xs flex items-center gap-1 shadow-2xs transition-colors cursor-pointer ${
+                  isCameraLocked
+                    ? 'bg-rose-600 text-white border-rose-700'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+                title="Lock camera to prevent panning instability"
+              >
+                {isCameraLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                <span>{isCameraLocked ? 'Locked' : 'Lock'}</span>
+              </button>
+
+              {/* Unpin button */}
+              <button
+                onClick={() => {
+                  setPinnedLocation(null);
+                  setIsCameraLocked(false);
+                  showToast('Location Unpinned');
+                }}
+                className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                title="Unpin location"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* MAIN SLIPPY MAP CANVAS */}
         <div
           ref={mapContainerRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          className={`flex-1 relative overflow-hidden bg-slate-100 ${
-            isDragging ? 'cursor-grabbing' : 'cursor-grab'
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          style={{
+            touchAction: 'none',
+            overscrollBehavior: 'contain'
+          }}
+          className={`flex-1 relative overflow-hidden bg-slate-100 select-none ${
+            isDropPinMode ? 'cursor-crosshair' : isCameraLocked ? 'cursor-default' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
           }`}
         >
           
           {/* SLIPPY MAP TILES CONTAINER */}
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 pointer-events-none select-none">
             {visibleTiles.map(tile => (
               <img
                 key={`${tile.x}-${tile.y}-${zoom}-${mapType}`}
@@ -584,7 +873,8 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
                   top: `${tile.top}px`,
                   width: `${TILE_SIZE}px`,
                   height: `${TILE_SIZE}px`,
-                  userSelect: 'none'
+                  userSelect: 'none',
+                  pointerEvents: 'none'
                 }}
                 className="select-none"
               />
@@ -592,7 +882,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
           </div>
 
           {/* HIGHWAY CORRIDOR BADGES (Float on map relative to center) */}
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 pointer-events-none select-none">
             {/* NH 44 Badge (Kashmir to Kanyakumari via Salem, Namakkal, Madurai) */}
             {(() => {
               const px = projectLngToPixel(78.1674, zoom);
@@ -628,31 +918,58 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
               }
               return null;
             })()}
+
+            {/* NH 66 Badge (Kerala Malabar Coastal Freight) */}
+            {(() => {
+              const px = projectLngToPixel(76.2490, zoom);
+              const py = projectLatToPixel(9.9816, zoom);
+              const sx = px - centerPixelX + halfW;
+              const sy = py - centerPixelY + halfH - 35;
+              if (sx >= 0 && sx <= viewportSize.width && sy >= 0 && sy <= viewportSize.height) {
+                return (
+                  <div style={{ left: `${sx}px`, top: `${sy}px` }} className="absolute -translate-x-1/2 -translate-y-1/2">
+                    <span className="px-2 py-0.5 rounded font-black font-mono text-[9px] bg-emerald-600 text-white border border-white shadow-md">
+                      NH 66 (Kochi Port Corridor)
+                    </span>
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
 
           {/* REGIONAL BRANCH DEPOT PINS (Greenish Depot Markers) */}
-          {branchPins.map(({ operator, branch, lat, lng, screenX, screenY }) => (
-            <div
-              key={`branch-${branch.id}`}
-              style={{ left: `${screenX}px`, top: `${screenY}px` }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedPin({ operator, branch, lat, lng });
-              }}
-              className="interactive-control absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-15 group hover:z-30 transition-transform hover:scale-125"
-              title={`${operator.company_name} - ${branch.branch_name} (${branch.city})`}
-            >
-              <div className="w-5 h-5 rounded-full bg-teal-600 border-2 border-white text-white flex items-center justify-center shadow-md">
-                <Building2 className="w-2.5 h-2.5" />
+          {branchPins.map(({ operator, branch, lat, lng, screenX, screenY }) => {
+            const isThisPinned = pinnedLocation?.id === `branch-${branch.id}`;
+
+            return (
+              <div
+                key={`branch-${branch.id}`}
+                style={{ left: `${screenX}px`, top: `${screenY}px` }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedPin({ operator, branch, lat, lng });
+                }}
+                className={`interactive-control absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-15 group hover:z-30 transition-transform ${
+                  isThisPinned ? 'scale-125 z-40' : 'hover:scale-125'
+                }`}
+                title={`${operator.company_name} - ${branch.branch_name} (${branch.city})`}
+              >
+                <div className={`w-5 h-5 rounded-full text-white flex items-center justify-center shadow-md border-2 ${
+                  isThisPinned ? 'bg-amber-500 border-slate-950 scale-110' : 'bg-teal-600 border-white'
+                }`}>
+                  {isThisPinned ? <Pin className="w-2.5 h-2.5 fill-white" /> : <Building2 className="w-2.5 h-2.5" />}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* PRIMARY TRANSPORT OPERATOR PINS */}
           {operatorPins.map(({ operator, lat, lng, screenX, screenY }) => {
             const style = getPinStyle(operator.service_type);
             const Icon = style.icon;
             const isSelected = selectedPin?.operator.id === operator.id && !selectedPin.branch;
+            const isThisPinned = pinnedLocation?.id === `op-${operator.id}`;
 
             return (
               <div
@@ -663,24 +980,27 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
                   setSelectedPin({ operator, lat, lng });
                 }}
                 className={`interactive-control absolute -translate-x-1/2 -translate-y-full cursor-pointer z-20 group transition-all duration-150 ${
-                  isSelected ? 'scale-125 z-40' : 'hover:scale-115 hover:z-35'
+                  isThisPinned ? 'scale-125 z-45' : isSelected ? 'scale-125 z-40' : 'hover:scale-115 hover:z-35'
                 }`}
               >
                 {/* Google Maps Style Custom Pin Bubble */}
                 <div className="flex flex-col items-center">
-                  <div className={`px-2 py-1 rounded-xl flex items-center gap-1.5 shadow-lg border-2 ${style.bg} ${style.border} ${style.text} ${style.shadow}`}>
+                  <div className={`px-2 py-1 rounded-xl flex items-center gap-1.5 shadow-lg border-2 ${
+                    isThisPinned ? 'bg-amber-500 border-slate-950 text-slate-950 shadow-amber-500/50' : `${style.bg} ${style.border} ${style.text} ${style.shadow}`
+                  }`}>
                     {operator.state === 'Kerala' ? (
                       <span className="px-1 py-0.2 rounded bg-teal-950/80 text-[8px] font-bold text-teal-200">KL</span>
                     ) : (
                       <span className="px-1 py-0.2 rounded bg-amber-950/80 text-[8px] font-bold text-amber-200">TN</span>
                     )}
-                    <Icon className="w-3.5 h-3.5" />
+                    {isThisPinned ? <Pin className="w-3.5 h-3.5 fill-slate-950" /> : <Icon className="w-3.5 h-3.5" />}
                     <span className="text-[10px] font-bold max-w-[90px] truncate leading-none">
                       {operator.company_name.split(' ')[0]}
                     </span>
                   </div>
                   {/* Pin Point Pointer Triangle */}
                   <div className={`w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] -mt-[1px] ${
+                    isThisPinned ? 'border-t-amber-500' :
                     operator.service_type === 'govt' ? 'border-t-purple-600' :
                     operator.service_type === 'logistics' ? 'border-t-emerald-600' :
                     operator.service_type === 'bus' ? 'border-t-sky-600' : 'border-t-amber-600'
@@ -689,6 +1009,38 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
               </div>
             );
           })}
+
+          {/* DEDICATED PINNED LOCATION VISUAL BEACON (High-Visibility Animated Radar) */}
+          {pinnedLocation && (() => {
+            const px = projectLngToPixel(pinnedLocation.lng, zoom);
+            const py = projectLatToPixel(pinnedLocation.lat, zoom);
+            const screenX = px - centerPixelX + halfW;
+            const screenY = py - centerPixelY + halfH;
+            if (screenX < -60 || screenX > viewportSize.width + 60 || screenY < -60 || screenY > viewportSize.height + 60) return null;
+
+            return (
+              <div
+                style={{ left: `${screenX}px`, top: `${screenY}px` }}
+                className="interactive-control absolute -translate-x-1/2 -translate-y-full z-45 pointer-events-auto"
+              >
+                {/* Pulsing Radar Beacon Waves */}
+                <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                  <span className="animate-ping absolute inline-flex h-12 w-12 rounded-full bg-amber-400 opacity-75 -left-6 -top-6"></span>
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500 border-2 border-white shadow-lg"></span>
+                </div>
+
+                {/* Floating Anchor Badge */}
+                <div className="flex flex-col items-center">
+                  <div className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs shadow-2xl border-2 border-white flex items-center gap-1.5 animate-bounce">
+                    <Pin className="w-3.5 h-3.5 fill-slate-950" />
+                    <span className="max-w-[130px] truncate">{pinnedLocation.name}</span>
+                    {isCameraLocked && <Lock className="w-3 h-3 text-slate-950" />}
+                  </div>
+                  <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-amber-600 -mt-[1px]"></div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* GOOGLE MAPS STYLE INFOWINDOW MODAL */}
           {selectedPin && (() => {
@@ -699,6 +1051,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
             const op = selectedPin.operator;
             const br = selectedPin.branch;
             const style = getPinStyle(op.service_type);
+            const isCurrentlyPinned = pinnedLocation?.id === (br ? `branch-${br.id}` : `op-${op.id}`);
 
             return (
               <div
@@ -729,7 +1082,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
 
                   <button
                     onClick={() => setSelectedPin(null)}
-                    className="p-1 rounded-lg bg-black/20 hover:bg-black/40 text-white transition-all"
+                    className="p-1 rounded-lg bg-black/20 hover:bg-black/40 text-white transition-colors cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -766,31 +1119,56 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
                     <div>
                       <span className="text-slate-400 block text-[10px]">Statewide Depots</span>
                       <strong className="text-slate-900 font-mono">
-                        {op.branches ? `${op.branches.length} Branches across TN` : 'Headquarters'}
+                        {op.branches ? `${op.branches.length} Branches across TN/KL` : 'Headquarters'}
                       </strong>
                     </div>
                   </div>
 
-                  {/* Address */}
+                  {/* Address & Exact Coordinates */}
                   <div className="text-[11px] text-slate-600 flex items-start gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span className="line-clamp-2">
-                      {br ? br.address : op.address}
-                    </span>
+                    <div>
+                      <p className="line-clamp-2">{br ? br.address : op.address}</p>
+                      <p className="text-[10px] font-mono text-slate-400 mt-0.5">
+                        GPS: {selectedPin.lat.toFixed(4)}°N, {selectedPin.lng.toFixed(4)}°E
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Actions: Direct WhatsApp & Full Dossier */}
+                  {/* Actions: Pin This Location, Direct WhatsApp & Full Dossier */}
                   <div className="pt-2 flex items-center gap-2">
+                    {/* Pin Location Button */}
+                    <button
+                      onClick={() => {
+                        if (isCurrentlyPinned) {
+                          setPinnedLocation(null);
+                          showToast('Location Unpinned');
+                        } else {
+                          if (br) handlePinBranch(op, br);
+                          else handlePinOperator(op);
+                        }
+                      }}
+                      className={`py-1.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        isCurrentlyPinned
+                          ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-sm'
+                          : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300'
+                      }`}
+                      title={isCurrentlyPinned ? 'Click to unpin location' : 'Pin this location and stabilize camera'}
+                    >
+                      <Pin className={`w-3.5 h-3.5 ${isCurrentlyPinned ? 'fill-slate-950' : ''}`} />
+                      <span>{isCurrentlyPinned ? 'Pinned' : 'Pin Location'}</span>
+                    </button>
+
                     <a
                       href={`https://wa.me/${(br ? br.whatsapp : op.whatsapp_number).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
                         `Hello ${br ? br.manager_name : op.owner_name}, inquiring with ${op.company_name} regarding transport services via Nunes Transport Directory.`
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-center text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/20 transition-all"
+                      className="flex-1 py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-center text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/20 transition-colors"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
-                      <span>WhatsApp Direct</span>
+                      <span>WhatsApp</span>
                     </a>
 
                     <button
@@ -799,7 +1177,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
                         onClose();
                         onSelectOperator(op);
                       }}
-                      className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs flex items-center gap-1 transition-all"
+                      className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs flex items-center gap-1 transition-colors cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>Dossier</span>
@@ -823,25 +1201,43 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
                 setCenterLat(11.1271);
                 setCenterLng(78.6569);
                 setZoom(8);
+                showToast('Re-centered to All South India');
               }}
-              className="w-9 h-9 bg-white hover:bg-slate-50 text-slate-700 rounded-xl flex items-center justify-center border border-slate-200 shadow-md transition-all"
-              title="Reset View to All Tamil Nadu"
+              className="w-9 h-9 bg-white hover:bg-slate-50 text-slate-700 rounded-xl flex items-center justify-center border border-slate-200 shadow-md transition-all cursor-pointer"
+              title="Reset View to All Tamil Nadu & Kerala"
             >
               <Compass className="w-4 h-4 text-amber-600" />
+            </button>
+
+            {/* Camera Lock / Freeze view button */}
+            <button
+              onClick={() => {
+                const nextLocked = !isCameraLocked;
+                setIsCameraLocked(nextLocked);
+                showToast(nextLocked ? '🔒 View Locked: Pan is frozen to prevent jitter' : '🔓 Free Pan Enabled');
+              }}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center border shadow-md transition-all cursor-pointer ${
+                isCameraLocked
+                  ? 'bg-rose-600 text-white border-rose-700 shadow-rose-600/30'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+              }`}
+              title={isCameraLocked ? 'Unlock camera pan' : 'Lock camera pan'}
+            >
+              {isCameraLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
             </button>
 
             {/* Zoom In & Out */}
             <div className="flex flex-col bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden">
               <button
                 onClick={() => setZoom(Math.min(16, zoom + 1))}
-                className="w-9 h-9 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100"
+                className="w-9 h-9 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100 cursor-pointer"
                 title="Zoom In"
               >
                 <Plus className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setZoom(Math.max(6, zoom - 1))}
-                className="w-9 h-9 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
+                className="w-9 h-9 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                 title="Zoom Out"
               >
                 <Minus className="w-4 h-4" />
@@ -850,7 +1246,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
 
           </div>
 
-          {/* ZOOM LEVEL BADGE (Bottom-Left) */}
+          {/* ZOOM LEVEL & COORDINATES BADGE (Bottom-Left) */}
           <div className="interactive-control absolute bottom-3 left-4 z-20 flex items-center gap-2">
             <span className="px-2.5 py-1 bg-white/90 backdrop-blur-xs text-[10px] font-mono text-slate-700 rounded-lg border border-slate-200 shadow-xs">
               Zoom: {zoom}x ({zoom <= 8 ? 'Statewide' : zoom <= 12 ? 'City Hub' : 'Street & Depot'})
@@ -858,11 +1254,25 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
             <span className="px-2 py-0.5 bg-slate-900/80 text-[10px] text-white rounded font-mono shadow-xs">
               {centerLat.toFixed(4)}°N, {centerLng.toFixed(4)}°E
             </span>
+            {isCameraLocked && (
+              <span className="px-2 py-0.5 bg-rose-600 text-[10px] text-white font-bold rounded shadow-xs flex items-center gap-1">
+                <Lock className="w-2.5 h-2.5" />
+                <span>Pan Frozen</span>
+              </span>
+            )}
           </div>
+
+          {/* TOAST POPUP NOTIFICATION (Bottom-Center) */}
+          {toastMessage && (
+            <div className="interactive-control absolute bottom-4 left-1/2 -translate-x-1/2 z-50 bg-slate-950/90 text-white text-xs px-4 py-2 rounded-xl border border-amber-500/40 shadow-2xl backdrop-blur-xs animate-in fade-in slide-in-from-bottom-2 duration-150 flex items-center gap-2 pointer-events-none">
+              <span className="text-amber-400 font-bold">ℹ️</span>
+              <span>{toastMessage}</span>
+            </div>
+          )}
 
           {/* ATTRIBUTION WATERMARK */}
           <div className="absolute bottom-1 right-2 z-10 text-[9px] text-slate-500 bg-white/80 px-2 py-0.5 rounded shadow-2xs pointer-events-none">
-            Google Maps Slippy Tiles • Tamil Nadu Transport Directorate
+            Google Maps Slippy Tiles • Tamil Nadu & Kerala Transport Directorates
           </div>
 
         </div>

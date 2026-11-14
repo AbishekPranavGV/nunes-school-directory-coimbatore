@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   X, 
   MapPin, 
@@ -23,10 +23,27 @@ import {
   ArrowUpRight,
   Globe2,
   MessageSquare,
-  Loader2
+  Loader2,
+  Pin,
+  Lock,
+  Unlock,
+  Target
 } from 'lucide-react';
 import { SchoolRecord } from '@/types';
 import { getCanonicalDistrictName, matchesDistrict } from '@/lib/data/tamilNaduDistricts';
+
+export interface PinnedLocation {
+  id: string;
+  lat: number;
+  lng: number;
+  title: string;
+  subtitle: string;
+  district?: string;
+  block?: string;
+  school?: SchoolRecord;
+  pinnedAt: string;
+  isCustom?: boolean;
+}
 
 interface MapViewModalProps {
   isOpen: boolean;
@@ -138,6 +155,28 @@ function pixelToLat(pixelY: number, zoom: number): number {
   return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 }
 
+interface MarkerCluster {
+  id: string;
+  isCluster: true;
+  count: number;
+  verifiedCount: number;
+  lat: number;
+  lng: number;
+  screenX: number;
+  screenY: number;
+  schools: SchoolRecord[];
+}
+
+interface SingleMarker {
+  id: string;
+  isCluster: false;
+  school: SchoolRecord;
+  screenX: number;
+  screenY: number;
+}
+
+type MapDisplayItem = MarkerCluster | SingleMarker;
+
 export const MapViewModal: React.FC<MapViewModalProps> = ({
   isOpen,
   onClose,
@@ -170,13 +209,18 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [searchStatusMessage, setSearchStatusMessage] = useState<string>('');
   
+  // Advanced Pinned Location System State
+  const [pinnedLocation, setPinnedLocation] = useState<PinnedLocation | null>(null);
+  const [isLockCameraToPin, setIsLockCameraToPin] = useState<boolean>(false);
+  const [isDropPinMode, setIsDropPinMode] = useState<boolean>(false);
+
   // School Dataset State
   const [allLoadedSchools, setAllLoadedSchools] = useState<SchoolRecord[]>(schools);
 
-  // Mouse pan / drag state
+  // 60FPS Hardware-Accelerated Pan / Drag Engine State
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [dragCenterStart, setDragCenterStart] = useState<{ px: number; py: number }>({ px: 0, py: 0 });
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const dragStartRef = useRef<{ x: number; y: number; centerPx: number; centerPy: number }>({ x: 0, y: 0, centerPx: 0, centerPy: 0 });
 
   // Viewport dimensions
   const [viewportSize, setViewportSize] = useState<{ width: number; height: number }>({ width: 1000, height: 600 });
@@ -198,6 +242,16 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
     return () => window.removeEventListener('resize', updateSize);
   }, [isOpen, isFullscreen]);
 
+  // Prevent background page scrolling completely when map modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = origOverflow;
+    };
+  }, [isOpen]);
+
   // Load statewide or district dataset when modal opens
   useEffect(() => {
     if (isOpen && allLoadedSchools.length < 500) {
@@ -212,95 +266,227 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
     }
   }, [isOpen, allLoadedSchools.length]);
 
+  // Keep camera locked to pinned location if active
+  useEffect(() => {
+    if (isLockCameraToPin && pinnedLocation) {
+      setCenterLat(pinnedLocation.lat);
+      setCenterLng(pinnedLocation.lng);
+    }
+  }, [isLockCameraToPin, pinnedLocation]);
+
   // Center pixel coordinates
   const centerPixelX = projectLngToPixel(centerLng, zoom);
   const centerPixelY = projectLatToPixel(centerLat, zoom);
 
-  // Compute visible slippy map tiles
+  // Compute visible slippy map tiles with 1-tile buffer on all sides to eliminate edge gaps during drag
   const halfW = viewportSize.width / 2;
   const halfH = viewportSize.height / 2;
 
-  const minTileX = Math.max(0, Math.floor((centerPixelX - halfW) / TILE_SIZE));
-  const maxTileX = Math.min(Math.pow(2, zoom) - 1, Math.floor((centerPixelX + halfW) / TILE_SIZE));
-  const minTileY = Math.max(0, Math.floor((centerPixelY - halfH) / TILE_SIZE));
-  const maxTileY = Math.min(Math.pow(2, zoom) - 1, Math.floor((centerPixelY + halfH) / TILE_SIZE));
+  const minTileX = Math.max(0, Math.floor((centerPixelX - halfW) / TILE_SIZE) - 1);
+  const maxTileX = Math.min(Math.pow(2, zoom) - 1, Math.floor((centerPixelX + halfW) / TILE_SIZE) + 1);
+  const minTileY = Math.max(0, Math.floor((centerPixelY - halfH) / TILE_SIZE) - 1);
+  const maxTileY = Math.min(Math.pow(2, zoom) - 1, Math.floor((centerPixelY + halfH) / TILE_SIZE) + 1);
 
-  const visibleTiles: { x: number; y: number; left: number; top: number; url: string }[] = [];
+  const visibleTiles: { x: number; y: number; left: number; top: number; url: string }[] = useMemo(() => {
+    const tiles: { x: number; y: number; left: number; top: number; url: string }[] = [];
+    for (let tx = minTileX; tx <= maxTileX; tx++) {
+      for (let ty = minTileY; ty <= maxTileY; ty++) {
+        const left = tx * TILE_SIZE - centerPixelX + halfW;
+        const top = ty * TILE_SIZE - centerPixelY + halfH;
+        
+        let tileUrl = `https://mt1.google.com/vt/lyrs=m&x=${tx}&y=${ty}&z=${zoom}`;
+        if (mapType === 'satellite') {
+          tileUrl = `https://mt1.google.com/vt/lyrs=y&x=${tx}&y=${ty}&z=${zoom}`;
+        } else if (mapType === 'terrain') {
+          tileUrl = `https://mt1.google.com/vt/lyrs=p&x=${tx}&y=${ty}&z=${zoom}`;
+        }
 
-  for (let tx = minTileX; tx <= maxTileX; tx++) {
-    for (let ty = minTileY; ty <= maxTileY; ty++) {
-      const left = tx * TILE_SIZE - centerPixelX + halfW;
-      const top = ty * TILE_SIZE - centerPixelY + halfH;
-      
-      let tileUrl = `https://mt1.google.com/vt/lyrs=m&x=${tx}&y=${ty}&z=${zoom}`;
-      if (mapType === 'satellite') {
-        tileUrl = `https://mt1.google.com/vt/lyrs=y&x=${tx}&y=${ty}&z=${zoom}`;
-      } else if (mapType === 'terrain') {
-        tileUrl = `https://mt1.google.com/vt/lyrs=p&x=${tx}&y=${ty}&z=${zoom}`;
+        tiles.push({ x: tx, y: ty, left, top, url: tileUrl });
       }
-
-      visibleTiles.push({ x: tx, y: ty, left, top, url: tileUrl });
     }
-  }
+    return tiles;
+  }, [minTileX, maxTileX, minTileY, maxTileY, centerPixelX, centerPixelY, halfW, halfH, zoom, mapType]);
 
   // Filter schools for current view
-  const displaySchools = allLoadedSchools.filter(s => {
-    if (regionTab === 'coimbatore_blocks' && selectedBlock !== 'All Blocks') {
-      const bNorm = selectedBlock.toLowerCase();
-      const sBlock = (s.block || '').toLowerCase();
-      if (!sBlock.includes(bNorm) && !bNorm.includes(sBlock)) return false;
+  const displaySchools = useMemo(() => {
+    return allLoadedSchools.filter(s => {
+      if (regionTab === 'coimbatore_blocks' && selectedBlock !== 'All Blocks') {
+        const bNorm = selectedBlock.toLowerCase();
+        const sBlock = (s.block || '').toLowerCase();
+        if (!sBlock.includes(bNorm) && !bNorm.includes(sBlock)) return false;
+      }
+      if (regionTab === 'tamil_nadu' && selectedRegionId !== 'all_tn') {
+        const region = TAMIL_NADU_REGION_PLACES.find(r => r.id === selectedRegionId);
+        if (region?.district) {
+          if ((s.district || '').toLowerCase() !== region.district.toLowerCase()) return false;
+        }
+      }
+      return Boolean(s.latitude && s.longitude);
+    });
+  }, [allLoadedSchools, regionTab, selectedBlock, selectedRegionId]);
+
+  // Intelligent Spatial Grid Clustering Algorithm (Resolves Image 1 Overlapping Clutter)
+  // When zoom < 14, clusters schools within 40px radius into sleek, high-tech count badges
+  const mapDisplayItems: MapDisplayItem[] = useMemo(() => {
+    // 1. Calculate screen coordinates for all visible schools
+    const rawVisible = displaySchools.map(s => {
+      const lat = s.latitude || 11.0;
+      const lng = s.longitude || 76.9;
+      const px = projectLngToPixel(lng, zoom);
+      const py = projectLatToPixel(lat, zoom);
+      const screenX = px - centerPixelX + halfW;
+      const screenY = py - centerPixelY + halfH;
+      return {
+        school: s,
+        screenX,
+        screenY,
+        lat,
+        lng,
+        isVisible: screenX >= -60 && screenX <= viewportSize.width + 60 && screenY >= -60 && screenY <= viewportSize.height + 60
+      };
+    }).filter(item => item.isVisible);
+
+    // If zoom is street/block level (>= 14), render individual pins without clustering
+    if (zoom >= 14) {
+      return rawVisible.map(item => ({
+        id: item.school.id,
+        isCluster: false as const,
+        school: item.school,
+        screenX: item.screenX,
+        screenY: item.screenY
+      }));
     }
-    if (regionTab === 'tamil_nadu' && selectedRegionId !== 'all_tn') {
-      const region = TAMIL_NADU_REGION_PLACES.find(r => r.id === selectedRegionId);
-      if (region?.district) {
-        if ((s.district || '').toLowerCase() !== region.district.toLowerCase()) return false;
+
+    // Grid clustering with 42px cell width
+    const CLUSTER_CELL_SIZE = 42;
+    const grid: Record<string, typeof rawVisible> = {};
+
+    rawVisible.forEach(item => {
+      // If this school is explicitly pinned, let it render individually with top priority
+      if (pinnedLocation?.school?.id === item.school.id) {
+        return;
+      }
+      const cellKey = `${Math.floor(item.screenX / CLUSTER_CELL_SIZE)}_${Math.floor(item.screenY / CLUSTER_CELL_SIZE)}`;
+      if (!grid[cellKey]) grid[cellKey] = [];
+      grid[cellKey].push(item);
+    });
+
+    const items: MapDisplayItem[] = [];
+
+    // Add back the pinned school as a single pin if it was visible
+    if (pinnedLocation?.school) {
+      const pinSchoolItem = rawVisible.find(r => r.school.id === pinnedLocation.school?.id);
+      if (pinSchoolItem) {
+        items.push({
+          id: pinSchoolItem.school.id,
+          isCluster: false,
+          school: pinSchoolItem.school,
+          screenX: pinSchoolItem.screenX,
+          screenY: pinSchoolItem.screenY
+        });
       }
     }
-    return Boolean(s.latitude && s.longitude);
-  });
 
-  // Calculate pixel positions for visible school pins
-  const visibleSchoolPins = displaySchools.map(s => {
-    const lat = s.latitude || 11.0;
-    const lng = s.longitude || 76.9;
-    const px = projectLngToPixel(lng, zoom);
-    const py = projectLatToPixel(lat, zoom);
-    const screenX = px - centerPixelX + halfW;
-    const screenY = py - centerPixelY + halfH;
-    return {
-      school: s,
-      screenX,
-      screenY,
-      isVisible: screenX >= -50 && screenX <= viewportSize.width + 50 && screenY >= -50 && screenY <= viewportSize.height + 50
-    };
-  }).filter(item => item.isVisible);
+    Object.entries(grid).forEach(([cellKey, cellSchools]) => {
+      if (cellSchools.length === 1) {
+        items.push({
+          id: cellSchools[0].school.id,
+          isCluster: false,
+          school: cellSchools[0].school,
+          screenX: cellSchools[0].screenX,
+          screenY: cellSchools[0].screenY
+        });
+      } else {
+        // Multi-school cluster
+        let sumX = 0;
+        let sumY = 0;
+        let sumLat = 0;
+        let sumLng = 0;
+        let verifiedCount = 0;
 
-  // Drag / Pan Handlers
+        cellSchools.forEach(cs => {
+          sumX += cs.screenX;
+          sumY += cs.screenY;
+          sumLat += cs.lat;
+          sumLng += cs.lng;
+          if (cs.school.official_landline || cs.school.official_email || cs.school.is_contact_complete) {
+            verifiedCount++;
+          }
+        });
+
+        items.push({
+          id: `cluster_${cellKey}`,
+          isCluster: true,
+          count: cellSchools.length,
+          verifiedCount,
+          lat: sumLat / cellSchools.length,
+          lng: sumLng / cellSchools.length,
+          screenX: sumX / cellSchools.length,
+          screenY: sumY / cellSchools.length,
+          schools: cellSchools.map(cs => cs.school)
+        });
+      }
+    });
+
+    return items;
+  }, [displaySchools, zoom, centerPixelX, centerPixelY, halfW, halfH, viewportSize.width, viewportSize.height, pinnedLocation]);
+
+  // Click on a Cluster: Zooms in by +2 levels directly centered on cluster centroid
+  const handleClusterClick = (cluster: MarkerCluster, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCenterLat(cluster.lat);
+    setCenterLng(cluster.lng);
+    setZoom(prev => Math.min(18, prev + 2));
+    setSearchStatusMessage(`Zoomed into cluster of ${cluster.count} schools`);
+    setTimeout(() => setSearchStatusMessage(''), 2500);
+  };
+
+  // 60FPS Drag / Pan Handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.interactive-control')) return;
+
+    if (isDropPinMode) {
+      handleMapClickDropPin(e);
+      return;
+    }
+
     setIsDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
-    setDragCenterStart({ px: centerPixelX, py: centerPixelY });
+    setDragOffset({ x: 0, y: 0 });
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      centerPx: centerPixelX,
+      centerPy: centerPixelY
+    };
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
-    const newPx = dragCenterStart.px - dx;
-    const newPy = dragCenterStart.py - dy;
-    setCenterLng(pixelToLng(newPx, zoom));
-    setCenterLat(pixelToLat(newPy, zoom));
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+    setDragOffset({ x: dx, y: dy });
   };
 
   const handleMouseUp = () => {
+    if (!isDragging) return;
     setIsDragging(false);
+    if (dragOffset.x !== 0 || dragOffset.y !== 0) {
+      const finalPx = dragStartRef.current.centerPx - dragOffset.x;
+      const finalPy = dragStartRef.current.centerPy - dragOffset.y;
+      setCenterLng(pixelToLng(finalPx, zoom));
+      setCenterLat(pixelToLat(finalPy, zoom));
+      setDragOffset({ x: 0, y: 0 });
+    }
   };
 
   // Mouse Wheel Zoom centered on cursor
   const handleWheel = (e: React.WheelEvent) => {
     if ((e.target as HTMLElement).closest('.interactive-control')) return;
     e.preventDefault();
+    if (isLockCameraToPin && pinnedLocation) {
+      setCenterLat(pinnedLocation.lat);
+      setCenterLng(pinnedLocation.lng);
+    }
     if (e.deltaY < 0) {
       setZoom(prev => Math.min(18, prev + 1));
     } else if (e.deltaY > 0) {
@@ -332,12 +518,26 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
 
   // Re-center on Tamil Nadu center or Coimbatore Hub
   const handleRecenter = () => {
+    if (isLockCameraToPin && pinnedLocation) {
+      setCenterLat(pinnedLocation.lat);
+      setCenterLng(pinnedLocation.lng);
+      setSearchStatusMessage(`Centered on Pinned Location: ${pinnedLocation.title}`);
+      setTimeout(() => setSearchStatusMessage(''), 3000);
+      return;
+    }
+
     if (regionTab === 'tamil_nadu') {
       setSelectedRegionId('all_tn');
       setCenterLat(11.1271);
       setCenterLng(78.6569);
       setZoom(7);
       setSearchStatusMessage('Re-centered to Tamil Nadu Statewide View');
+    } else if (regionTab === 'kerala') {
+      setSelectedRegionId('all_kl');
+      setCenterLat(10.8505);
+      setCenterLng(76.2711);
+      setZoom(7);
+      setSearchStatusMessage('Re-centered to Kerala Statewide View');
     } else {
       setSelectedBlock('All Blocks');
       setCenterLat(11.0168);
@@ -347,6 +547,100 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
     }
     setSelectedSchoolPin(null);
     setTimeout(() => setSearchStatusMessage(''), 3000);
+  };
+
+  // Pinning Handlers
+  const handlePinSchool = (school: SchoolRecord) => {
+    if (!school.latitude || !school.longitude) return;
+    const pin: PinnedLocation = {
+      id: school.id,
+      lat: school.latitude,
+      lng: school.longitude,
+      title: school.school_name,
+      subtitle: `${school.block || ''} • ${school.district || ''}`,
+      district: school.district,
+      block: school.block,
+      school,
+      pinnedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isCustom: false
+    };
+    setPinnedLocation(pin);
+    setSearchStatusMessage(`📌 Pinned Location: ${school.school_name}`);
+    setTimeout(() => setSearchStatusMessage(''), 3500);
+  };
+
+  const handleUnpinLocation = () => {
+    setPinnedLocation(null);
+    setIsLockCameraToPin(false);
+    setSearchStatusMessage('Unpinned location.');
+    setTimeout(() => setSearchStatusMessage(''), 2500);
+  };
+
+  const handleCenterOnPin = () => {
+    if (!pinnedLocation) return;
+    setCenterLat(pinnedLocation.lat);
+    setCenterLng(pinnedLocation.lng);
+    setZoom(prev => Math.max(prev, 14));
+    setSearchStatusMessage(`🎯 Centered on pinned location: ${pinnedLocation.title}`);
+    setTimeout(() => setSearchStatusMessage(''), 3000);
+  };
+
+  const handleToggleLockPin = () => {
+    if (!pinnedLocation) return;
+    setIsLockCameraToPin(prev => {
+      const next = !prev;
+      if (next) {
+        setCenterLat(pinnedLocation.lat);
+        setCenterLng(pinnedLocation.lng);
+        setSearchStatusMessage('🔒 Camera locked to pinned location');
+      } else {
+        setSearchStatusMessage('🔓 Camera unlocked');
+      }
+      setTimeout(() => setSearchStatusMessage(''), 3000);
+      return next;
+    });
+  };
+
+  // Drop Custom Pin anywhere on the map
+  const handleMapClickDropPin = (e: React.MouseEvent) => {
+    if (!mapContainerRef.current) return;
+    const rect = mapContainerRef.current.getBoundingClientRect();
+    const clickScreenX = e.clientX - rect.left;
+    const clickScreenY = e.clientY - rect.top;
+    
+    const clickPixelX = centerPixelX - halfW + clickScreenX;
+    const clickPixelY = centerPixelY - halfH + clickScreenY;
+    const dropLat = pixelToLat(clickPixelY, zoom);
+    const dropLng = pixelToLng(clickPixelX, zoom);
+
+    // Look for a school nearby within 35 pixels
+    const nearby = displaySchools.find(s => {
+      if (!s.latitude || !s.longitude) return false;
+      const sPx = projectLngToPixel(s.longitude, zoom);
+      const sPy = projectLatToPixel(s.latitude, zoom);
+      const dist = Math.hypot(sPx - clickPixelX, sPy - clickPixelY);
+      return dist < 35;
+    });
+
+    if (nearby) {
+      handlePinSchool(nearby);
+      setSelectedSchoolPin(nearby);
+    } else {
+      const customPin: PinnedLocation = {
+        id: `custom_${Date.now()}`,
+        lat: dropLat,
+        lng: dropLng,
+        title: `Pinned Waypoint (${dropLat.toFixed(4)}°, ${dropLng.toFixed(4)}°)`,
+        subtitle: `${regionTab === 'kerala' ? 'Kerala' : 'Tamil Nadu'} Custom Anchor`,
+        district: regionTab === 'kerala' ? 'Kerala' : 'Tamil Nadu',
+        pinnedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isCustom: true
+      };
+      setPinnedLocation(customPin);
+      setSearchStatusMessage(`📍 Custom Pin Dropped at ${dropLat.toFixed(4)}° N, ${dropLng.toFixed(4)}° E`);
+      setTimeout(() => setSearchStatusMessage(''), 4000);
+    }
+    setIsDropPinMode(false);
   };
 
   // LIVE SCHOOL SEARCH HANDLER
@@ -384,7 +678,6 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
     setIsSearching(false);
 
     if (match && match.latitude && match.longitude) {
-      // Smoothly pan & zoom to the school's live location
       setCenterLat(match.latitude);
       setCenterLng(match.longitude);
       setZoom(15);
@@ -392,7 +685,6 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
       setPulsingSchoolId(match.id);
       setSearchStatusMessage(`📍 Live Location Found: ${match.school_name} (${match.district || 'Tamil Nadu'})`);
       
-      // Stop pulsing radar ring after 6 seconds
       setTimeout(() => {
         setPulsingSchoolId(null);
       }, 6000);
@@ -403,6 +695,11 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
   };
 
   if (!isOpen) return null;
+
+  // Screen coordinates for pinned location anchor
+  const pinnedScreenX = pinnedLocation ? projectLngToPixel(pinnedLocation.lng, zoom) - centerPixelX + halfW : 0;
+  const pinnedScreenY = pinnedLocation ? projectLatToPixel(pinnedLocation.lat, zoom) - centerPixelY + halfH : 0;
+  const isPinnedVisible = pinnedLocation && pinnedScreenX >= -100 && pinnedScreenX <= viewportSize.width + 100 && pinnedScreenY >= -100 && pinnedScreenY <= viewportSize.height + 100;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 animate-in fade-in-50 duration-200">
@@ -422,33 +719,199 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onWheel={handleWheel}
+          style={{
+            touchAction: 'none',
+            overscrollBehavior: 'contain'
+          }}
           className={`relative flex-1 overflow-hidden select-none bg-[#e5e3df] ${
-            isDragging ? 'cursor-grabbing' : 'cursor-grab'
+            isDropPinMode ? 'cursor-crosshair' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
           }`}
         >
-          {/* 1. Google Slippy Tiles Layer */}
-          <div className="absolute inset-0 pointer-events-none">
-            {visibleTiles.map(t => (
-              <img
-                key={`${t.x}-${t.y}-${zoom}-${mapType}`}
-                src={t.url}
-                alt=""
-                className="absolute select-none pointer-events-none transition-opacity duration-200"
-                style={{
-                  left: `${t.left}px`,
-                  top: `${t.top}px`,
-                  width: `${TILE_SIZE}px`,
-                  height: `${TILE_SIZE}px`
-                }}
-                loading="eager"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${t.x}/${t.y}.png`;
-                }}
-              />
-            ))}
+          {/* HARDWARE GPU-ACCELERATED WORLD CONTAINER */}
+          {/* Decouples pan motion from React state re-renders for fluid 60FPS dragging */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)`,
+              willChange: isDragging ? 'transform' : 'auto',
+              transition: isDragging ? 'none' : 'transform 0.05s ease-out'
+            }}
+          >
+            {/* 1. Google Slippy Tiles Layer */}
+            <div className="absolute inset-0 pointer-events-none">
+              {visibleTiles.map(t => (
+                <img
+                  key={`${t.x}-${t.y}-${zoom}-${mapType}`}
+                  src={t.url}
+                  alt=""
+                  className="absolute select-none pointer-events-none transition-opacity duration-150"
+                  style={{
+                    left: `${t.left}px`,
+                    top: `${t.top}px`,
+                    width: `${TILE_SIZE}px`,
+                    height: `${TILE_SIZE}px`
+                  }}
+                  loading="eager"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${t.x}/${t.y}.png`;
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* 2. Interactive Markers & Clusters Layer */}
+            <div className={`absolute inset-0 ${isDragging ? 'pointer-events-none' : 'pointer-events-none'}`}>
+              {mapDisplayItems.map(item => {
+                if (item.isCluster) {
+                  // High-tech Cluster Bubble
+                  const hasVerified = item.verifiedCount > 0;
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={(e) => handleClusterClick(item, e)}
+                      className="interactive-control absolute pointer-events-auto cursor-pointer transition-transform duration-150 hover:scale-110 active:scale-95"
+                      style={{
+                        left: `${item.screenX}px`,
+                        top: `${item.screenY}px`,
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 25
+                      }}
+                      title={`${item.count} Schools in this area (${item.verifiedCount} verified) • Click to Zoom`}
+                    >
+                      <div className="relative group flex items-center justify-center">
+                        {/* Outer Glow Ring */}
+                        <div className={`absolute -inset-1.5 rounded-full blur-[2px] opacity-75 animate-pulse ${
+                          hasVerified ? 'bg-emerald-400' : 'bg-sky-400'
+                        }`} />
+
+                        {/* Cluster Badge */}
+                        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex flex-col items-center justify-center text-white font-black text-xs shadow-xl border-2 border-white ${
+                          hasVerified 
+                            ? 'bg-gradient-to-tr from-emerald-600 to-teal-700' 
+                            : 'bg-gradient-to-tr from-sky-600 to-indigo-700'
+                        }`}>
+                          <span className="leading-none">{item.count}</span>
+                          <span className="text-[8px] font-normal opacity-90 leading-none mt-0.5">sch</span>
+                        </div>
+
+                        {/* Mini Verified Dot */}
+                        {hasVerified && (
+                          <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-amber-400 border border-white rounded-full flex items-center justify-center shadow-xs">
+                            <span className="text-[7px] text-amber-950 font-black">✓</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Individual School Pin
+                const s = item.school;
+                const isSelected = selectedSchool?.id === s.id;
+                const isHovered = hoveredSchoolId === s.id;
+                const isPulsing = pulsingSchoolId === s.id;
+                const isVerified = Boolean(s.official_landline || s.official_mobile || s.official_whatsapp || s.official_email);
+
+                return (
+                  <div
+                    key={s.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSchoolPin(s);
+                    }}
+                    onMouseEnter={() => setHoveredSchoolId(s.id)}
+                    onMouseLeave={() => setHoveredSchoolId(null)}
+                    className="interactive-control absolute pointer-events-auto cursor-pointer transition-transform duration-100"
+                    style={{
+                      left: `${item.screenX}px`,
+                      top: `${item.screenY}px`,
+                      transform: `translate(-50%, -100%) scale(${isSelected || isPulsing ? 1.3 : isHovered ? 1.2 : 1})`,
+                      zIndex: isSelected || isPulsing ? 50 : isHovered ? 40 : 20
+                    }}
+                  >
+                    {/* Pulsing Radar Ring Animation when Searched */}
+                    {isPulsing && (
+                      <div className="absolute -inset-3 -top-6 rounded-full bg-sky-500/40 animate-ping pointer-events-none" />
+                    )}
+                    {isPulsing && (
+                      <div className="absolute -inset-1.5 -top-4 rounded-full bg-emerald-400/60 animate-pulse pointer-events-none" />
+                    )}
+
+                    {/* Pin Graphic */}
+                    {isSelected || isHovered || isPulsing ? (
+                      <div className="flex flex-col items-center">
+                        <div className={`px-2.5 py-1 rounded-xl shadow-xl flex items-center gap-1.5 text-white whitespace-nowrap text-xs font-bold border ${
+                          isSelected || isPulsing
+                            ? 'bg-sky-600 border-white ring-4 ring-sky-300' 
+                            : isVerified 
+                            ? 'bg-emerald-600 border-emerald-300' 
+                            : 'bg-rose-600 border-rose-300'
+                        }`}>
+                          <MapPin className="w-3.5 h-3.5 shrink-0" />
+                          <span className="max-w-[140px] truncate">{s.school_name}</span>
+                        </div>
+                        <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 shadow-xs" />
+                      </div>
+                    ) : (
+                      /* Default Google Maps Style Teardrop Pin */
+                      <div className="relative group">
+                        <div className={`w-6 h-6 rounded-full rounded-br-none -rotate-45 flex items-center justify-center shadow-md border border-white ${
+                          isVerified ? 'bg-emerald-600' : 'bg-rose-600'
+                        }`}>
+                          <div className="w-2 h-2 rounded-full bg-white rotate-45" />
+                        </div>
+                        <div className="w-2 h-1 bg-black/40 rounded-full mx-auto blur-[1px] mt-0.5" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* 3. DEDICATED HIGH-VISIBILITY PINNED ANCHOR (Active Pinned Location) */}
+              {pinnedLocation && isPinnedVisible && (
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (pinnedLocation.school) {
+                      setSelectedSchoolPin(pinnedLocation.school);
+                    }
+                  }}
+                  className="interactive-control absolute pointer-events-auto cursor-pointer transition-transform duration-150 hover:scale-110 active:scale-95"
+                  style={{
+                    left: `${pinnedScreenX}px`,
+                    top: `${pinnedScreenY}px`,
+                    transform: 'translate(-50%, -100%)',
+                    zIndex: 60
+                  }}
+                >
+                  {/* Triple Animated Sonar Rings */}
+                  <div className="absolute -inset-6 -top-8 rounded-full bg-amber-400/40 animate-ping pointer-events-none" />
+                  <div className="absolute -inset-3 -top-5 rounded-full bg-indigo-500/30 animate-pulse pointer-events-none" />
+
+                  <div className="relative flex flex-col items-center">
+                    {/* Header Banner */}
+                    <div className="px-3 py-1 rounded-xl shadow-2xl flex items-center gap-1.5 text-white whitespace-nowrap text-xs font-black bg-gradient-to-r from-amber-600 via-rose-600 to-indigo-700 border-2 border-white ring-4 ring-amber-300">
+                      <span className="text-amber-200">📌</span>
+                      <span className="max-w-[160px] truncate">{pinnedLocation.title}</span>
+                    </div>
+
+                    {/* 3D Radiant Anchor Pin Head */}
+                    <div className="w-8 h-8 rounded-full rounded-br-none -rotate-45 flex items-center justify-center shadow-2xl border-2 border-white bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 mt-0.5">
+                      <span className="rotate-45 text-white text-xs font-black">★</span>
+                    </div>
+                    {/* Shadow */}
+                    <div className="w-3 h-1.5 bg-black/50 rounded-full mx-auto blur-[1.5px] mt-1" />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* 2. Top-Left Google Maps Search Box with Action Button */}
+          {/* ======================================================================= */}
+          {/* TOP CONTROLS & FLOATING HUD OVERLAYS                                     */}
+          {/* ======================================================================= */}
+
+          {/* Top-Left Search Box */}
           <div className="interactive-control absolute top-3 left-3 z-30 max-w-md w-full">
             <div className="bg-white rounded-xl shadow-xl border-2 border-sky-300 ring-4 ring-sky-50 flex items-center p-1.5 gap-1.5 transition-all">
               <div className="flex items-center flex-1 pl-2">
@@ -462,7 +925,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
                       handleExecuteSearch();
                     }
                   }}
-                  placeholder="Search Tamil Nadu school name, UDISE, district..."
+                  placeholder="Search school name, UDISE, district..."
                   className="w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none bg-transparent"
                 />
                 {searchQuery && (
@@ -476,7 +939,6 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
                 )}
               </div>
               
-              {/* Explicit Search Button (Image / Request Match) */}
               <button
                 type="button"
                 onClick={handleExecuteSearch}
@@ -492,7 +954,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
               </button>
             </div>
 
-            {/* Live Search Status Feedback Toast */}
+            {/* Live Search Feedback Toast */}
             {searchStatusMessage && (
               <div className="mt-1.5 px-3 py-1.5 bg-slate-900/90 text-white text-xs font-medium rounded-lg shadow-lg backdrop-blur-xs flex items-center gap-2 animate-in fade-in-50 duration-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -501,9 +963,30 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
             )}
           </div>
 
-          {/* 3. Top-Right Controls: Google Maps Layer Switcher & Modal Exit */}
+          {/* Top-Right Tools: Drop Pin, Layers, Fullscreen, Close */}
           <div className="interactive-control absolute top-3 right-3 z-30 flex items-center gap-2">
             
+            {/* Dedicated "Drop Pin" Mode Toggle Button */}
+            <button
+              onClick={() => {
+                setIsDropPinMode(prev => !prev);
+                if (!isDropPinMode) {
+                  setSearchStatusMessage('📍 Drop Pin Mode: Click anywhere on the map to pin that location.');
+                } else {
+                  setSearchStatusMessage('');
+                }
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer border ${
+                isDropPinMode 
+                  ? 'bg-gradient-to-r from-amber-500 to-rose-600 text-white border-white ring-2 ring-amber-300 animate-pulse'
+                  : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'
+              }`}
+              title="Click anywhere on the map to pin that location"
+            >
+              <span>📍</span>
+              <span className="hidden sm:inline">{isDropPinMode ? 'Click Map to Pin' : 'Drop Pin'}</span>
+            </button>
+
             {/* Layer Switcher: Map vs Satellite vs Terrain */}
             <div className="bg-white rounded-xl shadow-md border border-slate-200 p-0.5 flex items-center text-xs font-semibold">
               <button
@@ -557,75 +1040,68 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
             </button>
           </div>
 
-          {/* 4. Live Geographical School Pins Overlay */}
-          <div className="absolute inset-0 pointer-events-none">
-            {visibleSchoolPins.map(({ school: s, screenX, screenY }) => {
-              const isSelected = selectedSchool?.id === s.id;
-              const isHovered = hoveredSchoolId === s.id;
-              const isPulsing = pulsingSchoolId === s.id;
-              const isVerified = Boolean(s.official_landline || s.official_mobile || s.official_whatsapp || s.official_email);
-
-              return (
-                <div
-                  key={s.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedSchoolPin(s);
-                  }}
-                  onMouseEnter={() => setHoveredSchoolId(s.id)}
-                  onMouseLeave={() => setHoveredSchoolId(null)}
-                  className="interactive-control absolute pointer-events-auto cursor-pointer transition-transform duration-150"
-                  style={{
-                    left: `${screenX}px`,
-                    top: `${screenY}px`,
-                    transform: `translate(-50%, -100%) scale(${isSelected || isPulsing ? 1.3 : isHovered ? 1.2 : 1})`,
-                    zIndex: isSelected || isPulsing ? 50 : isHovered ? 40 : 20
-                  }}
-                >
-                  {/* Pulsing Radar Ring Animation when Searched */}
-                  {isPulsing && (
-                    <div className="absolute -inset-3 -top-6 rounded-full bg-sky-500/40 animate-ping pointer-events-none" />
-                  )}
-                  {isPulsing && (
-                    <div className="absolute -inset-1.5 -top-4 rounded-full bg-emerald-400/60 animate-pulse pointer-events-none" />
-                  )}
-
-                  {/* Pin Graphic */}
-                  {isSelected || isHovered || isPulsing ? (
-                    <div className="flex flex-col items-center">
-                      <div className={`px-2.5 py-1 rounded-xl shadow-xl flex items-center gap-1.5 text-white whitespace-nowrap text-xs font-bold border ${
-                        isSelected || isPulsing
-                          ? 'bg-sky-600 border-white ring-4 ring-sky-300' 
-                          : isVerified 
-                          ? 'bg-emerald-600 border-emerald-300' 
-                          : 'bg-rose-600 border-rose-300'
-                      }`}>
-                        <MapPin className="w-3.5 h-3.5 shrink-0" />
-                        <span className="max-w-[140px] truncate">{s.school_name}</span>
-                      </div>
-                      <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 shadow-xs" />
-                    </div>
-                  ) : (
-                    /* Default Google Maps Style Teardrop Pin */
-                    <div className="relative group">
-                      <div className={`w-6 h-6 rounded-full rounded-br-none -rotate-45 flex items-center justify-center shadow-md border border-white ${
-                        isVerified ? 'bg-emerald-600' : 'bg-rose-600'
-                      }`}>
-                        <div className="w-2 h-2 rounded-full bg-white rotate-45" />
-                      </div>
-                      {/* Ground drop shadow */}
-                      <div className="w-2 h-1 bg-black/40 rounded-full mx-auto blur-[1px] mt-0.5" />
-                    </div>
-                  )}
+          {/* FLOATING PINNED LOCATION HUD BANNER */}
+          {pinnedLocation && (
+            <div className="interactive-control absolute top-16 left-3 right-3 sm:left-auto sm:right-3 z-30 sm:max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-amber-400 p-2.5 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 text-white flex items-center justify-center shrink-0 shadow-md font-bold text-sm">
+                  📌
                 </div>
-              );
-            })}
-          </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                      Pinned Location
+                    </span>
+                    {isLockCameraToPin && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-800 flex items-center gap-0.5">
+                        <Lock className="w-2.5 h-2.5 inline" /> Locked
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 truncate">{pinnedLocation.title}</h4>
+                  <p className="text-[10px] text-slate-500 truncate">
+                    {pinnedLocation.lat.toFixed(4)}° N, {pinnedLocation.lng.toFixed(4)}° E • {pinnedLocation.subtitle}
+                  </p>
+                </div>
+              </div>
 
-          {/* 5. Google Maps Style InfoWindow Card (when pin selected) */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={handleCenterOnPin}
+                  className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                  title="Center Camera on Pinned Location"
+                >
+                  <Target className="w-3 h-3 text-amber-700" />
+                  <span>Center</span>
+                </button>
+
+                <button
+                  onClick={handleToggleLockPin}
+                  className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                    isLockCameraToPin
+                      ? 'bg-indigo-600 text-white border-indigo-700'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
+                  }`}
+                  title={isLockCameraToPin ? 'Unlock Camera' : 'Lock Camera to Pinned Location'}
+                >
+                  {isLockCameraToPin ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                </button>
+
+                <button
+                  onClick={handleUnpinLocation}
+                  className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg transition-all cursor-pointer"
+                  title="Unpin Location"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* InfoWindow Card (when pin selected) */}
           {selectedSchool && (
-            <div className="interactive-control absolute bottom-24 left-1/2 -translate-x-1/2 z-40 max-w-lg w-[94%] sm:w-[460px] bg-white rounded-2xl shadow-2xl border-2 border-sky-300 p-4.5 animate-in fade-in-50 zoom-in-95 duration-150">
-              <div className="flex items-start justify-between gap-3 mb-2.5 pb-2.5 border-b border-slate-100">
+            <div className="interactive-control absolute bottom-24 left-1/2 -translate-x-1/2 z-40 max-w-lg w-[94%] sm:w-[460px] bg-white rounded-2xl shadow-2xl border-2 border-sky-300 p-4 animate-in fade-in-50 zoom-in-95 duration-150">
+              <div className="flex items-start justify-between gap-3 mb-2.5 pb-2 border-b border-slate-100">
                 <div>
                   <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                     <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200">
@@ -657,7 +1133,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
               </div>
 
               {/* Complete 4-Field Official Contact Details Box */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 mb-3 space-y-2 text-xs">
+              <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 mb-2.5 space-y-1.5 text-xs">
                 {/* Principal / Headmaster Name */}
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400 w-24 shrink-0 font-medium">Principal:</span>
@@ -717,33 +1193,55 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
                 </div>
               </div>
 
-              {/* Action Buttons & Google Maps Directions Link */}
+              {/* Action Buttons: Pin Location, Google Directions, Inspect Record */}
               <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 text-xs">
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedSchool.school_name + ' ' + (selectedSchool.district || 'Tamil Nadu'))}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sky-600 hover:text-sky-800 font-bold flex items-center gap-1"
-                >
-                  <span>Google Maps Directions</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-
+                {/* Pin Location Button */}
                 <button
+                  type="button"
                   onClick={() => {
-                    onSelectSchool(selectedSchool);
-                    onClose();
+                    if (pinnedLocation?.id === selectedSchool.id) {
+                      handleUnpinLocation();
+                    } else {
+                      handlePinSchool(selectedSchool);
+                    }
                   }}
-                  className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                    pinnedLocation?.id === selectedSchool.id
+                      ? 'bg-amber-100 text-amber-900 border-amber-300'
+                      : 'bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-900 border-slate-200'
+                  }`}
                 >
-                  <span>Inspect Full Record</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <Pin className="w-3.5 h-3.5 text-amber-600" />
+                  <span>{pinnedLocation?.id === selectedSchool.id ? '📍 Pinned Anchor' : '📌 Pin Location'}</span>
                 </button>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedSchool.school_name + ' ' + (selectedSchool.district || 'Tamil Nadu'))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sky-600 hover:text-sky-800 font-bold flex items-center gap-1"
+                  >
+                    <span>Directions</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+
+                  <button
+                    onClick={() => {
+                      onSelectSchool(selectedSchool);
+                      onClose();
+                    }}
+                    className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Inspect</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
-          {/* 6. Bottom-Right Navigation & Zoom Controls (Google Maps Style) */}
+          {/* Bottom-Right Navigation & Zoom Controls */}
           <div className="interactive-control absolute bottom-24 right-4 z-30 flex flex-col gap-2">
             
             {/* Recenter Button */}
@@ -758,14 +1256,26 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
             {/* Zoom In & Out */}
             <div className="bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden">
               <button
-                onClick={() => setZoom(prev => Math.min(18, prev + 1))}
+                onClick={() => {
+                  if (isLockCameraToPin && pinnedLocation) {
+                    setCenterLat(pinnedLocation.lat);
+                    setCenterLng(pinnedLocation.lng);
+                  }
+                  setZoom(prev => Math.min(18, prev + 1));
+                }}
                 className="p-2.5 text-slate-700 hover:bg-slate-50 border-b border-slate-100 transition-all flex items-center justify-center cursor-pointer"
                 title="Zoom In"
               >
                 <Plus className="w-4 h-4" />
               </button>
               <button
-                onClick={() => setZoom(prev => Math.max(6, prev - 1))}
+                onClick={() => {
+                  if (isLockCameraToPin && pinnedLocation) {
+                    setCenterLat(pinnedLocation.lat);
+                    setCenterLng(pinnedLocation.lng);
+                  }
+                  setZoom(prev => Math.max(6, prev - 1));
+                }}
                 className="p-2.5 text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-center cursor-pointer"
                 title="Zoom Out"
               >
@@ -774,7 +1284,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
             </div>
           </div>
 
-          {/* 7. Bottom-Left Authentic Google Brand & Copyright */}
+          {/* Bottom-Left Authentic Google Brand & Copyright */}
           <div className="absolute bottom-20 left-3 z-30 pointer-events-none flex items-center gap-2 text-[10px] text-slate-600 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md border border-slate-200/60 shadow-xs">
             <span className="font-bold text-slate-800">Google</span>
             <span className="text-slate-400">•</span>

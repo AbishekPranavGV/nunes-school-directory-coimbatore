@@ -190,8 +190,8 @@ export function getSubDistrictsForStateAndDistrict(selectedState: string = 'all'
       return {
         taluks: COIMBATORE_TALUKS.map(t => ({ name: t })),
         blocks: COIMBATORE_BLOCKS.map(b => ({ name: b })),
-        talukPlaceholder: 'All 11 Taluks (Coimbatore)',
-        blockPlaceholder: 'All 15 Blocks (Coimbatore)'
+        talukPlaceholder: 'All Coimbatore Taluks (11)',
+        blockPlaceholder: 'All Coimbatore Blocks (15)'
       };
     }
     if (normDistrict === 'the_nilgiris' || normDistrict === 'nilgiris') {
@@ -230,7 +230,7 @@ export function getSubDistrictsForStateAndDistrict(selectedState: string = 'all'
       ...COIMBATORE_BLOCKS.map(b => ({ name: b, group: '🌿 Tamil Nadu Educational Blocks' })),
       ...klBlocks.map(b => ({ name: b, group: '🌴 Kerala Educational Blocks' }))
     ],
-    talukPlaceholder: 'All South India Taluks (KL & TN)',
-    blockPlaceholder: 'All South India Blocks (KL & TN)'
+    talukPlaceholder: 'All South India Taluks (52 Districts)',
+    blockPlaceholder: 'All Educational Blocks (548 Blocks)'
   };
 }

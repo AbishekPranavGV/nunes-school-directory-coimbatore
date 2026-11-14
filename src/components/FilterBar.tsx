@@ -223,34 +223,94 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
         {/* Taluk Filter */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-sky-500" />
-            <span>Revenue Taluk</span>
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-sky-500" />
+              <span>Revenue Taluk</span>
+            </label>
+            {taluk && (
+              <button
+                type="button"
+                onClick={() => setTaluk('')}
+                className="text-[10px] text-rose-600 hover:text-rose-800 font-semibold"
+                title="Remove Taluk Filter"
+              >
+                ✕ Clear
+              </button>
+            )}
+          </div>
           <select
             value={taluk}
             onChange={(e) => setTaluk(e.target.value)}
             className="w-full text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:bg-white"
           >
             <option value="">{talukPlaceholder}</option>
-            {taluks.map(t => (
-              <option key={t.name} value={t.name}>{t.name}</option>
-            ))}
+            {(() => {
+              const hasGroups = taluks.some(t => Boolean(t.group));
+              if (!hasGroups) {
+                return taluks.map(t => (
+                  <option key={t.name} value={t.name}>{t.name}</option>
+                ));
+              }
+              const groups: Record<string, typeof taluks> = {};
+              taluks.forEach(t => {
+                const g = t.group || 'Other';
+                if (!groups[g]) groups[g] = [];
+                groups[g].push(t);
+              });
+              return Object.entries(groups).map(([groupName, items]) => (
+                <optgroup key={groupName} label={groupName}>
+                  {items.map(t => (
+                    <option key={t.name} value={t.name}>{t.name}</option>
+                  ))}
+                </optgroup>
+              ));
+            })()}
           </select>
         </div>
 
         {/* Educational Block Filter */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-500 mb-1">Educational Block</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-500">Educational Block</label>
+            {block && (
+              <button
+                type="button"
+                onClick={() => setBlock('')}
+                className="text-[10px] text-rose-600 hover:text-rose-800 font-semibold"
+                title="Remove Block Filter"
+              >
+                ✕ Clear
+              </button>
+            )}
+          </div>
           <select
             value={block}
             onChange={(e) => setBlock(e.target.value)}
             className="w-full text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:bg-white"
           >
             <option value="">{blockPlaceholder}</option>
-            {blocks.map(b => (
-              <option key={b.name} value={b.name}>{b.name}</option>
-            ))}
+            {(() => {
+              const hasGroups = blocks.some(b => Boolean(b.group));
+              if (!hasGroups) {
+                return blocks.map(b => (
+                  <option key={b.name} value={b.name}>{b.name}</option>
+                ));
+              }
+              const groups: Record<string, typeof blocks> = {};
+              blocks.forEach(b => {
+                const g = b.group || 'Other';
+                if (!groups[g]) groups[g] = [];
+                groups[g].push(b);
+              });
+              return Object.entries(groups).map(([groupName, items]) => (
+                <optgroup key={groupName} label={groupName}>
+                  {items.map(b => (
+                    <option key={b.name} value={b.name}>{b.name}</option>
+                  ))}
+                </optgroup>
+              ));
+            })()}
           </select>
         </div>
 
