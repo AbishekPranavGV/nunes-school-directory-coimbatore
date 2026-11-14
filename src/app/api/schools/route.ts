@@ -33,12 +33,18 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'school_name';
     const sortOrder = searchParams.get('sortOrder') === 'desc' ? -1 : 1;
 
-    const allSchools = await getMasterSchoolsFromMemoryOrDb(district || undefined);
+    const canonicalQ = q ? getCanonicalDistrictName(q) : undefined;
+    const effectiveDistrict = canonicalQ ? 'all' : (district || undefined);
+    const allSchools = await getMasterSchoolsFromMemoryOrDb(effectiveDistrict);
 
     let filtered = allSchools.filter((s: any) => {
-      // District filter
+      // District filter: If query targets a specific district name, allow it through
       if (district && district.toLowerCase() !== 'all' && district.toLowerCase() !== 'statewide') {
-        if (!matchesDistrict(s.district || '', district)) {
+        if (canonicalQ) {
+          if (!matchesDistrict(s.district || '', canonicalQ)) {
+            return false;
+          }
+        } else if (!matchesDistrict(s.district || '', district)) {
           return false;
         }
       }

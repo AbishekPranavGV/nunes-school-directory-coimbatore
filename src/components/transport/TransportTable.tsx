@@ -19,7 +19,9 @@ import {
   User,
   Star,
   Edit3,
-  Building2
+  Building2,
+  Package,
+  Landmark
 } from 'lucide-react';
 import { TransportRecord } from '@/types/transport';
 
@@ -157,8 +159,42 @@ export const TransportTable: React.FC<TransportTableProps> = ({
             ) : (
               operators.map((item) => {
                 const isBus = item.service_type === 'bus';
+                const isLorry = item.service_type === 'lorry';
+                const isLogistics = item.service_type === 'logistics';
+                const isGovt = item.service_type === 'govt';
                 const cleanPhone = item.contact_number.replace(/[^0-9+]/g, '');
                 const cleanWhatsApp = item.whatsapp_number.replace(/[^0-9]/g, '');
+
+                const getIconAndColors = () => {
+                  if (isGovt) {
+                    return {
+                      icon: <Landmark className="w-4 h-4" />,
+                      boxClass: 'bg-purple-50 text-purple-700',
+                      badgeClass: 'bg-purple-50 text-purple-800 border border-purple-200'
+                    };
+                  }
+                  if (isLogistics) {
+                    return {
+                      icon: <Package className="w-4 h-4" />,
+                      boxClass: 'bg-emerald-50 text-emerald-700',
+                      badgeClass: 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    };
+                  }
+                  if (isBus) {
+                    return {
+                      icon: <Bus className="w-4 h-4" />,
+                      boxClass: 'bg-sky-50 text-sky-700',
+                      badgeClass: 'bg-sky-50 text-sky-800 border border-sky-200'
+                    };
+                  }
+                  return {
+                    icon: <Truck className="w-4 h-4" />,
+                    boxClass: 'bg-amber-50 text-amber-700',
+                    badgeClass: 'bg-amber-50 text-amber-900 border border-amber-200'
+                  };
+                };
+
+                const style = getIconAndColors();
 
                 return (
                   <tr 
@@ -170,10 +206,8 @@ export const TransportTable: React.FC<TransportTableProps> = ({
                     {/* Operator Name & Category */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-start gap-2.5">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                          isBus ? 'bg-sky-50 text-sky-700' : 'bg-amber-50 text-amber-700'
-                        }`}>
-                          {isBus ? <Bus className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${style.boxClass}`}>
+                          {style.icon}
                         </div>
 
                         <div>
@@ -187,11 +221,7 @@ export const TransportTable: React.FC<TransportTableProps> = ({
                           </div>
 
                           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                              isBus 
-                                ? 'bg-sky-50 text-sky-800 border border-sky-200' 
-                                : 'bg-amber-50 text-amber-900 border border-amber-200'
-                            }`}>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${style.badgeClass}`}>
                               {item.category}
                             </span>
 

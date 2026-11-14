@@ -25,13 +25,9 @@ export async function GET(request: NextRequest) {
 
     let filtered: TransportRecord[] = [...operatorsCache];
 
-    // Service type filter (bus, lorry, logistics)
+    // Service type filter (bus, lorry, logistics, govt)
     if (serviceType && serviceType !== 'all') {
-      if (serviceType === 'lorry') {
-        filtered = filtered.filter(item => item.service_type === 'lorry' || item.service_type === 'logistics');
-      } else {
-        filtered = filtered.filter(item => item.service_type === serviceType);
-      }
+      filtered = filtered.filter(item => item.service_type === serviceType);
     }
 
     // Category filter

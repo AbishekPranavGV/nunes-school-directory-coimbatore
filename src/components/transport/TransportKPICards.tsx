@@ -9,7 +9,9 @@ import {
   UserCheck, 
   Building2,
   AlertTriangle,
-  Send
+  Send,
+  Package,
+  Landmark
 } from 'lucide-react';
 import { TransportKPI } from '@/types/transport';
 
@@ -30,8 +32,8 @@ export const TransportKPICards: React.FC<TransportKPICardsProps> = ({
 }) => {
   if (!kpi) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-5 animate-pulse">
-        {[...Array(7)].map((_, i) => (
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-5 animate-pulse">
+        {[...Array(8)].map((_, i) => (
           <div key={i} className="h-24 bg-white/70 border border-slate-200/60 rounded-xl"></div>
         ))}
       </div>
@@ -50,21 +52,10 @@ export const TransportKPICards: React.FC<TransportKPICardsProps> = ({
       filterValue: ''
     },
     {
-      id: 'branches',
-      title: 'Regional Branches',
-      value: (kpi.total_branches_count || 52).toLocaleString(),
-      subtext: 'Depots across Tamil Nadu',
-      icon: Building2,
-      iconColor: 'text-orange-600',
-      iconBg: 'bg-orange-50',
-      filterValue: 'has_branches',
-      customAction: onNavigateToBranches
-    },
-    {
       id: 'bus_services',
       title: 'Bus Fleets',
       value: kpi.bus_services.toLocaleString(),
-      subtext: 'Omni, AC Sleeper & Tourist',
+      subtext: 'Omni, Sleeper & Tourist',
       icon: Bus,
       iconColor: 'text-sky-600',
       iconBg: 'bg-sky-50',
@@ -74,21 +65,42 @@ export const TransportKPICards: React.FC<TransportKPICardsProps> = ({
       id: 'lorry_services',
       title: 'Lorry & Haulers',
       value: kpi.lorry_services.toLocaleString(),
-      subtext: 'Multi-Axle, Bulkers & FTL',
+      subtext: 'Multi-Axle & Bulkers',
       icon: Truck,
-      iconColor: 'text-emerald-600',
-      iconBg: 'bg-emerald-50',
+      iconColor: 'text-amber-600',
+      iconBg: 'bg-amber-50',
       filterValue: 'lorry_services'
     },
     {
-      id: 'verified_owners',
-      title: 'Verified Owners',
-      value: kpi.verified_owners.toLocaleString(),
-      subtext: '100% Named MD / Proprietors',
-      icon: UserCheck,
-      iconColor: 'text-indigo-600',
-      iconBg: 'bg-indigo-50',
-      filterValue: 'verified_owners'
+      id: 'logistics_services',
+      title: '3PL & Logistics',
+      value: (kpi.logistics_services || 8).toLocaleString(),
+      subtext: 'Multimodal & Linehaul',
+      icon: Package,
+      iconColor: 'text-emerald-600',
+      iconBg: 'bg-emerald-50',
+      filterValue: 'logistics_services'
+    },
+    {
+      id: 'govt_services',
+      title: 'Govt & STU Fleets',
+      value: (kpi.govt_services || 6).toLocaleString(),
+      subtext: 'SETC, TNSTC & STA',
+      icon: Landmark,
+      iconColor: 'text-purple-600',
+      iconBg: 'bg-purple-50',
+      filterValue: 'govt_services'
+    },
+    {
+      id: 'branches',
+      title: 'Regional Branches',
+      value: (kpi.total_branches_count || 56).toLocaleString(),
+      subtext: 'Depots across Tamil Nadu',
+      icon: Building2,
+      iconColor: 'text-orange-600',
+      iconBg: 'bg-orange-50',
+      filterValue: 'has_branches',
+      customAction: onNavigateToBranches
     },
     {
       id: 'has_whatsapp',
@@ -114,7 +126,7 @@ export const TransportKPICards: React.FC<TransportKPICardsProps> = ({
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 mb-5">
+    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 mb-5">
       {cards.map((card) => {
         const Icon = card.icon;
         const isSelected = activeQuickFilter === card.filterValue;

@@ -10,7 +10,9 @@ import {
   Bus, 
   MapPin, 
   Award,
-  Filter
+  Filter,
+  Package,
+  Landmark
 } from 'lucide-react';
 
 interface TransportFilterBarProps {
@@ -32,14 +34,17 @@ interface TransportFilterBarProps {
 
 const CATEGORIES = [
   'Omni Bus (Intercity Sleeper / AC)',
+  'State Transport Corporation (Govt)',
   'Tourist Coach & Contract Carriage',
   'Staff & Educational Bus',
   'Heavy Commercial Lorry (Multi-Axle)',
+  '3PL & Multimodal Logistics',
   'Bulk LPG & Petroleum Tanker',
   'Container & Port Logistics',
   'ODC & Heavy Trailer Haulage',
   'Parcel, Express Cargo & FTL',
-  'Mini Truck & Light Commercial'
+  'Mini Truck & Light Commercial',
+  'Transport Regulatory & Apex Association'
 ];
 
 const PERMIT_TYPES = [
@@ -47,7 +52,10 @@ const PERMIT_TYPES = [
   'South Zone Permit',
   'State Goods Carriage',
   'All India Tourist Permit (AITP)',
-  'Stage Carriage'
+  'Stage Carriage',
+  'Government STU Stage Carriage',
+  'Multimodal Logistics Operator (MTO)',
+  'Apex Transport Regulatory'
 ];
 
 const DISTRICT_HUBS = [

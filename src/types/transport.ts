@@ -1,15 +1,19 @@
-export type ServiceCategory = 'bus' | 'lorry' | 'logistics' | 'all';
+export type ServiceCategory = 'bus' | 'lorry' | 'logistics' | 'govt' | 'all';
 
 export type TransportCategoryType =
   | 'Omni Bus (Intercity Sleeper / AC)'
   | 'Tourist Coach & Contract Carriage'
   | 'Staff & Educational Bus'
+  | 'State Transport Corporation (Govt)'
   | 'Heavy Commercial Lorry (Multi-Axle)'
   | 'Bulk LPG & Petroleum Tanker'
   | 'Container & Port Logistics'
   | 'ODC & Heavy Trailer Haulage'
   | 'Parcel, Express Cargo & FTL'
-  | 'Mini Truck & Light Commercial';
+  | '3PL & Multimodal Logistics'
+  | 'Mini Truck & Light Commercial'
+  | 'Transport Regulatory & Apex Association'
+  | 'Port Drayage & Container Freight';
 
 export interface BranchOffice {
   id: string;
@@ -28,7 +32,10 @@ export interface BranchOffice {
     | 'Transshipment & Cargo Yard'
     | 'Container Drayage Depot'
     | 'Heavy Vehicle Workshop'
-    | 'Express Parcel Depot';
+    | 'Express Parcel Depot'
+    | 'Government STU Depot & Divisional Office'
+    | 'Multimodal Logistics Park (MMLP)'
+    | 'Port Drayage & Terminal';
   is_headquarters?: boolean;
   latitude?: number;
   longitude?: number;
@@ -38,7 +45,7 @@ export interface TransportRecord {
   id: string;
   company_name: string;
   category: TransportCategoryType;
-  service_type: 'bus' | 'lorry' | 'logistics';
+  service_type: 'bus' | 'lorry' | 'logistics' | 'govt';
   owner_name: string;
   owner_designation: string;
   contact_number: string;
@@ -58,7 +65,10 @@ export interface TransportRecord {
     | 'South Zone Permit'
     | 'State Goods Carriage'
     | 'All India Tourist Permit (AITP)'
-    | 'Stage Carriage';
+    | 'Stage Carriage'
+    | 'Government STU Stage Carriage'
+    | 'Multimodal Logistics Operator (MTO)'
+    | 'Apex Transport Regulatory';
   gstin?: string;
   udyam_reg?: string;
   established_year: number;
@@ -77,6 +87,8 @@ export interface TransportKPI {
   total_fleets: number;
   bus_services: number;
   lorry_services: number;
+  logistics_services: number;
+  govt_services: number;
   verified_owners: number;
   whatsapp_verified: number;
   email_verified: number;

@@ -23,6 +23,7 @@ import { MapViewModal } from '@/components/MapViewModal';
 import { WorkerModal } from '@/components/WorkerModal';
 import { SchoolRecord, KPIMetrics, UserSession, WorkspaceView } from '@/types';
 import { LayoutGrid, AlertTriangle, Sparkles, X, PhoneCall } from 'lucide-react';
+import { getDistrictById } from '@/lib/data/tamilNaduDistricts';
 
 export default function DashboardPage() {
   // Navigation view state (9 Primary Workspaces)
@@ -46,8 +47,8 @@ export default function DashboardPage() {
     status: string;
   } | null>(null);
 
-  // District state (defaults to 'coimbatore', or 'all' for statewide 38 districts)
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('coimbatore');
+  // District state (defaults to 'all' for statewide 38 districts)
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -438,6 +439,12 @@ export default function DashboardPage() {
               setSearchQuery={(q) => {
                 setSearchQuery(q);
                 setCurrentPage(1);
+                if (q.trim().length >= 3) {
+                  const matched = getDistrictById(q.trim());
+                  if (matched && selectedDistrict !== matched.id) {
+                    setSelectedDistrict(matched.id);
+                  }
+                }
               }}
               selectedDistrict={selectedDistrict}
               setSelectedDistrict={handleSelectDistrict}

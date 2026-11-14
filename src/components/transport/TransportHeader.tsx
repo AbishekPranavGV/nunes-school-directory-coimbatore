@@ -26,7 +26,9 @@ import {
   Globe2,
   GraduationCap,
   ArrowRight,
-  Building2
+  Building2,
+  Package,
+  Landmark
 } from 'lucide-react';
 import { TransportWorkspaceView } from '@/types/transport';
 
@@ -226,7 +228,7 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
           {/* Action Buttons */}
           <div className="flex items-center flex-wrap gap-1.5 sm:gap-2">
             
-            {/* Quick Filter: All / Bus / Lorry */}
+            {/* Quick Filter: All / Bus / Lorry / Logistics / Govt */}
             <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs">
               <button
                 onClick={() => onServiceFilterChange('all')}
@@ -247,6 +249,20 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
               >
                 <Truck className="w-3 h-3" />
                 <span>Lorries</span>
+              </button>
+              <button
+                onClick={() => onServiceFilterChange('logistics')}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all ${serviceFilter === 'logistics' ? 'bg-emerald-600 text-white shadow-2xs font-semibold' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                <Package className="w-3 h-3" />
+                <span>3PL & Logistics</span>
+              </button>
+              <button
+                onClick={() => onServiceFilterChange('govt')}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all ${serviceFilter === 'govt' ? 'bg-purple-600 text-white shadow-2xs font-semibold' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                <Landmark className="w-3 h-3" />
+                <span>Govt & STU</span>
               </button>
             </div>
 

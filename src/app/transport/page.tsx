@@ -249,6 +249,14 @@ export default function TransportDashboardPage() {
             } else if (qf === 'lorry_services') {
               setServiceFilter('lorry');
               setQuickFilter(null);
+            } else if (qf === 'logistics_services') {
+              setServiceFilter('logistics');
+              setQuickFilter(null);
+            } else if (qf === 'govt_services') {
+              setServiceFilter('govt');
+              setQuickFilter(null);
+            } else if (qf === 'has_branches') {
+              setCurrentView('branches');
             } else {
               setQuickFilter(prev => (prev === qf ? null : qf));
             }
