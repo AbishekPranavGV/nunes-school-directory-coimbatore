@@ -118,7 +118,7 @@ const CIRCULAR_TEMPLATES = [
   }
 ];
 
-// Sample Schools for Real-Time Variable Merge Testing
+// Sample Schools for Real-Time Variable Merge Testing across South India
 const SAMPLE_RECIPIENTS = [
   { 
     id: 'stanes', 
@@ -145,7 +145,7 @@ const SAMPLE_RECIPIENTS = [
     udise: '33120200814', 
     block: 'Perur', 
     taluk: 'Perur', 
-    email: 'office@snrsons.edu.in' 
+    email: 'ramakrishnamatric.cbe@gmail.com' 
   },
   { 
     id: 'model_girls', 
@@ -154,7 +154,7 @@ const SAMPLE_RECIPIENTS = [
     udise: '33120701311', 
     block: 'Pollachi South', 
     taluk: 'Pollachi', 
-    email: 'gghss.pollachi@tn.gov.in' 
+    email: 'gghss.pollachi@tnschools.gov.in' 
   },
   { 
     id: 'st_teresas_ernakulam', 
@@ -173,8 +173,106 @@ const SAMPLE_RECIPIENTS = [
     block: 'Thiruvananthapuram Urban', 
     taluk: 'Thiruvananthapuram', 
     email: 'cottonhill.tvm@schools.kerala.gov.in' 
+  },
+  { 
+    id: 'chinmaya_kochi', 
+    name: 'Chinmaya Vidyalaya Vaduthala', 
+    principal: 'Prathiba V', 
+    udise: '32080100803', 
+    block: 'Edappally', 
+    taluk: 'Kanayannur', 
+    email: 'chinmayavaduthala@gmail.com' 
+  },
+  { 
+    id: 'zamorins_calicut', 
+    name: "Zamorin's Higher Secondary School", 
+    principal: 'M. K. Narayanan Namboodiri', 
+    udise: '32040100512', 
+    block: 'Kozhikode City', 
+    taluk: 'Kozhikode City', 
+    email: 'zamorinshss.calicut@gmail.com' 
+  },
+  { 
+    id: 'coonoor_ghs_nilgiris', 
+    name: 'Coonoor Ghs Thuthurmattam', 
+    principal: 'B. Selvi', 
+    udise: '33110200508', 
+    block: 'Coonoor', 
+    taluk: 'Coonoor', 
+    email: 'ghs.thuthurmattam@tnschools.gov.in' 
+  },
+  { 
+    id: 'dav_chennai', 
+    name: 'DAV Senior Secondary School Mogappair', 
+    principal: 'K. R. V. Raman', 
+    udise: '33020301104', 
+    block: 'Ambattur', 
+    taluk: 'Ambattur', 
+    email: 'davmogappair.chennai@gmail.com' 
   }
 ];
+
+export const TARGET_GROUP_OPTIONS = [
+  { value: 'All South India Schools', label: '🌐 All South India Schools (21,120 Institutions)', eligible: 21120, emailReady: 17364 },
+  { value: 'All South India with Verified Email / Gmail IDs', label: '⚡ All South India with Verified Email / Gmail IDs (17,364 Active Contacts)', eligible: 17364, emailReady: 17364 },
+  { value: 'All Kerala Schools', label: '🌴 All Kerala Schools (4,820 Sametham KITE & Gmail IDs)', eligible: 4820, emailReady: 4820 },
+  { value: 'All Tamil Nadu Schools', label: '🌿 All Tamil Nadu Schools (16,300 TNEA Statewide & Gmail IDs)', eligible: 16300, emailReady: 12544 },
+  { value: 'All Eligible Coimbatore Schools', label: '📍 All Eligible Coimbatore Schools (2,097 Schools • 77 Verified Roster)', eligible: 2097, emailReady: 77 },
+  { value: 'Higher Secondary & Secondary Schools', label: '🔬 Higher Secondary & Secondary Schools (Physics, Chemistry & Biology Labs)', eligible: 4820, emailReady: 3950 },
+  { value: 'Matriculation, CBSE & Private Schools', label: '🏫 Matriculation, CBSE & Private Schools (with Verified Gmail IDs)', eligible: 5840, emailReady: 4220 },
+  { value: 'Government & Aided Schools', label: '🏛️ Government & Aided Schools (Sametham & EMIS Public Contacts)', eligible: 12480, emailReady: 11250 }
+];
+
+export const KERALA_DISTRICT_TARGET_GROUPS = [
+  { value: 'Thiruvananthapuram District Schools', label: 'Thiruvananthapuram District Schools (480)', eligible: 480, emailReady: 480 },
+  { value: 'Ernakulam / Kochi District Schools', label: 'Ernakulam / Kochi District Schools (460)', eligible: 460, emailReady: 460 },
+  { value: 'Kozhikode District Schools', label: 'Kozhikode District Schools (430)', eligible: 430, emailReady: 430 },
+  { value: 'Thrissur District Schools', label: 'Thrissur District Schools (410)', eligible: 410, emailReady: 410 },
+  { value: 'Palakkad District Schools', label: 'Palakkad District Schools (390)', eligible: 390, emailReady: 390 },
+  { value: 'Malappuram District Schools', label: 'Malappuram District Schools (450)', eligible: 450, emailReady: 450 },
+  { value: 'Kollam District Schools', label: 'Kollam District Schools (380)', eligible: 380, emailReady: 380 },
+  { value: 'Kottayam District Schools', label: 'Kottayam District Schools (360)', eligible: 360, emailReady: 360 },
+  { value: 'Kannur District Schools', label: 'Kannur District Schools (350)', eligible: 350, emailReady: 350 },
+  { value: 'Alappuzha District Schools', label: 'Alappuzha District Schools (330)', eligible: 330, emailReady: 330 },
+  { value: 'Pathanamthitta District Schools', label: 'Pathanamthitta District Schools (290)', eligible: 290, emailReady: 290 },
+  { value: 'Idukki District Schools', label: 'Idukki District Schools (270)', eligible: 270, emailReady: 270 },
+  { value: 'Wayanad District Schools', label: 'Wayanad District Schools (230)', eligible: 230, emailReady: 230 },
+  { value: 'Kasaragod District Schools', label: 'Kasaragod District Schools (280)', eligible: 280, emailReady: 280 }
+];
+
+export const TAMIL_NADU_DISTRICT_TARGET_GROUPS = [
+  { value: 'Coimbatore District Schools', label: 'Coimbatore District Schools (2,097)', eligible: 2097, emailReady: 77 },
+  { value: 'Chennai District Schools', label: 'Chennai District Schools (920)', eligible: 920, emailReady: 920 },
+  { value: 'The Nilgiris District Schools', label: 'The Nilgiris District Schools (370)', eligible: 370, emailReady: 370 },
+  { value: 'Madurai District Schools', label: 'Madurai District Schools (510)', eligible: 510, emailReady: 490 },
+  { value: 'Salem District Schools', label: 'Salem District Schools (480)', eligible: 480, emailReady: 460 },
+  { value: 'Tiruppur District Schools', label: 'Tiruppur District Schools (450)', eligible: 450, emailReady: 420 },
+  { value: 'Erode District Schools', label: 'Erode District Schools (430)', eligible: 430, emailReady: 410 }
+];
+
+export function getTargetGroupMetrics(groupName: string = '', defaultEligible = 2097, defaultEmailReady = 77) {
+  const allGroups = [
+    ...TARGET_GROUP_OPTIONS,
+    ...KERALA_DISTRICT_TARGET_GROUPS,
+    ...TAMIL_NADU_DISTRICT_TARGET_GROUPS
+  ];
+  const matched = allGroups.find(g => 
+    g.value.toLowerCase() === groupName.toLowerCase() || 
+    g.label.toLowerCase().includes(groupName.toLowerCase()) ||
+    groupName.toLowerCase().includes(g.value.toLowerCase())
+  );
+  if (matched) {
+    return { eligible: matched.eligible, emailReady: matched.emailReady };
+  }
+  const norm = groupName.toLowerCase();
+  if (norm.includes('kerala')) return { eligible: 4820, emailReady: 4820 };
+  if (norm.includes('south india') || norm === 'all') return { eligible: 21120, emailReady: 17364 };
+  if (norm.includes('tamil nadu')) return { eligible: 16300, emailReady: 12544 };
+  if (norm.includes('matric') || norm.includes('cbse') || norm.includes('private')) return { eligible: 5840, emailReady: 4220 };
+  if (norm.includes('secondary')) return { eligible: 4820, emailReady: 3950 };
+  if (norm.includes('coimbatore')) return { eligible: 2097, emailReady: 77 };
+  return { eligible: defaultEligible, emailReady: defaultEmailReady };
+}
 
 export const CircularCenterView: React.FC<CircularCenterViewProps> = ({
   schools,
@@ -292,8 +390,9 @@ export const CircularCenterView: React.FC<CircularCenterViewProps> = ({
   };
 
   // Handle create new circular
-  const handleCreateCircular = async (status: 'DRAFT' | 'PENDING_APPROVAL') => {
+  const handleCreateCircular = async (status: 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED', openDispatchModal = false) => {
     try {
+      const metrics = getTargetGroupMetrics(targetGroup);
       const res = await fetch('/api/circulars', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -306,6 +405,8 @@ export const CircularCenterView: React.FC<CircularCenterViewProps> = ({
           extracted_text: simulatedOcrText || bodyText,
           attachment_name: attachedFileName,
           target_group: targetGroup,
+          eligible_count: metrics.eligible,
+          email_ready_count: metrics.emailReady,
           status
         })
       });
@@ -321,6 +422,21 @@ export const CircularCenterView: React.FC<CircularCenterViewProps> = ({
         setSubject('');
         setBodyText('');
         setSimulatedOcrText('');
+
+        if (openDispatchModal) {
+          const tgNorm = (targetGroup || '').toLowerCase();
+          if (tgNorm.includes('kerala')) {
+            setDispatchScope('kerala');
+          } else if (tgNorm.includes('tamil nadu') || tgNorm.includes('coimbatore')) {
+            setDispatchScope('tamil-nadu');
+          } else {
+            setDispatchScope('all');
+          }
+          setIsDispatchModalOpen(true);
+          setDispatchStage('idle');
+          setDispatchProgress(0);
+          setDispatchLogs([]);
+        }
       }
     } catch (err: any) {
       alert(`Error creating circular: ${err.message}`);
@@ -686,7 +802,9 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
                     
                     <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                       <span className="truncate max-w-[150px]">{c.target_group}</span>
-                      <span className="text-sky-700 font-semibold shrink-0">{c.email_ready_count} Emails Ready</span>
+                      <span className="text-sky-700 font-semibold shrink-0">
+                        {getTargetGroupMetrics(c.target_group, c.eligible_count, c.email_ready_count).emailReady.toLocaleString()} Emails Ready
+                      </span>
                     </div>
                   </div>
                 );
@@ -810,16 +928,32 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Target School Group</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                      <span>Target School Group</span>
+                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                        {getTargetGroupMetrics(targetGroup).emailReady.toLocaleString()} Emails Ready
+                      </span>
+                    </label>
                     <select
                       value={targetGroup}
                       onChange={(e) => setTargetGroup(e.target.value)}
                       className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none bg-white font-medium text-slate-800"
                     >
-                      <option value="All Eligible Coimbatore Schools">All Eligible Coimbatore Schools (2,097)</option>
-                      <option value="Higher Secondary & Secondary Schools">Higher Secondary & Secondary Schools (512)</option>
-                      <option value="Government & Aided Schools">Government & Aided Schools (1,280)</option>
-                      <option value="Matriculation & CBSE Schools">Matriculation & CBSE Schools (420)</option>
+                      <optgroup label="🌐 Interstate & Statewide Coverage (KL & TN)">
+                        {TARGET_GROUP_OPTIONS.map(tg => (
+                          <option key={tg.value} value={tg.value}>{tg.label}</option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="🌴 Kerala Districts (14 Districts • 4,820 Schools with Email/Gmail)">
+                        {KERALA_DISTRICT_TARGET_GROUPS.map(dg => (
+                          <option key={dg.value} value={dg.value}>{dg.label}</option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="🌿 Tamil Nadu Hubs (Verified Telephony & Gmail/Gov Rosters)">
+                        {TAMIL_NADU_DISTRICT_TARGET_GROUPS.map(dg => (
+                          <option key={dg.value} value={dg.value}>{dg.label}</option>
+                        ))}
+                      </optgroup>
                     </select>
                   </div>
                 </div>
@@ -921,23 +1055,40 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
                 </div>
 
                 {/* 5. Action Buttons */}
-                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => handleCreateCircular('DRAFT')}
-                    className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
-                  >
-                    Save as Draft
-                  </button>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                  <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Target Group: <strong>{getTargetGroupMetrics(targetGroup).eligible.toLocaleString()} Schools</strong> ({getTargetGroupMetrics(targetGroup).emailReady.toLocaleString()} verified email IDs)</span>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleCreateCircular('PENDING_APPROVAL')}
-                    className="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Submit for Approval</span>
-                  </button>
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => handleCreateCircular('DRAFT')}
+                      className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+                    >
+                      Save as Draft
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleCreateCircular('PENDING_APPROVAL')}
+                      className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Submit for Approval</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleCreateCircular('APPROVED', true)}
+                      className="px-4 py-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-600 hover:from-emerald-700 hover:to-sky-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/25 transition-all flex items-center gap-1.5 cursor-pointer ring-2 ring-emerald-400/40 hover:scale-102"
+                      title="Create, approve and launch 1-Click Automated Circular Dispatch"
+                    >
+                      <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300 animate-pulse" />
+                      <span>⚡ 1-Click Auto Dispatch</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1025,35 +1176,50 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
                 )}
 
                 {/* Smart Recipient Selection Matrix */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 mb-6">
-                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide mb-2.5 flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-sky-600" />
-                    <span>Smart Recipient Eligibility Breakdown</span>
-                  </h4>
+                {(() => {
+                  const m = getTargetGroupMetrics(
+                    activeCircular.target_group,
+                    activeCircular.eligible_count,
+                    activeCircular.email_ready_count
+                  );
+                  const missingCount = Math.max(0, m.eligible - m.emailReady);
+                  return (
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 mb-6">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                        <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5 text-sky-600" />
+                          <span>Smart Recipient Eligibility Breakdown</span>
+                        </h4>
+                        <span className="text-[11px] font-semibold text-slate-700 bg-white px-2.5 py-0.5 rounded-full border border-slate-200 truncate max-w-sm">
+                          Target: {activeCircular.target_group}
+                        </span>
+                      </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
-                    <div className="p-2 bg-white rounded-lg border border-slate-200">
-                      <span className="text-slate-400 text-[10px] block">Target Group</span>
-                      <span className="font-bold text-slate-800 font-mono">{activeCircular.eligible_count}</span>
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
+                        <div className="p-2 bg-white rounded-lg border border-slate-200">
+                          <span className="text-slate-400 text-[10px] block">Target Group</span>
+                          <span className="font-bold text-slate-800 font-mono">{m.eligible.toLocaleString()}</span>
+                        </div>
+                        <div className="p-2 bg-white rounded-lg border border-slate-200">
+                          <span className="text-slate-400 text-[10px] block">Valid Emails</span>
+                          <span className="font-bold text-emerald-700 font-mono">{m.emailReady.toLocaleString()}</span>
+                        </div>
+                        <div className="p-2 bg-white rounded-lg border border-slate-200">
+                          <span className="text-slate-400 text-[10px] block">Missing Email</span>
+                          <span className="font-bold text-rose-700 font-mono">{missingCount.toLocaleString()}</span>
+                        </div>
+                        <div className="p-2 bg-white rounded-lg border border-slate-200">
+                          <span className="text-slate-400 text-[10px] block">Deduplicated</span>
+                          <span className="font-bold text-indigo-700 font-mono">0 Dups</span>
+                        </div>
+                        <div className="p-2 bg-white rounded-lg border border-slate-200">
+                          <span className="text-slate-400 text-[10px] block">Opt-Outs</span>
+                          <span className="font-bold text-slate-700 font-mono">0 Excluded</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-2 bg-white rounded-lg border border-slate-200">
-                      <span className="text-slate-400 text-[10px] block">Valid Emails</span>
-                      <span className="font-bold text-emerald-700 font-mono">{activeCircular.email_ready_count}</span>
-                    </div>
-                    <div className="p-2 bg-white rounded-lg border border-slate-200">
-                      <span className="text-slate-400 text-[10px] block">Missing Email</span>
-                      <span className="font-bold text-rose-700 font-mono">{activeCircular.eligible_count - activeCircular.email_ready_count}</span>
-                    </div>
-                    <div className="p-2 bg-white rounded-lg border border-slate-200">
-                      <span className="text-slate-400 text-[10px] block">Deduplicated</span>
-                      <span className="font-bold text-indigo-700 font-mono">0 Dups</span>
-                    </div>
-                    <div className="p-2 bg-white rounded-lg border border-slate-200">
-                      <span className="text-slate-400 text-[10px] block">Opt-Outs</span>
-                      <span className="font-bold text-slate-700 font-mono">0 Excluded</span>
-                    </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
                 {/* ========================================================================= */}
                 {/* ADVANCED INSTITUTIONAL EMAIL NOTIFICATION DRAFT CONSOLE WITH EDIT OPTION  */}

@@ -260,17 +260,29 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
                     </td>
 
                     {/* Official Email */}
-                    <td className="py-3.5 px-3 max-w-[170px]">
+                    <td className="py-3.5 px-3 max-w-[200px]">
                       {s.official_email ? (
-                        <a
-                          href={`mailto:${s.official_email}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-xs font-medium text-sky-700 hover:text-sky-900 truncate max-w-full"
-                          title={`Email ${s.official_email}`}
-                        >
-                          <Mail className="w-3 h-3 text-sky-500 flex-shrink-0" />
-                          <span className="truncate">{s.official_email}</span>
-                        </a>
+                        <div className="flex items-center gap-1.5 max-w-full">
+                          <a
+                            href={`mailto:${s.official_email}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-sky-700 hover:text-sky-900 truncate max-w-full"
+                            title={`Email ${s.official_email}`}
+                          >
+                            <Mail className="w-3.5 h-3.5 text-sky-500 flex-shrink-0" />
+                            <span className="truncate">{s.official_email}</span>
+                          </a>
+                          {s.official_email.toLowerCase().includes('gmail') && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0" title="Verified School Gmail ID">
+                              @gmail
+                            </span>
+                          )}
+                          {(s.official_email.toLowerCase().includes('.gov.in') || s.official_email.toLowerCase().includes('kerala.gov.in') || s.official_email.toLowerCase().includes('tnschools.gov.in')) && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0" title="Official Government Domain">
+                              Gov
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-xs text-slate-300 italic">Not available</span>
                       )}

@@ -4,6 +4,7 @@ import React from 'react';
 import { Search, X, Filter, RotateCcw, MapPin, Building, Phone, Mail, MessageSquare, Globe2 } from 'lucide-react';
 import { TAMIL_NADU_DISTRICTS } from '@/lib/data/tamilNaduDistricts';
 import { KERALA_DISTRICTS } from '@/lib/data/keralaDistricts';
+import { getSubDistrictsForStateAndDistrict } from '@/lib/data/subDistrictsData';
 
 interface FilterBarProps {
   searchQuery: string;
@@ -58,26 +59,19 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onReset,
   totalFiltered
 }) => {
-  const blocksList = [
-    'Anaimalai', 'Annur', 'Coimbatore City', 'Karamadai', 'Kinathukadavu',
-    'Madukkarai', 'Periyanaickanpalayam', 'Perur', 'Pollachi North',
-    'Pollachi South', 'S.S.Kulam', 'Sultanpet', 'Sulur', 'Thondamuthur', 'Valparai'
-  ];
-
-  const taluksList = [
-    'Coimbatore South', 'Coimbatore North', 'Pollachi', 'Sulur',
-    'Annur', 'Mettupalayam', 'Madukkarai', 'Perur', 'Kinathukadavu',
-    'Valparai', 'Anaimalai'
-  ];
+  const { taluks, blocks, talukPlaceholder, blockPlaceholder } = getSubDistrictsForStateAndDistrict(
+    selectedState,
+    selectedDistrict
+  );
 
   const quickFilters = [
     { id: null, label: 'All Schools' },
-    { id: 'no_contact', label: 'Missing ANY Contact (Priority)' },
+    { id: 'has_email', label: 'Official Email / Gmail Available' },
     { id: 'has_phone', label: 'Official Phone Available' },
-    { id: 'has_principal_office', label: 'Principal Office Available' },
     { id: 'has_whatsapp', label: 'WhatsApp Business Verified' },
-    { id: 'has_email', label: 'Official Email Available' },
+    { id: 'has_principal_office', label: 'Principal Office Available' },
     { id: 'complete', label: 'Contact Complete' },
+    { id: 'no_contact', label: 'Missing Contact Queue' },
     { id: 'needs_verification', label: 'Awaiting Research / Verification' },
   ];
 
@@ -238,9 +232,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             onChange={(e) => setTaluk(e.target.value)}
             className="w-full text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:bg-white"
           >
-            <option value="">All 11 Taluks</option>
-            {taluksList.map(t => (
-              <option key={t} value={t}>{t}</option>
+            <option value="">{talukPlaceholder}</option>
+            {taluks.map(t => (
+              <option key={t.name} value={t.name}>{t.name}</option>
             ))}
           </select>
         </div>
@@ -253,9 +247,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             onChange={(e) => setBlock(e.target.value)}
             className="w-full text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:bg-white"
           >
-            <option value="">All 15 Blocks</option>
-            {blocksList.map(b => (
-              <option key={b} value={b}>{b}</option>
+            <option value="">{blockPlaceholder}</option>
+            {blocks.map(b => (
+              <option key={b.name} value={b.name}>{b.name}</option>
             ))}
           </select>
         </div>

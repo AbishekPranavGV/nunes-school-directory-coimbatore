@@ -82,6 +82,46 @@ Nunes Instruments`,
     target_group: 'All 2,097 Coimbatore Schools',
     eligible_count: 2097,
     email_ready_count: 77
+  },
+  {
+    id: 'circ_2026_003',
+    title: 'Sametham KITE 2026 Higher Secondary Science Lab Instrumentation Audit',
+    reference_number: 'NUNES/KRL/EDU/2026/014',
+    circular_date: '2026-04-10',
+    subject: 'Official Verification of Physics, Chemistry & Biology Laboratory Instrumentation for Higher Secondary Schools in Kerala',
+    body_text: `To The Principals / Headmasters of All Higher Secondary & Vocational Higher Secondary Schools,
+State of Kerala.
+
+Subject: State-Wide Science Laboratory Instrumentation & Precision Sensor Survey (Academic Year 2026-27).
+
+In coordination with Sametham KITE and General Education Department Kerala directives, Nunes Instruments is conducting an equipment audit of digital spectrometers, analytical balances, cathode ray oscilloscopes, and optical benches across all 14 revenue districts.
+
+Kindly review your institutional science apparatus status and submit the laboratory inventory verification proforma.
+
+For technical queries, contact the South India Educational Liaison Desk at Nunes Instruments.`,
+    extracted_text: 'Sametham KITE 2026 Kerala Science Lab Census. 14 Districts covered. Mandatory precision apparatus verification.',
+    attachment_name: 'Kerala_Sametham_Lab_Audit_2026.pdf',
+    attachment_type: 'application/pdf',
+    attachment_size_kb: 512,
+    generated_email_subject: 'Official Circular: Sametham KITE Science Lab Apparatus Verification - Kerala State',
+    generated_email_body: `Respected Principal / Headmaster,
+
+Greetings from Nunes Instruments South India Educational Liaison Desk.
+
+Under Sametham KITE educational guidelines, we are sharing the official circular regarding the Annual Science Laboratory Apparatus & Precision Metrology Audit for Higher Secondary schools across Kerala.
+
+Please find attached circular Ref: NUNES/KRL/EDU/2026/014 and the laboratory verification proforma.
+
+With regards,
+South India Educational Liaison Team
+Nunes Instruments`,
+    status: 'APPROVED',
+    created_at: '2026-04-10T08:00:00.000Z',
+    approved_by: 'Director of Educational Metrology',
+    approved_at: '2026-04-10T09:15:00.000Z',
+    target_group: '🌴 All Kerala Schools (4,820 Sametham KITE & Gmail IDs)',
+    eligible_count: 4820,
+    email_ready_count: 4820
   }
 ];
 
@@ -148,11 +188,33 @@ export async function POST(req: NextRequest) {
       const circ = circularsStore.find(c => c.id === circular_id) || circularsStore[0];
       if (!circ) return NextResponse.json({ error: 'Circular not found' }, { status: 404 });
 
-      const targetState = body.target_state || 'all';
-      const targetDistrict = body.target_district || undefined;
+      let targetState = body.target_state || 'all';
+      let targetDistrict = body.target_district || undefined;
+      const targetGroup = (body.target_group || circ.target_group || '').toLowerCase();
+
+      if (!body.target_state && targetGroup) {
+        if (targetGroup.includes('kerala')) {
+          targetState = 'kerala';
+        } else if (targetGroup.includes('coimbatore')) {
+          targetState = 'tamil-nadu';
+          targetDistrict = 'coimbatore';
+        } else if (targetGroup.includes('tamil nadu')) {
+          targetState = 'tamil-nadu';
+        } else if (targetGroup.includes('south india')) {
+          targetState = 'all';
+        }
+      }
+
       const schools = await getMasterSchoolsFromMemoryOrDb(targetDistrict, targetState);
       
-      const eligibleRecipients = schools.filter((s: any) => Boolean(s.official_email || s.contact_email));
+      let eligibleRecipients = schools.filter((s: any) => Boolean(s.official_email || s.contact_email));
+      if (targetGroup.includes('matric') || targetGroup.includes('cbse') || targetGroup.includes('private')) {
+        const filtered = eligibleRecipients.filter((s: any) => 
+          (s.management && /matric|cbse|private|unaided/i.test(s.management)) ||
+          s.school_type === 'Private'
+        );
+        if (filtered.length > 0) eligibleRecipients = filtered;
+      }
       const recipientCount = eligibleRecipients.length;
 
       // Update circular metrics
@@ -207,12 +269,40 @@ export async function POST(req: NextRequest) {
     const refNum = body.reference_number || `NUNES/CBE/CIR/${Date.now().toString().slice(-3)}`;
     const subject = body.subject || title;
     const bodyText = body.body_text || body.extracted_text || 'Official circular message body.';
+    const targetGroup = body.target_group || 'All Eligible Coimbatore Schools';
+    const tgNorm = targetGroup.toLowerCase();
+
+    let eligibleCount = body.eligible_count;
+    let emailReadyCount = body.email_ready_count;
+
+    if (!eligibleCount || !emailReadyCount) {
+      if (tgNorm.includes('kerala')) {
+        eligibleCount = 4820;
+        emailReadyCount = 4820;
+      } else if (tgNorm.includes('south india') || tgNorm === 'all') {
+        eligibleCount = 21120;
+        emailReadyCount = 17364;
+      } else if (tgNorm.includes('tamil nadu')) {
+        eligibleCount = 16300;
+        emailReadyCount = 12544;
+      } else if (tgNorm.includes('matric') || tgNorm.includes('cbse') || tgNorm.includes('private')) {
+        eligibleCount = 5840;
+        emailReadyCount = 4220;
+      } else if (tgNorm.includes('secondary')) {
+        eligibleCount = 4820;
+        emailReadyCount = 3950;
+      } else {
+        eligibleCount = 2097;
+        emailReadyCount = 77;
+      }
+    }
 
     // Generate professional email draft automatically
-    const genSubject = `Official Circular: ${title} - Coimbatore District`;
-    const genBody = `Respected Principal / Head of Institution,
+    const regionName = tgNorm.includes('kerala') ? 'Kerala State' : tgNorm.includes('south india') ? 'South India' : 'Tamil Nadu & Kerala';
+    const genSubject = body.generated_email_subject || `Official Circular: ${title} - ${regionName}`;
+    const genBody = body.generated_email_body || `Respected Principal / Head of Institution,
 
-Greetings from Nunes Instruments Educational Services, Coimbatore.
+Greetings from Nunes Instruments South India Educational Services.
 
 We are sharing the following official communication (Ref: ${refNum}):
 
@@ -223,8 +313,8 @@ ${bodyText}
 Please review the attached circular document and confirm receipt at your earliest convenience.
 
 With regards,
-Liaison Office
-Nunes Instruments, Coimbatore District, Tamil Nadu`;
+Educational Liaison Office
+Nunes Instruments`;
 
     const newCirc: CircularItem = {
       id: newId,
@@ -241,9 +331,9 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
       generated_email_body: genBody,
       status: body.status || 'DRAFT',
       created_at: new Date().toISOString(),
-      target_group: body.target_group || 'All Eligible Coimbatore Schools',
-      eligible_count: body.eligible_count || 2097,
-      email_ready_count: body.email_ready_count || 77
+      target_group: targetGroup,
+      eligible_count: eligibleCount,
+      email_ready_count: emailReadyCount
     };
 
     circularsStore.unshift(newCirc);
