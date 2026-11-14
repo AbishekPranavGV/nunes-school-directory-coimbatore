@@ -520,6 +520,13 @@ export default function DashboardPage() {
           <ReportsView
             kpi={kpi}
             schools={schools}
+            selectedState={selectedState}
+            selectedDistrict={selectedDistrict}
+            onSelectDistrict={(d) => {
+              setSelectedDistrict(d);
+              setCurrentView('directory');
+            }}
+            onSelectState={handleSelectState}
             onExport={() => setIsExportOpen(true)}
           />
         ) : currentView === 'settings' ? (
