@@ -194,6 +194,27 @@ Nunes Instruments operates accredited calibration desks at Coimbatore Bypass, Wa
     signatory_title: 'Director of Technical Services & Logistics Standards',
     issuing_authority: 'Nunes Instruments — South India Inter-State Transport Directorate (TN & KL)',
     attachment_name: 'Walayar_Corridor_Retarder_Inspection_Protocol_2026.pdf',
+    attachments: [
+      {
+        id: 'att-seed-1',
+        name: 'Walayar_Corridor_Retarder_Inspection_Protocol_2026.pdf',
+        type: 'pdf',
+        size: '1.6 MB'
+      },
+      {
+        id: 'att-seed-2',
+        name: 'Walayar_Border_FASTag_RFID_Clearance_Notice.docx',
+        type: 'word',
+        size: '890 KB'
+      },
+      {
+        id: 'att-seed-3',
+        name: 'NH544_NH66_Freight_Corridor_Route_Map.png',
+        type: 'image',
+        size: '2.4 MB',
+        dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300"><rect width="100%" height="100%" fill="%230f172a"/><path d="M50 240 Q150 160 300 140 T550 60" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-dasharray="6 6"/><circle cx="50" cy="240" r="8" fill="%2310b981"/><circle cx="300" cy="140" r="8" fill="%23f59e0b"/><circle cx="550" cy="60" r="8" fill="%236366f1"/><text x="65" y="245" fill="%23fff" font-family="sans-serif" font-size="12" font-weight="bold">Kochi ICTT (KL)</text><text x="315" y="145" fill="%23fff" font-family="sans-serif" font-size="12" font-weight="bold">Walayar / Coimbatore</text><text x="450" y="55" fill="%23fff" font-family="sans-serif" font-size="12" font-weight="bold">Chennai Port (TN)</text><text x="50%" y="30" fill="%2338bdf8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Official Highway Corridor Route Map (NH 544 &amp; NH 66)</text></svg>'
+      }
+    ],
     created_at: '2026-11-14T08:00:00Z',
     status: 'Sent',
     recipient_count: 3200
@@ -219,6 +240,27 @@ Nunes Instruments calibration mobile units are stationed at Ernakulam Marine Dri
     signatory_title: 'Chief Maritime & Transshipment Metrology Auditor',
     issuing_authority: 'Nunes Instruments — Kerala Regional Logistics Directorate (Ernakulam Hub)',
     attachment_name: 'ICTT_Vallarpadam_Drayage_Safety_Manual_2026.pdf',
+    attachments: [
+      {
+        id: 'att-kl-seed-1',
+        name: 'ICTT_Vallarpadam_Drayage_Safety_Manual_2026.pdf',
+        type: 'pdf',
+        size: '1.8 MB'
+      },
+      {
+        id: 'att-kl-seed-2',
+        name: 'MVD_Kerala_Vehicle_Fitness_Annexure.docx',
+        type: 'word',
+        size: '720 KB'
+      },
+      {
+        id: 'att-kl-seed-3',
+        name: 'Cochin_Port_ICTT_Maritime_Corridor_Map.png',
+        type: 'image',
+        size: '2.1 MB',
+        dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300"><rect width="100%" height="100%" fill="%23064e3b"/><circle cx="300" cy="150" r="100" fill="none" stroke="%2334d399" stroke-width="3"/><text x="50%" y="45%" fill="%2334d399" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">ICTT Vallarpadam Port Hub</text><text x="50%" y="60%" fill="%23a7f3d0" font-family="sans-serif" font-size="13" text-anchor="middle">Cochin Port Drayage Security Clearances</text></svg>'
+      }
+    ],
     created_at: '2026-11-13T14:30:00Z',
     status: 'Sent',
     recipient_count: 1120
@@ -236,6 +278,27 @@ Nunes Instruments calibration mobile units are stationed at Ernakulam Marine Dri
     signatory_title: 'Chief Technical Director — Transport & Metrology Desk',
     issuing_authority: 'Nunes Instruments Industrial Audit Directorate — Tamil Nadu Operations',
     attachment_name: 'AIS_140_Telematics_Verification_Roster_2026.pdf',
+    attachments: [
+      {
+        id: 'att-rto-1',
+        name: 'AIS_140_Telematics_Verification_Roster_2026.pdf',
+        type: 'pdf',
+        size: '1.4 MB'
+      },
+      {
+        id: 'att-rto-2',
+        name: 'Commercial_Vehicle_Fitness_Roster.docx',
+        type: 'word',
+        size: '860 KB'
+      },
+      {
+        id: 'att-rto-3',
+        name: 'TN_Highway_Telematics_Surveillance_Grid.png',
+        type: 'image',
+        size: '1.9 MB',
+        dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300"><rect width="100%" height="100%" fill="%231e293b"/><line x1="50" y1="150" x2="550" y2="150" stroke="%2338bdf8" stroke-width="4"/><circle cx="150" cy="150" r="10" fill="%23e11d48"/><circle cx="350" cy="150" r="10" fill="%2310b981"/><circle cx="480" cy="150" r="10" fill="%23f59e0b"/><text x="50%" y="80%" fill="%2394a3b8" font-family="sans-serif" font-size="14" text-anchor="middle">AIS-140 GPS Telematics Command Grid (Tamil Nadu)</text></svg>'
+      }
+    ],
     created_at: '2026-11-10T10:00:00Z',
     status: 'Sent',
     recipient_count: 438

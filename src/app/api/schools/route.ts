@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
       if (board && s.board !== board) return false;
       if (category && s.category !== category) return false;
       if (block && s.block !== block) return false;
-      if (taluk && s.taluk !== taluk) return false;
+      if (taluk && s.taluk !== taluk && s.block !== taluk) return false;
       if (urban_rural && s.urban_rural !== urban_rural) return false;
       if (status && s.status !== status) return false;
 

@@ -99,6 +99,16 @@ export interface TransportKPI {
   tamil_nadu_fleets?: number;
 }
 
+export interface TransportAttachment {
+  id: string;
+  name: string;
+  type: 'pdf' | 'word' | 'image' | 'other';
+  size?: string;
+  url?: string;
+  dataUrl?: string; // base64 or blob preview for images
+  uploadedAt?: string;
+}
+
 export interface TransportCircular {
   id: string;
   title: string;
@@ -125,6 +135,7 @@ export interface TransportCircular {
   signatory_title: string;
   issuing_authority: string;
   attachment_name?: string;
+  attachments?: TransportAttachment[];
   created_at: string;
   status: 'Draft' | 'Scheduled' | 'Sent' | 'Archived';
   recipient_count?: number;

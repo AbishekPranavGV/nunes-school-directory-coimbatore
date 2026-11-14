@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
         signatory_title: body.signatory_title || 'Director of Technical Services & Logistics Standards',
         issuing_authority: body.issuing_authority || 'Nunes Instruments — South India Inter-State Transport Directorate',
         attachment_name: body.attachment_name || undefined,
+        attachments: body.attachments || undefined,
         created_at: new Date().toISOString(),
         status: body.send_now ? 'Sent' : 'Draft',
         recipient_count: body.recipient_count || 3200

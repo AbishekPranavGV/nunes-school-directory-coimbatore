@@ -19,8 +19,8 @@ interface FilterBarProps {
   setBoard: (b: string) => void;
   category: string;
   setCategory: (c: string) => void;
-  block: string;
-  setBlock: (bl: string) => void;
+  block?: string;
+  setBlock?: (bl: string) => void;
   taluk: string;
   setTaluk: (t: string) => void;
   urbanRural: string;
@@ -59,7 +59,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onReset,
   totalFiltered
 }) => {
-  const { taluks, blocks, talukPlaceholder, blockPlaceholder } = getSubDistrictsForStateAndDistrict(
+  const { taluks, talukPlaceholder } = getSubDistrictsForStateAndDistrict(
     selectedState,
     selectedDistrict
   );
@@ -154,7 +154,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       </div>
 
       {/* Multi-Dimensional Select Dropdowns */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
         
         {/* State Filter */}
         {setSelectedState && (
@@ -262,51 +262,6 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 <optgroup key={groupName} label={groupName}>
                   {items.map(t => (
                     <option key={t.name} value={t.name}>{t.name}</option>
-                  ))}
-                </optgroup>
-              ));
-            })()}
-          </select>
-        </div>
-
-        {/* Educational Block Filter */}
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-[11px] font-semibold text-slate-500">Educational Block</label>
-            {block && (
-              <button
-                type="button"
-                onClick={() => setBlock('')}
-                className="text-[10px] text-rose-600 hover:text-rose-800 font-semibold"
-                title="Remove Block Filter"
-              >
-                ✕ Clear
-              </button>
-            )}
-          </div>
-          <select
-            value={block}
-            onChange={(e) => setBlock(e.target.value)}
-            className="w-full text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:bg-white"
-          >
-            <option value="">{blockPlaceholder}</option>
-            {(() => {
-              const hasGroups = blocks.some(b => Boolean(b.group));
-              if (!hasGroups) {
-                return blocks.map(b => (
-                  <option key={b.name} value={b.name}>{b.name}</option>
-                ));
-              }
-              const groups: Record<string, typeof blocks> = {};
-              blocks.forEach(b => {
-                const g = b.group || 'Other';
-                if (!groups[g]) groups[g] = [];
-                groups[g].push(b);
-              });
-              return Object.entries(groups).map(([groupName, items]) => (
-                <optgroup key={groupName} label={groupName}>
-                  {items.map(b => (
-                    <option key={b.name} value={b.name}>{b.name}</option>
                   ))}
                 </optgroup>
               ));

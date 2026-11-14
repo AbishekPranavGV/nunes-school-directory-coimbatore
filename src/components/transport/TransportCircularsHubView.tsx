@@ -10,6 +10,9 @@ import {
   RotateCcw, 
   MessageCircle, 
   FileText, 
+  FileCode,
+  Image as ImageIcon,
+  Paperclip,
   ShieldCheck, 
   Plus, 
   Eye, 
@@ -445,6 +448,39 @@ export const TransportCircularsHubView: React.FC<TransportCircularsHubViewProps>
                   <p className="text-xs text-slate-600 mt-2.5 line-clamp-3 leading-relaxed">
                     {cir.body}
                   </p>
+
+                  {/* Multi-Format Enclosures Badge Row */}
+                  {(cir.attachments && cir.attachments.length > 0) ? (
+                    <div className="flex items-center gap-1.5 flex-wrap pt-2 mt-2 border-t border-slate-100/80">
+                      <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                        <Paperclip className="w-2.5 h-2.5" />
+                        <span>Enclosures:</span>
+                      </span>
+                      {cir.attachments.map(att => (
+                        <span key={att.id} className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border flex items-center gap-1 ${
+                          att.type === 'pdf' ? 'bg-red-50 text-red-700 border-red-200' :
+                          att.type === 'word' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        }`}>
+                          {att.type === 'pdf' && <FileText className="w-2.5 h-2.5 text-red-600" />}
+                          {att.type === 'word' && <FileCode className="w-2.5 h-2.5 text-blue-600" />}
+                          {att.type === 'image' && <ImageIcon className="w-2.5 h-2.5 text-emerald-600" />}
+                          <span className="truncate max-w-[130px]">{att.name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  ) : cir.attachment_name ? (
+                    <div className="flex items-center gap-1.5 flex-wrap pt-2 mt-2 border-t border-slate-100/80">
+                      <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                        <Paperclip className="w-2.5 h-2.5" />
+                        <span>Enclosure:</span>
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200 flex items-center gap-1">
+                        <FileText className="w-2.5 h-2.5 text-red-600" />
+                        <span className="truncate max-w-[160px]">{cir.attachment_name}</span>
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
 
                 {/* Footer Actions */}
