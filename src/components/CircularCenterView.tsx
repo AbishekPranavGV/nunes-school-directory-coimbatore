@@ -35,7 +35,8 @@ import {
   Terminal,
   Play,
   Flame,
-  Radio
+  Radio,
+  X
 } from 'lucide-react';
 import { CircularItem, SchoolRecord } from '@/types';
 import { TAMIL_NADU_DISTRICTS } from '@/lib/data/tamilNaduDistricts';

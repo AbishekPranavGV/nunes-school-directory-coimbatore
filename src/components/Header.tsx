@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { UserSession, WorkspaceView } from '@/types';
 import { TAMIL_NADU_DISTRICTS, DistrictMetadata, getDistrictById, getCanonicalDistrictName, matchesDistrict } from '@/lib/data/tamilNaduDistricts';
+import { KERALA_DISTRICTS, getKeralaDistrictById, matchesKeralaDistrict } from '@/lib/data/keralaDistricts';
 
 interface HeaderProps {
   user: UserSession | null;
@@ -38,6 +39,8 @@ interface HeaderProps {
   onViewChange: (view: WorkspaceView) => void;
   selectedDistrict: string;
   onSelectDistrict: (districtId: string) => void;
+  selectedState?: string;
+  onSelectState?: (state: string) => void;
   missingCount: number;
   totalCount: number;
   onOpenWorker: () => void;
@@ -56,6 +59,8 @@ export const Header: React.FC<HeaderProps> = ({
   onViewChange,
   selectedDistrict,
   onSelectDistrict,
+  selectedState = 'all',
+  onSelectState,
   missingCount,
   totalCount,
   onOpenWorker,
@@ -85,16 +90,28 @@ export const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDistrictMenuOpen]);
 
-  const currentDistrictObj = getDistrictById(selectedDistrict);
+  const tnDistrictObj = getDistrictById(selectedDistrict);
+  const klDistrictObj = getKeralaDistrictById(selectedDistrict);
+  const currentDistrictObj = tnDistrictObj || klDistrictObj;
   const isStatewide = selectedDistrict === 'all' || selectedDistrict === 'statewide';
 
-  const filteredDistricts = TAMIL_NADU_DISTRICTS.filter(d => {
+  const filteredTnDistricts = TAMIL_NADU_DISTRICTS.filter(d => {
     if (selectedZone !== 'ALL' && d.zone !== selectedZone) return false;
     if (districtSearch) {
       const q = districtSearch.toLowerCase();
       const canonical = getCanonicalDistrictName(q);
       const matchesDirect = d.name.toLowerCase().includes(q) || d.headquarters.toLowerCase().includes(q) || d.code.toLowerCase().includes(q);
       const matchesCanonical = canonical ? matchesDistrict(d.name, canonical) : false;
+      return matchesDirect || matchesCanonical;
+    }
+    return true;
+  });
+
+  const filteredKlDistricts = KERALA_DISTRICTS.filter(d => {
+    if (districtSearch) {
+      const q = districtSearch.toLowerCase();
+      const matchesDirect = d.name.toLowerCase().includes(q) || d.headquarters.toLowerCase().includes(q) || d.code.toLowerCase().includes(q);
+      const matchesCanonical = matchesKeralaDistrict(d.name, q);
       return matchesDirect || matchesCanonical;
     }
     return true;
@@ -150,33 +167,76 @@ export const Header: React.FC<HeaderProps> = ({
                   Nunes Instruments <span className="text-sky-600 font-semibold">AI School Intelligence</span>
                 </h1>
 
-                {/* Interactive District Selector Dropdown Button */}
+                {/* Interactive District & State Selector Dropdown */}
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIsDistrictMenuOpen(!isDistrictMenuOpen)}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition-all shadow-2xs cursor-pointer group"
-                    title="Switch Tamil Nadu District or View Statewide Directory"
+                    title="Switch State / District across South India (Tamil Nadu & Kerala)"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="max-w-[140px] sm:max-w-none truncate">
-                      {isStatewide ? 'All Tamil Nadu (38 Districts)' : `${currentDistrictObj?.name || 'Coimbatore'} District`}
+                    <span className="max-w-[170px] sm:max-w-none truncate">
+                      {isStatewide
+                        ? selectedState === 'kerala'
+                          ? '🌴 All Kerala (14 Districts)'
+                          : selectedState === 'tamil-nadu'
+                          ? '🌿 All Tamil Nadu (38 Districts)'
+                          : '🌐 All South India (52 Districts)'
+                        : `${currentDistrictObj?.name || 'Coimbatore'} District`}
                     </span>
                     <ChevronDown className={`w-3.5 h-3.5 text-emerald-700 transition-transform ${isDistrictMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Dropdown Menu */}
                   {isDistrictMenuOpen && (
-                    <div className="absolute left-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 p-3 animate-in fade-in-50 zoom-in-95 duration-150">
+                    <div className="absolute left-0 mt-2 w-84 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 p-3 animate-in fade-in-50 zoom-in-95 duration-150">
                       
                       {/* Dropdown Header */}
                       <div className="pb-2.5 mb-2.5 border-b border-slate-100 flex items-center justify-between">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
                           <Globe2 className="w-4 h-4 text-sky-600" />
-                          <span>Tamil Nadu District Selector</span>
+                          <span>South India Multi-State Directory</span>
                         </div>
-                        <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                          38 Districts
+                        <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                          52 Districts (TN + KL)
                         </span>
+                      </div>
+
+                      {/* State Filter Buttons */}
+                      <div className="grid grid-cols-3 gap-1 mb-2">
+                        <button
+                          type="button"
+                          onClick={() => onSelectState?.('all')}
+                          className={`py-1 text-[11px] font-semibold rounded-lg text-center transition-all ${
+                            selectedState === 'all'
+                              ? 'bg-indigo-600 text-white shadow-2xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          All (52)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onSelectState?.('tamil-nadu')}
+                          className={`py-1 text-[11px] font-semibold rounded-lg text-center transition-all ${
+                            selectedState === 'tamil-nadu'
+                              ? 'bg-sky-600 text-white shadow-2xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          🌿 TN (38)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onSelectState?.('kerala')}
+                          className={`py-1 text-[11px] font-semibold rounded-lg text-center transition-all ${
+                            selectedState === 'kerala'
+                              ? 'bg-emerald-600 text-white shadow-2xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          🌴 Kerala (14)
+                        </button>
                       </div>
 
                       {/* Search Bar */}
@@ -186,101 +246,174 @@ export const Header: React.FC<HeaderProps> = ({
                           type="text"
                           value={districtSearch}
                           onChange={(e) => setDistrictSearch(e.target.value)}
-                          placeholder="Search 38 districts..."
+                          placeholder="Search 52 districts across TN & Kerala..."
                           className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                         />
                       </div>
 
-                      {/* Zone Filter Chips */}
-                      <div className="flex items-center gap-1 mb-2 overflow-x-auto pb-1 scrollbar-none text-[11px]">
-                        {['ALL', 'Western', 'Northern', 'Central', 'Southern'].map((zone) => (
-                          <button
-                            key={zone}
-                            onClick={() => setSelectedZone(zone)}
-                            className={`px-2 py-0.5 rounded-lg font-medium whitespace-nowrap transition-all ${
-                              selectedZone === zone
-                                ? 'bg-sky-600 text-white font-semibold'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
-                          >
-                            {zone}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Option 1: Statewide All Tamil Nadu */}
-                      <div className="mb-2">
+                      {/* Option 1: Statewide All Options */}
+                      <div className="mb-2 space-y-1">
                         <button
                           onClick={() => {
+                            onSelectState?.('all');
                             onSelectDistrict('all');
                             setIsDistrictMenuOpen(false);
                           }}
                           className={`w-full p-2 rounded-xl text-left flex items-center justify-between text-xs transition-all ${
-                            isStatewide
-                              ? 'bg-sky-50 border border-sky-300 text-sky-900 font-bold'
-                              : 'bg-gradient-to-r from-sky-50/50 to-indigo-50/50 hover:bg-sky-100/70 border border-sky-100 text-slate-800'
+                            isStatewide && selectedState === 'all'
+                              ? 'bg-indigo-50 border border-indigo-300 text-indigo-900 font-bold'
+                              : 'hover:bg-slate-50 border border-slate-100 text-slate-800'
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            <Globe2 className="w-4 h-4 text-sky-600 shrink-0" />
+                            <Globe2 className="w-4 h-4 text-indigo-600 shrink-0" />
                             <div>
-                              <p className="font-bold text-slate-900 text-xs">All Tamil Nadu (38 Districts)</p>
-                              <p className="text-[10px] text-slate-500">Statewide Master Census • 16,300 Schools</p>
+                              <p className="font-bold text-slate-900 text-xs">All South India (52 Districts)</p>
+                              <p className="text-[10px] text-slate-500">21,120 Schools • Tamil Nadu & Kerala</p>
                             </div>
                           </div>
-                          {isStatewide && <Check className="w-4 h-4 text-sky-600 shrink-0" />}
+                          {isStatewide && selectedState === 'all' && <Check className="w-4 h-4 text-indigo-600 shrink-0" />}
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            onSelectState?.('kerala');
+                            onSelectDistrict('all');
+                            setIsDistrictMenuOpen(false);
+                          }}
+                          className={`w-full p-1.5 px-2 rounded-xl text-left flex items-center justify-between text-xs transition-all ${
+                            isStatewide && selectedState === 'kerala'
+                              ? 'bg-emerald-50 border border-emerald-300 text-emerald-900 font-bold'
+                              : 'hover:bg-emerald-50/50 border border-transparent text-slate-800'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-emerald-700 font-bold text-xs">🌴 All Kerala (14 Districts)</span>
+                            <span className="text-[10px] text-slate-400">• 4,820 Schools</span>
+                          </div>
+                          {isStatewide && selectedState === 'kerala' && <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            onSelectState?.('tamil-nadu');
+                            onSelectDistrict('all');
+                            setIsDistrictMenuOpen(false);
+                          }}
+                          className={`w-full p-1.5 px-2 rounded-xl text-left flex items-center justify-between text-xs transition-all ${
+                            isStatewide && selectedState === 'tamil-nadu'
+                              ? 'bg-sky-50 border border-sky-300 text-sky-900 font-bold'
+                              : 'hover:bg-sky-50/50 border border-transparent text-slate-800'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sky-700 font-bold text-xs">🌿 All Tamil Nadu (38 Districts)</span>
+                            <span className="text-[10px] text-slate-400">• 16,300 Schools</span>
+                          </div>
+                          {isStatewide && selectedState === 'tamil-nadu' && <Check className="w-3.5 h-3.5 text-sky-600 shrink-0" />}
                         </button>
                       </div>
 
-                      {/* District List */}
-                      <div className="max-h-60 overflow-y-auto space-y-1 pr-1 text-xs">
-                        {filteredDistricts.map((d) => {
-                          const isSelected = selectedDistrict.toLowerCase() === d.id.toLowerCase();
+                      {/* District List with State Grouping */}
+                      <div className="max-h-60 overflow-y-auto space-y-2 pr-1 text-xs">
+                        
+                        {/* Kerala Section */}
+                        {(selectedState === 'all' || selectedState === 'kerala') && filteredKlDistricts.length > 0 && (
+                          <div>
+                            <div className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider py-1 px-1 bg-emerald-50/80 rounded-md mb-1 flex items-center justify-between">
+                              <span>🌴 Kerala Districts (14)</span>
+                              <span className="font-mono">STD +91 4xx</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {filteredKlDistricts.map((d) => {
+                                const isSelected = selectedDistrict.toLowerCase() === d.id.toLowerCase();
+                                return (
+                                  <button
+                                    key={`kl_${d.id}`}
+                                    onClick={() => {
+                                      onSelectState?.('kerala');
+                                      onSelectDistrict(d.id);
+                                      setIsDistrictMenuOpen(false);
+                                    }}
+                                    className={`w-full p-1.5 px-2 rounded-lg text-left flex items-center justify-between transition-all ${
+                                      isSelected
+                                        ? 'bg-emerald-100/70 border border-emerald-300 text-emerald-950 font-bold'
+                                        : 'hover:bg-slate-50 text-slate-700'
+                                    }`}
+                                  >
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="font-semibold text-slate-900 text-xs">{d.name}</span>
+                                        <span className="text-[10px] px-1 py-0.2 rounded bg-emerald-100 text-emerald-800 font-mono font-bold">
+                                          KL
+                                        </span>
+                                        <span className="text-[10px] text-slate-400">• {d.headquarters}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+                                        {d.total_schools}
+                                      </span>
+                                      {isSelected && <Check className="w-3.5 h-3.5 text-emerald-600" />}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
 
-                          return (
-                            <button
-                              key={d.id}
-                              onClick={() => {
-                                onSelectDistrict(d.id);
-                                setIsDistrictMenuOpen(false);
-                              }}
-                              className={`w-full p-2 rounded-xl text-left flex items-center justify-between transition-all ${
-                                isSelected
-                                  ? 'bg-emerald-50 border border-emerald-300 text-emerald-900 font-bold'
-                                  : 'hover:bg-slate-50 border border-transparent text-slate-700'
-                              }`}
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-semibold text-slate-900 text-xs">{d.name}</span>
-                                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 font-mono">
-                                    {d.code}
-                                  </span>
-                                  <span className="text-[10px] text-slate-400">• {d.zone}</span>
-                                </div>
-                                <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                                  HQ: {d.headquarters} • {d.blocks_count} Blocks
-                                </p>
-                              </div>
+                        {/* Tamil Nadu Section */}
+                        {(selectedState === 'all' || selectedState === 'tamil-nadu') && filteredTnDistricts.length > 0 && (
+                          <div>
+                            <div className="text-[10px] font-bold text-sky-800 uppercase tracking-wider py-1 px-1 bg-sky-50/80 rounded-md mb-1 flex items-center justify-between">
+                              <span>🌿 Tamil Nadu Districts (38)</span>
+                              <span className="font-mono">STD +91 04xx</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {filteredTnDistricts.map((d) => {
+                                const isSelected = selectedDistrict.toLowerCase() === d.id.toLowerCase();
+                                return (
+                                  <button
+                                    key={`tn_${d.id}`}
+                                    onClick={() => {
+                                      onSelectState?.('tamil-nadu');
+                                      onSelectDistrict(d.id);
+                                      setIsDistrictMenuOpen(false);
+                                    }}
+                                    className={`w-full p-1.5 px-2 rounded-lg text-left flex items-center justify-between transition-all ${
+                                      isSelected
+                                        ? 'bg-sky-100/70 border border-sky-300 text-sky-950 font-bold'
+                                        : 'hover:bg-slate-50 text-slate-700'
+                                    }`}
+                                  >
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="font-semibold text-slate-900 text-xs">{d.name}</span>
+                                        <span className="text-[10px] px-1 py-0.2 rounded bg-sky-100 text-sky-800 font-mono font-bold">
+                                          TN
+                                        </span>
+                                        <span className="text-[10px] text-slate-400">• {d.zone}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200 font-semibold">
+                                        {d.total_schools.toLocaleString()}
+                                      </span>
+                                      {isSelected && <Check className="w-3.5 h-3.5 text-sky-600" />}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
 
-                              <div className="flex items-center gap-2 shrink-0">
-                                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-semibold ${
-                                  d.imported
-                                    ? 'bg-sky-50 text-sky-700 border border-sky-200'
-                                    : 'bg-slate-100 text-slate-500'
-                                }`}>
-                                  {d.total_schools.toLocaleString()}
-                                </span>
-                                {isSelected && <Check className="w-4 h-4 text-emerald-600" />}
-                              </div>
-                            </button>
-                          );
-                        })}
                       </div>
 
                       {/* Dropdown Footer */}
                       <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-                        <span>Total 38 Districts in Tamil Nadu</span>
+                        <span>52 Districts • South India</span>
                         <span className="text-emerald-700 font-semibold">Zero Data Overwrite Enforced</span>
                       </div>
 
@@ -288,16 +421,59 @@ export const Header: React.FC<HeaderProps> = ({
                   )}
                 </div>
 
+                {/* State Quick Switcher Pill (Desktop) */}
+                <div className="hidden lg:inline-flex items-center p-0.5 bg-slate-100/90 rounded-full border border-slate-200 text-[11px] font-semibold">
+                  <button
+                    onClick={() => {
+                      onSelectState?.('all');
+                      onSelectDistrict('all');
+                    }}
+                    className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                      selectedState === 'all' && isStatewide
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    All South India (52)
+                  </button>
+                  <button
+                    onClick={() => {
+                      onSelectState?.('tamil-nadu');
+                      onSelectDistrict('all');
+                    }}
+                    className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                      selectedState === 'tamil-nadu' && isStatewide
+                        ? 'bg-sky-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    🌿 Tamil Nadu (38)
+                  </button>
+                  <button
+                    onClick={() => {
+                      onSelectState?.('kerala');
+                      onSelectDistrict('all');
+                    }}
+                    className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                      selectedState === 'kerala' && isStatewide
+                        ? 'bg-emerald-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    🌴 Kerala (14)
+                  </button>
+                </div>
+
               </div>
 
               <p className="text-[11px] text-slate-500 hidden sm:flex items-center gap-1.5 mt-0.5">
-                <span>Tamil Nadu, India</span>
+                <span>South India (Tamil Nadu & Kerala)</span>
                 <span className="text-slate-300">•</span>
-                <span>Authoritative UDISE+ & TNEA 2026 Master Register</span>
+                <span>Authoritative UDISE+, Sametham KITE & TNEA 2026 Master Register</span>
                 <span className="text-slate-300">•</span>
                 <span className="text-sky-700 font-medium">Urban & Rural</span>
                 <span className="text-slate-300">•</span>
-                <span className="text-emerald-700 font-medium">Statewide Intelligence</span>
+                <span className="text-emerald-700 font-medium">Multi-State Intelligence</span>
               </p>
             </div>
           </div>

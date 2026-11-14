@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { SchoolRecord } from '@/types';
 import { getDistrictById } from '@/lib/data/tamilNaduDistricts';
+import { getKeralaDistrictById } from '@/lib/data/keralaDistricts';
 
 interface SchoolTableProps {
   schools: SchoolRecord[];
@@ -36,6 +37,7 @@ interface SchoolTableProps {
   onSelectSchool: (school: SchoolRecord) => void;
   onTriggerResearch?: (schoolId: string) => void;
   selectedDistrict?: string;
+  selectedState?: string;
 }
 
 export const SchoolTable: React.FC<SchoolTableProps> = ({
@@ -51,16 +53,24 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
   onSort,
   onSelectSchool,
   onTriggerResearch,
-  selectedDistrict
+  selectedDistrict,
+  selectedState = 'all'
 }) => {
-  const districtObj = selectedDistrict ? getDistrictById(selectedDistrict) : undefined;
+  const tnDistrictObj = selectedDistrict ? getDistrictById(selectedDistrict) : undefined;
+  const klDistrictObj = selectedDistrict ? getKeralaDistrictById(selectedDistrict) : undefined;
+  const districtObj = tnDistrictObj || klDistrictObj;
+
   const districtLabel = selectedDistrict === 'all' || selectedDistrict === 'statewide'
-    ? 'Tamil Nadu (All 38 Districts)'
+    ? selectedState === 'kerala'
+      ? 'Kerala (All 14 Districts)'
+      : selectedState === 'tamil-nadu'
+      ? 'Tamil Nadu (All 38 Districts)'
+      : 'South India (Tamil Nadu & Kerala - 52 Districts)'
     : districtObj
-    ? `${districtObj.name} District`
+    ? `${districtObj.name} District (${klDistrictObj ? 'Kerala' : 'Tamil Nadu'})`
     : selectedDistrict 
     ? `${selectedDistrict.charAt(0).toUpperCase() + selectedDistrict.slice(1)} District`
-    : 'Coimbatore District';
+    : 'All Districts';
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
@@ -158,7 +168,14 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
                       <div className="font-semibold text-slate-900 group-hover:text-sky-700 transition-colors line-clamp-1">
                         {s.school_name}
                       </div>
-                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <span className={`font-mono text-[9px] font-bold px-1.5 py-0.2 rounded border ${
+                          (s as any).state === 'kerala' || s.udise_code?.startsWith('32')
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                            : 'bg-sky-100 text-sky-800 border-sky-300'
+                        }`}>
+                          {(s as any).state === 'kerala' || s.udise_code?.startsWith('32') ? 'KL • Kerala' : 'TN • Tamil Nadu'}
+                        </span>
                         <span className="font-mono text-[11px] text-sky-800 bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200/60">
                           {s.udise_code}
                         </span>

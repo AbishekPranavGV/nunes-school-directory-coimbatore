@@ -3,10 +3,13 @@
 import React from 'react';
 import { Search, X, Filter, RotateCcw, MapPin, Building, Phone, Mail, MessageSquare, Globe2 } from 'lucide-react';
 import { TAMIL_NADU_DISTRICTS } from '@/lib/data/tamilNaduDistricts';
+import { KERALA_DISTRICTS } from '@/lib/data/keralaDistricts';
 
 interface FilterBarProps {
   searchQuery: string;
   setSearchQuery: (q: string) => void;
+  selectedState?: string;
+  setSelectedState?: (s: string) => void;
   selectedDistrict?: string;
   setSelectedDistrict?: (d: string) => void;
   management: string;
@@ -32,6 +35,8 @@ interface FilterBarProps {
 export const FilterBar: React.FC<FilterBarProps> = ({
   searchQuery,
   setSearchQuery,
+  selectedState = 'all',
+  setSelectedState,
   selectedDistrict,
   setSelectedDistrict,
   management,
@@ -155,24 +160,69 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       </div>
 
       {/* Multi-Dimensional Select Dropdowns */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
         
+        {/* State Filter */}
+        {setSelectedState && (
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
+              <Globe2 className="w-3 h-3 text-indigo-600" />
+              <span>State (South India)</span>
+            </label>
+            <select
+              value={selectedState}
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                if (setSelectedDistrict) setSelectedDistrict('all');
+              }}
+              className="w-full text-xs py-2 px-2.5 bg-indigo-50/70 border border-indigo-200 rounded-lg text-indigo-950 font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white"
+            >
+              <option value="all">All South India (52)</option>
+              <option value="tamil-nadu">🌿 Tamil Nadu (38)</option>
+              <option value="kerala">🌴 Kerala (14)</option>
+            </select>
+          </div>
+        )}
+
         {/* District Filter */}
         {setSelectedDistrict && (
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
-              <Globe2 className="w-3 h-3 text-emerald-600" />
-              <span>District (TN)</span>
+              <MapPin className="w-3 h-3 text-emerald-600" />
+              <span>District</span>
             </label>
             <select
-              value={selectedDistrict || 'coimbatore'}
+              value={selectedDistrict || 'all'}
               onChange={(e) => setSelectedDistrict(e.target.value)}
               className="w-full text-xs py-2 px-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg text-emerald-950 font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white"
             >
-              <option value="all">All Tamil Nadu (38)</option>
-              {TAMIL_NADU_DISTRICTS.map(d => (
-                <option key={d.id} value={d.id}>{d.name} ({d.total_schools})</option>
-              ))}
+              <option value="all">
+                {selectedState === 'kerala'
+                  ? 'All Kerala (14 Districts)'
+                  : selectedState === 'tamil-nadu'
+                  ? 'All Tamil Nadu (38 Districts)'
+                  : 'All South India (52 Districts)'}
+              </option>
+
+              {(selectedState === 'all' || selectedState === 'kerala') && (
+                <optgroup label="🌴 Kerala (14 Districts)">
+                  {KERALA_DISTRICTS.map(d => (
+                    <option key={`kl_${d.id}`} value={d.id}>
+                      {d.name} ({d.total_schools})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+
+              {(selectedState === 'all' || selectedState === 'tamil-nadu') && (
+                <optgroup label="🌿 Tamil Nadu (38 Districts)">
+                  {TAMIL_NADU_DISTRICTS.map(d => (
+                    <option key={`tn_${d.id}`} value={d.id}>
+                      {d.name} ({d.total_schools})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
           </div>
         )}
