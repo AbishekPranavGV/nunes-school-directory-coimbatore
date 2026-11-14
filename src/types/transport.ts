@@ -108,13 +108,15 @@ export interface TransportCircular {
     | 'Industrial Freight Tender'
     | 'Diesel Subsidy & Toll Compliance'
     | 'Vehicle Modernization & Inspection'
-    | 'Interstate Permit Notification';
+    | 'Interstate Permit Notification'
+    | string;
   target_audience:
     | 'All Transport Fleets'
     | 'Omni Bus Operators Only'
     | 'Heavy Multi-Axle Lorries Only'
     | 'LPG Tankers & Petroleum Fleets'
-    | 'Customs Container Freight';
+    | 'Customs Container Freight'
+    | string;
   target_districts: string[];
   target_state?: 'all' | 'Tamil Nadu' | 'Kerala';
   subject: string;

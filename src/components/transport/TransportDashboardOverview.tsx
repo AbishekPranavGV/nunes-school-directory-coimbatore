@@ -51,6 +51,8 @@ interface TransportDashboardOverviewProps {
   onViewAllDirectory: () => void;
   onViewAllCirculars: () => void;
   onViewAllBranches: () => void;
+  circulars?: any[];
+  onPreviewCircular?: (cir: any) => void;
 }
 
 export const TransportDashboardOverview: React.FC<TransportDashboardOverviewProps> = ({
@@ -71,7 +73,9 @@ export const TransportDashboardOverview: React.FC<TransportDashboardOverviewProp
   onOpenBlastModal,
   onViewAllDirectory,
   onViewAllCirculars,
-  onViewAllBranches
+  onViewAllBranches,
+  circulars = [],
+  onPreviewCircular
 }) => {
   const [activeChip, setActiveChip] = useState<string>('all');
   const [currentTimeStr, setCurrentTimeStr] = useState<string>('10:00 AM');
@@ -558,89 +562,119 @@ export const TransportDashboardOverview: React.FC<TransportDashboardOverviewProp
 
             <div className="space-y-2.5">
               
-              {/* Alert 1: Red Alert (Engine Failure / RTO mandate in mockup) */}
-              <div className="p-3 rounded-xl bg-rose-50/80 border border-rose-200/70 flex items-start justify-between gap-2.5">
-                <div className="flex items-start gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-rose-950">
-                      Mandatory Monsoon Brake Retarder Check
-                    </p>
-                    <p className="text-[11px] text-rose-700 mt-0.5">
-                      Walayar RTO Checkpost • 10 minutes ago
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={onViewAllCirculars}
-                  className="text-xs font-bold text-rose-700 hover:text-rose-900 hover:underline shrink-0 cursor-pointer pt-0.5"
-                >
-                  View
-                </button>
-              </div>
+              {/* If real circulars are loaded, render the top 4 with dynamic state tags */}
+              {circulars && circulars.length > 0 ? (
+                circulars.slice(0, 4).map((cir, idx) => {
+                  const isKL = cir.target_state === 'Kerala' || cir.target_audience?.includes('Kerala');
+                  const isTN = cir.target_state === 'Tamil Nadu' || cir.target_audience?.includes('Tamil Nadu');
+                  const badgeColor = isKL ? 'bg-emerald-500' : isTN ? 'bg-indigo-500' : 'bg-blue-500';
+                  const bgBox = isKL ? 'bg-emerald-50/80 border-emerald-200/70' : isTN ? 'bg-indigo-50/80 border-indigo-200/70' : 'bg-blue-50/80 border-blue-200/70';
+                  const textColor = isKL ? 'text-emerald-950' : isTN ? 'text-indigo-950' : 'text-blue-950';
+                  const subColor = isKL ? 'text-emerald-700' : isTN ? 'text-indigo-700' : 'text-blue-700';
 
-              {/* Alert 2: Yellow Warning (Low fuel warning in mockup) */}
-              <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/70 flex items-start justify-between gap-2.5">
-                <div className="flex items-start gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-amber-950">
-                      FASTag 3.0 RFID Commercial Lane Sync
-                    </p>
-                    <p className="text-[11px] text-amber-700 mt-0.5">
-                      Kochi-Coimbatore Corridor • 25 minutes ago
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={onViewAllCirculars}
-                  className="text-xs font-bold text-amber-700 hover:text-amber-900 hover:underline shrink-0 cursor-pointer pt-0.5"
-                >
-                  View
-                </button>
-              </div>
+                  return (
+                    <div 
+                      key={cir.id || idx}
+                      className={`p-3 rounded-xl border flex items-start justify-between gap-2.5 transition-all hover:shadow-2xs ${bgBox}`}
+                    >
+                      <div className="flex items-start gap-2.5 min-w-0">
+                        <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${badgeColor}`} />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded font-mono bg-white/80 border border-slate-200/60">
+                              {isKL ? '🌴 Kerala' : isTN ? '🌿 Tamil Nadu' : '🌐 South India'}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {cir.ref_no}
+                            </span>
+                          </div>
+                          <p className={`text-xs font-bold truncate mt-0.5 ${textColor}`}>
+                            {cir.title}
+                          </p>
+                          <p className={`text-[11px] truncate ${subColor}`}>
+                            {cir.recipient_count || 3200} Fleets • {cir.status === 'Sent' ? 'Dispatched (250 OK)' : 'Active Directive'}
+                          </p>
+                        </div>
+                      </div>
 
-              {/* Alert 3: Green Delivery Success (Vehicle arrived in mockup) */}
-              <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200/70 flex items-start justify-between gap-2.5">
-                <div className="flex items-start gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-emerald-950">
-                      1-Click Email Delivered to KSRTC SWIFT
-                    </p>
-                    <p className="text-[11px] text-emerald-700 mt-0.5">
-                      cmd@keralartc.com (TLS 1.3 250 OK) • 1 hour ago
-                    </p>
+                      <button
+                        onClick={() => {
+                          if (onPreviewCircular) onPreviewCircular(cir);
+                          else onViewAllCirculars();
+                        }}
+                        className={`text-xs font-bold hover:underline shrink-0 cursor-pointer pt-0.5 ${subColor}`}
+                      >
+                        View
+                      </button>
+                    </div>
+                  );
+                })
+              ) : (
+                <>
+                  {/* Fallback 1: Red Alert */}
+                  <div className="p-3 rounded-xl bg-rose-50/80 border border-rose-200/70 flex items-start justify-between gap-2.5">
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-rose-950">
+                          Mandatory Monsoon Brake Retarder Check
+                        </p>
+                        <p className="text-[11px] text-rose-700 mt-0.5">
+                          Walayar RTO Checkpost • 10 minutes ago
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={onViewAllCirculars}
+                      className="text-xs font-bold text-rose-700 hover:text-rose-900 hover:underline shrink-0 cursor-pointer pt-0.5"
+                    >
+                      View
+                    </button>
                   </div>
-                </div>
-                <button
-                  onClick={onViewAllCirculars}
-                  className="text-xs font-bold text-emerald-700 hover:text-emerald-900 hover:underline shrink-0 cursor-pointer pt-0.5"
-                >
-                  View
-                </button>
-              </div>
 
-              {/* Alert 4: Green Delivery Success */}
-              <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200/70 flex items-start justify-between gap-2.5">
-                <div className="flex items-start gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-emerald-950">
-                      1-Click Email Delivered to Kallada Travels
-                    </p>
-                    <p className="text-[11px] text-emerald-700 mt-0.5">
-                      bookings@kalladatravels.com • 2 hours ago
-                    </p>
+                  {/* Fallback 2: Yellow Warning */}
+                  <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/70 flex items-start justify-between gap-2.5">
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-amber-950">
+                          FASTag 3.0 RFID Commercial Lane Sync
+                        </p>
+                        <p className="text-[11px] text-amber-700 mt-0.5">
+                          Kochi-Coimbatore Corridor • 25 minutes ago
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={onViewAllCirculars}
+                      className="text-xs font-bold text-amber-700 hover:text-amber-900 hover:underline shrink-0 cursor-pointer pt-0.5"
+                    >
+                      View
+                    </button>
                   </div>
-                </div>
-                <button
-                  onClick={onViewAllCirculars}
-                  className="text-xs font-bold text-emerald-700 hover:text-emerald-900 hover:underline shrink-0 cursor-pointer pt-0.5"
-                >
-                  View
-                </button>
-              </div>
+
+                  {/* Fallback 3: Green Delivery */}
+                  <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200/70 flex items-start justify-between gap-2.5">
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-emerald-950">
+                          1-Click Email Delivered to KSRTC SWIFT
+                        </p>
+                        <p className="text-[11px] text-emerald-700 mt-0.5">
+                          cmd@keralartc.com (TLS 1.3 250 OK) • 1 hour ago
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={onViewAllCirculars}
+                      className="text-xs font-bold text-emerald-700 hover:text-emerald-900 hover:underline shrink-0 cursor-pointer pt-0.5"
+                    >
+                      View
+                    </button>
+                  </div>
+                </>
+              )}
 
             </div>
           </div>

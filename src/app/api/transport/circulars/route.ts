@@ -41,15 +41,16 @@ export async function POST(request: NextRequest) {
         category: body.category || 'Fleet Safety & RTO Mandate',
         target_audience: body.target_audience || 'All Transport Fleets',
         target_districts: body.target_districts || ['all'],
+        target_state: body.target_state || 'all',
         subject: body.subject || '',
         body: body.body || '',
-        signatory_name: body.signatory_name || 'Nunes Instruments Fleet Coordinator',
-        signatory_title: body.signatory_title || 'Chief Logistics Liaison Officer',
-        issuing_authority: body.issuing_authority || 'Nunes Instruments — Tamil Nadu Transport Directorate',
+        signatory_name: body.signatory_name || 'Er. K. R. Senthil Kumar, B.E., M.I.E.',
+        signatory_title: body.signatory_title || 'Director of Technical Services & Logistics Standards',
+        issuing_authority: body.issuing_authority || 'Nunes Instruments — South India Inter-State Transport Directorate',
         attachment_name: body.attachment_name || undefined,
         created_at: new Date().toISOString(),
         status: body.send_now ? 'Sent' : 'Draft',
-        recipient_count: body.recipient_count || 320
+        recipient_count: body.recipient_count || 3200
       };
 
       circularsState.unshift(newCircular);

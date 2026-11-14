@@ -10,7 +10,9 @@ import {
   ShieldCheck, 
   CheckCircle2,
   Building2,
-  FileText
+  FileText,
+  Globe2,
+  MapPin
 } from 'lucide-react';
 import { TransportCircular } from '@/types/transport';
 
@@ -35,6 +37,9 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
     window.print();
   };
 
+  const isKerala = circular.target_state === 'Kerala' || circular.target_audience?.includes('Kerala');
+  const isTN = circular.target_state === 'Tamil Nadu' || circular.target_audience?.includes('Tamil Nadu');
+
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150">
       <div 
@@ -45,19 +50,32 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
         {/* Top Control Bar */}
         <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-amber-100 text-amber-800">
+            <span className="p-1.5 rounded-lg bg-blue-100 text-blue-800">
               <FileText className="w-4 h-4" />
             </span>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Official Letterhead Preview</h3>
-              <p className="text-[11px] text-slate-500">Reference: {circular.ref_no} • Target: {circular.target_state || 'All South India'}</p>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-slate-900 text-sm">Official Letterhead Preview</h3>
+                <span className={`text-[10px] font-bold px-2 py-0.2 rounded font-mono ${
+                  isKerala 
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                    : isTN 
+                    ? 'bg-sky-100 text-sky-800 border border-sky-300' 
+                    : 'bg-blue-100 text-blue-800 border border-blue-300'
+                }`}>
+                  {isKerala ? '🌴 Kerala Fleets' : isTN ? '🌿 Tamil Nadu Fleets' : '🌐 All South India (TN + KL)'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Reference: <strong className="font-mono text-slate-700">{circular.ref_no}</strong> • Audience: {circular.target_audience}
+              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold transition-all shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print / PDF</span>
@@ -68,9 +86,9 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
                 onClose();
                 onEdit(circular);
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold transition-all shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
             >
-              <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+              <Edit3 className="w-3.5 h-3.5 text-blue-600" />
               <span>Edit Text</span>
             </button>
 
@@ -80,7 +98,7 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
                   onOneClickBlast(circular);
                   onClose();
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs hover:scale-102 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
                 title="1-Click Dispatch to all registered fleet emails"
               >
                 <Send className="w-3.5 h-3.5" />
@@ -93,7 +111,7 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
                 onSendNow(circular);
                 onClose();
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Send Outbound</span>
@@ -101,7 +119,7 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
 
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg transition-all"
+              className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg transition-all cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -119,10 +137,10 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
                 Nunes Instruments
               </h1>
               <p className="text-[11px] sm:text-xs text-slate-600 font-sans tracking-wide">
-                Precision Measurement Technologies & Industrial Logistics Directorate
+                Precision Measurement Technologies & South India Commercial Transport Directorate
               </p>
               <p className="text-[10px] text-slate-500 font-sans">
-                180, Race Course Road, Coimbatore - 641018, Tamil Nadu, India • Tel: 0422-4333666 • www.nunes.in
+                180, Race Course Road, Coimbatore, Tamil Nadu • Regional Transshipment Hub: Ernakulam North, Kochi, Kerala • Tel: 0422-4333666
               </p>
             </div>
 
@@ -138,16 +156,30 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
               </div>
             </div>
 
-            {/* Recipient Line */}
+            {/* Recipient Line (Dynamically adapted to target state) */}
             <div className="space-y-1 font-sans text-xs">
               <p className="text-slate-500">To,</p>
-              <p className="font-bold text-slate-900">The Managing Director / Proprietor,</p>
-              <p className="text-slate-700">All Registered Member Operators,</p>
-              <p className="text-slate-600">Tamil Nadu Omni Bus Owners Association & State Lorry Owners Federation.</p>
+              <p className="font-bold text-slate-900">The Managing Director / Chief Logistics Controller,</p>
+              {isKerala ? (
+                <>
+                  <p className="text-slate-800 font-semibold">Kerala State Road Transport Corporation (KSRTC SWIFT),</p>
+                  <p className="text-slate-600">Kerala State Lorry Owners Federation (KSLOF) & Registered Private Bus Fleets.</p>
+                </>
+              ) : isTN ? (
+                <>
+                  <p className="text-slate-800 font-semibold">Tamil Nadu Omni Bus Owners Association (TOBOA),</p>
+                  <p className="text-slate-600">State Lorry Owners Federation (SLOF) & Member Transporters.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-slate-800 font-semibold">South India Inter-State Transport Operators (Tamil Nadu & Kerala Corridors),</p>
+                  <p className="text-slate-600">TOBOA, SLOF, KSLOF & KSRTC SWIFT Member Fleets.</p>
+                </>
+              )}
             </div>
 
             {/* Subject Line */}
-            <div className="p-3 bg-slate-50 border-l-4 border-amber-600 font-sans">
+            <div className="p-3 bg-slate-50 border-l-4 border-blue-600 font-sans">
               <p className="text-xs font-bold text-slate-900 uppercase tracking-tight">
                 Subject: {circular.subject}
               </p>
@@ -159,9 +191,9 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
             </div>
 
             {circular.attachment_name && (
-              <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-lg text-xs font-sans text-amber-900 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>Enclosure / Annexure: <strong>{circular.attachment_name}</strong></span>
+              <div className="p-3 bg-blue-50/60 border border-blue-200 rounded-lg text-xs font-sans text-blue-900 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                <span>Enclosure / Official Annexure: <strong className="font-mono">{circular.attachment_name}</strong></span>
               </div>
             )}
 
@@ -172,7 +204,7 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
               <div className="w-24 h-24 rounded-full border-2 border-indigo-900/40 flex flex-col items-center justify-center text-center p-2 text-indigo-900/60 rotate-[-8deg]">
                 <ShieldCheck className="w-5 h-5 text-indigo-700/60" />
                 <span className="text-[8px] font-bold uppercase tracking-widest mt-0.5">Nunes Instruments</span>
-                <span className="text-[7px]">Logistics Bureau</span>
+                <span className="text-[7px]">South India Desk</span>
                 <span className="text-[7px]">Verified Seal</span>
               </div>
 

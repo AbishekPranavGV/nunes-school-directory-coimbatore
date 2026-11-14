@@ -169,6 +169,61 @@ export const BOUNCED_EMAILS_DATA: BouncedEmailRecord[] = [
 
 export const TRANSPORT_CIRCULARS_DATA: TransportCircular[] = [
   {
+    id: 'CIR-2026-KL-01',
+    title: 'Walayar-Palakkad Inter-State Corridor Toll RFID & Retarder Protocol',
+    ref_no: 'NUNES/TR/KL/2026/104',
+    category: 'Inter-State Walayar Border & Toll RFID FASTag Compliance' as any,
+    target_audience: '🌐 All Registered Transport Fleets (South India - TN & KL)' as any,
+    target_districts: ['palakkad', 'ernakulam', 'coimbatore', 'salem'],
+    target_state: 'all',
+    subject: 'Mandatory Monsoon Brake Retarder Inspection & FASTag 3.0 Commercial Lane Protocol across Walayar Checkpost (NH 544)',
+    body: `To All Managing Directors, Fleet Proprietors, and Depot Controllers,
+Inter-State Commercial Bus & Freight Carriers Operating across Tamil Nadu & Kerala Corridors.
+
+Subject: Joint Standard Operating Procedure — Walayar Border Commercial RFID Sync, Brake Retarder Verification, and Monsoon Highway Transit (Academic & Industrial Fiscal Year 2026-27).
+
+In accordance with joint transport safety protocols established between Tamil Nadu State Transport Authority and Motor Vehicles Department (MVD) Kerala, all heavy goods bulkers, container chassis, and luxury sleeper coaches traversing NH 544 are advised of updated toll RFID and safety retarder protocols.
+
+Inspection & Calibration Checkpoints:
+1. Walayar Border Integrated Toll Plaza: Mandatory FASTag 3.0 electronic transponder calibration.
+2. Ghat Road Auxiliary Retarders: Heavy vehicles descending Kuthiran Tunnel and Walayar stretches must carry certified brake retarder efficiency logs.
+3. KSRTC SWIFT & Private Omni Sleeper Verification: Working emergency panic systems and AIS-140 emergency trigger sync.
+
+Nunes Instruments operates accredited calibration desks at Coimbatore Bypass, Walayar Border Post, and Kochi Vallarpadam ICTT.`,
+    signatory_name: 'Er. K. R. Senthil Kumar, B.E., M.I.E.',
+    signatory_title: 'Director of Technical Services & Logistics Standards',
+    issuing_authority: 'Nunes Instruments — South India Inter-State Transport Directorate (TN & KL)',
+    attachment_name: 'Walayar_Corridor_Retarder_Inspection_Protocol_2026.pdf',
+    created_at: '2026-11-14T08:00:00Z',
+    status: 'Sent',
+    recipient_count: 3200
+  },
+  {
+    id: 'CIR-2026-KL-02',
+    title: 'Kerala MVD & Cochin Port ICTT Vallarpadam Drayage Safety Directive',
+    ref_no: 'NUNES/TR/MVD/2026/055',
+    category: 'Port Container & ICTT Vallarpadam Drayage Protocol' as any,
+    target_audience: '🌴 Kerala Registered Fleets (All 14 Districts - KSRTC, KSLOF, Omni Buses)' as any,
+    target_districts: ['ernakulam', 'thiruvananthapuram', 'kollam', 'alappuzha', 'thrissur'],
+    target_state: 'Kerala',
+    subject: 'Port Container Drayage, Hazardous Material Security, and AIS-140 GPS Compliance across Cochin Port Maritime Corridors',
+    body: `To All Container Drayage Operators, Heavy Haulage Fleets & Port Logistics Providers,
+Vallarpadam International Container Transshipment Terminal (ICTT) & Willingdon Island Logistics Gateways.
+
+Subject: Security & Metrology Directive — Container Weight Verification (VGM), Twist-Lock Integrity, and Hazardous Chemical Tanker Emergency Egress.
+
+Cochin Port Authority and MVD Kerala require all commercial heavy chassis and ISO container trailers entering ICTT gates to possess valid Verified Gross Mass (VGM) sensor calibration and anti-skid pneumatic braking certificates.
+
+Nunes Instruments calibration mobile units are stationed at Ernakulam Marine Drive, Aluva Industrial Belt, and Kakkanad IT Express Corridor.`,
+    signatory_name: 'P. T. Varghese, M.Tech.',
+    signatory_title: 'Chief Maritime & Transshipment Metrology Auditor',
+    issuing_authority: 'Nunes Instruments — Kerala Regional Logistics Directorate (Ernakulam Hub)',
+    attachment_name: 'ICTT_Vallarpadam_Drayage_Safety_Manual_2026.pdf',
+    created_at: '2026-11-13T14:30:00Z',
+    status: 'Sent',
+    recipient_count: 1120
+  },
+  {
     id: 'CIR-2026-RTO-01',
     title: 'Mandatory Fastag & GPS Telematics Fleet Certification',
     ref_no: 'NUNES/TR/RTO/2026/048',
