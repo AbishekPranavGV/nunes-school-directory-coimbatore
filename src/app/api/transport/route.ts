@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     const query = searchParams.get('q')?.toLowerCase().trim() || '';
+    const state = searchParams.get('state')?.toLowerCase().trim() || '';
     const serviceType = searchParams.get('service_type')?.toLowerCase().trim() || '';
     const category = searchParams.get('category')?.trim() || '';
     const district = searchParams.get('district')?.toLowerCase().trim() || '';
@@ -23,7 +24,20 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'company_name';
     const sortOrder = searchParams.get('sortOrder') || 'asc';
 
+    // Ensure cache has the full dataset
+    if (operatorsCache.length < TRANSPORT_OPERATORS.length) {
+      operatorsCache = [...TRANSPORT_OPERATORS];
+    }
+
     let filtered: TransportRecord[] = [...operatorsCache];
+
+    // State filter (Tamil Nadu, Kerala, or all)
+    if (state && state !== 'all') {
+      filtered = filtered.filter(item => 
+        item.state.toLowerCase() === state ||
+        item.state.toLowerCase().includes(state)
+      );
+    }
 
     // Service type filter (bus, lorry, logistics, govt)
     if (serviceType && serviceType !== 'all') {

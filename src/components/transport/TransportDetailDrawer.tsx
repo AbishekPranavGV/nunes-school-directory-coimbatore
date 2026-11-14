@@ -24,7 +24,9 @@ import {
   Edit3,
   Building2,
   Package,
-  Landmark
+  Landmark,
+  Zap,
+  Send
 } from 'lucide-react';
 import { TransportRecord } from '@/types/transport';
 
@@ -33,13 +35,15 @@ interface TransportDetailDrawerProps {
   onClose: () => void;
   onOpenDispatchModal?: (operator: TransportRecord) => void;
   onOpenEditModal?: (operator: TransportRecord) => void;
+  onOneClickEmail?: (operator: TransportRecord) => void;
 }
 
 export const TransportDetailDrawer: React.FC<TransportDetailDrawerProps> = ({
   operator,
   onClose,
   onOpenDispatchModal,
-  onOpenEditModal
+  onOpenEditModal,
+  onOneClickEmail
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'fleet' | 'routes' | 'branches' | 'compliance'>('overview');
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -86,6 +90,15 @@ export const TransportDetailDrawer: React.FC<TransportDetailDrawerProps> = ({
                 <h2 className="text-lg font-bold text-slate-900 leading-snug">
                   {operator.company_name}
                 </h2>
+                {operator.state === 'Kerala' ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+                    🌴 Kerala Fleet
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    🏛️ Tamil Nadu Fleet
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   <span>{operator.verification_status}</span>
@@ -243,6 +256,30 @@ export const TransportDetailDrawer: React.FC<TransportDetailDrawerProps> = ({
                 </div>
               </div>
 
+              {/* 1-Click Automated Circular Dispatch Card */}
+              {operator.email && onOneClickEmail && (
+                <div className="p-4 rounded-xl bg-gradient-to-r from-teal-50 via-emerald-50 to-sky-50 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                      <Zap className="w-5 h-5 fill-white animate-pulse" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">1-Click Automated Circular Dispatch</p>
+                      <p className="text-xs text-teal-800 font-mono mt-0.5">{operator.email} • TLS 1.3 Verified</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => onOneClickEmail(operator)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-lg font-bold text-xs shadow-xs transition-all hover:scale-102 cursor-pointer"
+                    title={`Dispatch official circular to ${operator.email} in 1 click`}
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Dispatch Circular Now</span>
+                  </button>
+                </div>
+              )}
+
               {/* Contact Grid: Phone, Email, Secondary */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 
@@ -293,7 +330,9 @@ export const TransportDetailDrawer: React.FC<TransportDetailDrawerProps> = ({
                   {operator.address}
                 </p>
                 <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500">
-                  <span className="font-semibold text-slate-700">Hub: {operator.city_hub}</span>
+                  <span className="font-semibold text-slate-700">State: {operator.state}</span>
+                  <span>•</span>
+                  <span>Hub: {operator.city_hub}</span>
                   <span>•</span>
                   <span>District: {operator.district}</span>
                   <span>•</span>

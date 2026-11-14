@@ -35,6 +35,8 @@ import { TransportWorkspaceView } from '@/types/transport';
 interface TransportHeaderProps {
   currentView: TransportWorkspaceView;
   onViewChange: (view: TransportWorkspaceView) => void;
+  selectedState?: string;
+  onSelectState?: (state: string) => void;
   selectedDistrict: string;
   onSelectDistrict: (districtId: string) => void;
   serviceFilter: string;
@@ -43,28 +45,41 @@ interface TransportHeaderProps {
   onOpenWorker: () => void;
   onOpenExport: () => void;
   onOpenMap: () => void;
+  onOpenBlastModal?: () => void;
 }
 
 const DISTRICT_HUBS = [
-  { id: 'all', name: 'All Tamil Nadu (Hubs & Corridors)', count: '4,200+ Fleets', zone: 'Statewide' },
-  { id: 'coimbatore', name: 'Coimbatore District', count: 'Industrial & Pumps Hub', zone: 'Western' },
-  { id: 'namakkal', name: 'Namakkal District', count: 'Truck City of India & Tankers', zone: 'Western' },
-  { id: 'salem', name: 'Salem District', count: 'Sankagiri Bulker & Steel Hub', zone: 'Western' },
-  { id: 'chennai', name: 'Chennai District', count: 'Port Containers & Koyambedu Omni', zone: 'Northern' },
-  { id: 'tiruppur', name: 'Tiruppur District', count: 'Textile Export FTL Corridor', zone: 'Western' },
-  { id: 'madurai', name: 'Madurai District', count: 'South Transit & Ring Road Hub', zone: 'Southern' },
-  { id: 'tiruchirappalli', name: 'Tiruchirappalli District', count: 'Central BHEL Heavy ODC', zone: 'Central' },
-  { id: 'erode', name: 'Erode District', count: 'Agricultural & Turmeric Freight', zone: 'Western' },
-  { id: 'karur', name: 'Karur District', count: 'Coach Building & Home Textiles', zone: 'Central' },
-  { id: 'thoothukudi', name: 'Thoothukudi District', count: 'VOC Port Sea Container Hub', zone: 'Southern' },
-  { id: 'tirunelveli', name: 'Tirunelveli District', count: 'South Goods Express Corridor', zone: 'Southern' },
-  { id: 'krishnagiri', name: 'Krishnagiri / Hosur', count: 'SIPCOT Auto Cluster Freight', zone: 'Northern' },
-  { id: 'vellore', name: 'Vellore District', count: 'Leather Goods Air Feeder', zone: 'Northern' }
+  { id: 'all', name: 'All South India (Tamil Nadu & Kerala Corridors)', count: '5,000+ Fleets', zone: 'Inter-State', state: 'All' },
+  // Tamil Nadu Key Hubs
+  { id: 'coimbatore', name: 'Coimbatore District (TN)', count: 'Industrial & Pumps Hub', zone: 'Western TN', state: 'Tamil Nadu' },
+  { id: 'namakkal', name: 'Namakkal District (TN)', count: 'Truck City of India & Tankers', zone: 'Western TN', state: 'Tamil Nadu' },
+  { id: 'salem', name: 'Salem District (TN)', count: 'Sankagiri Bulker & Steel Hub', zone: 'Western TN', state: 'Tamil Nadu' },
+  { id: 'chennai', name: 'Chennai District (TN)', count: 'Port Containers & Koyambedu Omni', zone: 'Northern TN', state: 'Tamil Nadu' },
+  { id: 'tiruppur', name: 'Tiruppur District (TN)', count: 'Textile Export FTL Corridor', zone: 'Western TN', state: 'Tamil Nadu' },
+  { id: 'madurai', name: 'Madurai District (TN)', count: 'South Transit & Ring Road Hub', zone: 'Southern TN', state: 'Tamil Nadu' },
+  { id: 'tiruchirappalli', name: 'Tiruchirappalli District (TN)', count: 'Central BHEL Heavy ODC', zone: 'Central TN', state: 'Tamil Nadu' },
+  { id: 'erode', name: 'Erode District (TN)', count: 'Agricultural & Turmeric Freight', zone: 'Western TN', state: 'Tamil Nadu' },
+  { id: 'karur', name: 'Karur District (TN)', count: 'Coach Building & Home Textiles', zone: 'Central TN', state: 'Tamil Nadu' },
+  { id: 'thoothukudi', name: 'Thoothukudi District (TN)', count: 'VOC Port Sea Container Hub', zone: 'Southern TN', state: 'Tamil Nadu' },
+  { id: 'tirunelveli', name: 'Tirunelveli District (TN)', count: 'South Goods Express Corridor', zone: 'Southern TN', state: 'Tamil Nadu' },
+  { id: 'krishnagiri', name: 'Krishnagiri / Hosur (TN)', count: 'SIPCOT Auto Cluster Freight', zone: 'Northern TN', state: 'Tamil Nadu' },
+  { id: 'vellore', name: 'Vellore District (TN)', count: 'Leather Goods Air Feeder', zone: 'Northern TN', state: 'Tamil Nadu' },
+  // Kerala Key Hubs
+  { id: 'ernakulam', name: 'Ernakulam / Kochi (KL)', count: 'Vallarpadam ICTT Port & SWIFT Hub', zone: 'Central KL', state: 'Kerala' },
+  { id: 'palakkad', name: 'Palakkad & Walayar (KL)', count: 'TN-KL Border Corridor & Goods Hub', zone: 'Eastern KL', state: 'Kerala' },
+  { id: 'kozhikode', name: 'Kozhikode (KL)', count: 'Mavoor Road Malabar Freight Corridor', zone: 'Northern KL', state: 'Kerala' },
+  { id: 'thiruvananthapuram', name: 'Thiruvananthapuram (KL)', count: 'Vizhinjam Port & Central Terminal', zone: 'Southern KL', state: 'Kerala' },
+  { id: 'thrissur', name: 'Thrissur (KL)', count: 'Central Kerala Commercial Transit Hub', zone: 'Central KL', state: 'Kerala' },
+  { id: 'kottayam', name: 'Kottayam (KL)', count: 'Rubber & Plantation Freight Depots', zone: 'Central KL', state: 'Kerala' },
+  { id: 'kollam', name: 'Kollam (KL)', count: 'Cashew & Coastal Marine Logistics', zone: 'Southern KL', state: 'Kerala' },
+  { id: 'kannur', name: 'Kannur (KL)', count: 'Handloom & Airport Cargo Hub', zone: 'Northern KL', state: 'Kerala' }
 ];
 
 export const TransportHeader: React.FC<TransportHeaderProps> = ({
   currentView,
   onViewChange,
+  selectedState = 'all',
+  onSelectState,
   selectedDistrict,
   onSelectDistrict,
   serviceFilter,
@@ -72,7 +87,8 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
   totalFleets,
   onOpenWorker,
   onOpenExport,
-  onOpenMap
+  onOpenMap,
+  onOpenBlastModal
 }) => {
   const [isDistrictMenuOpen, setIsDistrictMenuOpen] = useState(false);
   const [districtSearch, setDistrictSearch] = useState('');
@@ -95,7 +111,8 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
 
   const filteredDistricts = DISTRICT_HUBS.filter(d => 
     d.name.toLowerCase().includes(districtSearch.toLowerCase()) ||
-    d.count.toLowerCase().includes(districtSearch.toLowerCase())
+    d.count.toLowerCase().includes(districtSearch.toLowerCase()) ||
+    d.state.toLowerCase().includes(districtSearch.toLowerCase())
   );
 
   const workspaces: { id: TransportWorkspaceView; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string; badgeColor?: string }[] = [
@@ -120,7 +137,7 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             <span className="font-semibold text-slate-900">Nunes Multi-Enterprise Intelligence Hub:</span>
-            <span className="text-slate-600 hidden sm:inline">Active Transport & Logistics Fleet Master Registry (Omni Bus, Heavy Lorry, LPG Bulkers)</span>
+            <span className="text-slate-600 hidden sm:inline">Active Transport & Logistics Fleet Master Registry (Tamil Nadu & Kerala Inter-State Corridors)</span>
           </div>
 
           <Link 
@@ -133,8 +150,8 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
           </Link>
         </div>
 
-        {/* Tier 1: Main Title, District Selector, and Actions */}
-        <div className="py-3 flex items-center justify-between gap-4">
+        {/* Tier 1: Main Title, State Switcher, District Selector, and Actions */}
+        <div className="py-3 flex items-center justify-between gap-4 flex-wrap">
           
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-sky-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-sky-600/20 shrink-0">
@@ -144,8 +161,44 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 leading-tight">
-                  Nunes Instruments <span className="text-amber-600 font-semibold">Tamil Nadu Transport Fleet Intelligence</span>
+                  Nunes Instruments <span className="text-amber-600 font-semibold">South India Transport Fleet Intelligence</span>
                 </h1>
+
+                {/* State Switcher Pill Group */}
+                {onSelectState && (
+                  <div className="inline-flex items-center rounded-full border border-slate-300 bg-slate-100 p-0.5 text-xs shadow-2xs">
+                    <button
+                      onClick={() => onSelectState('all')}
+                      className={`px-2 py-0.5 rounded-full font-semibold transition-all ${
+                        selectedState === 'all'
+                          ? 'bg-amber-600 text-white shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      All States
+                    </button>
+                    <button
+                      onClick={() => onSelectState('Tamil Nadu')}
+                      className={`px-2 py-0.5 rounded-full font-semibold transition-all ${
+                        selectedState === 'Tamil Nadu'
+                          ? 'bg-amber-600 text-white shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Tamil Nadu
+                    </button>
+                    <button
+                      onClick={() => onSelectState('Kerala')}
+                      className={`px-2 py-0.5 rounded-full font-semibold transition-all ${
+                        selectedState === 'Kerala'
+                          ? 'bg-emerald-700 text-white shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Kerala
+                    </button>
+                  </div>
+                )}
 
                 {/* District Selector Dropdown Button */}
                 <div className="relative" ref={dropdownRef}>
@@ -155,7 +208,7 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
                   >
                     <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                     <span className="max-w-[150px] sm:max-w-none truncate">
-                      {isStatewide ? 'All Tamil Nadu Hubs' : (currentDistrictObj?.name || 'Selected Hub')}
+                      {isStatewide ? 'All South India Hubs' : (currentDistrictObj?.name || 'Selected Hub')}
                     </span>
                     <ChevronDown className={`w-3.5 h-3.5 text-amber-700 transition-transform ${isDistrictMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -166,10 +219,10 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
                       <div className="pb-2.5 mb-2.5 border-b border-slate-100 flex items-center justify-between">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
                           <Globe2 className="w-4 h-4 text-amber-600" />
-                          <span>Tamil Nadu Transport & Fleet Hubs</span>
+                          <span>South India Transport & Freight Hubs</span>
                         </div>
                         <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                          14 Key Hubs
+                          22 Major Hubs (TN & KL)
                         </span>
                       </div>
 
@@ -179,7 +232,7 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
                           type="text"
                           value={districtSearch}
                           onChange={(e) => setDistrictSearch(e.target.value)}
-                          placeholder="Search transport hub (Namakkal, Sankagiri, Coimbatore...)"
+                          placeholder="Search transport hub (Namakkal, Kochi, Palakkad...)"
                           className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
@@ -216,7 +269,7 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
               </div>
 
               <p className="text-[11px] text-slate-500 hidden sm:flex items-center gap-1.5 mt-0.5">
-                <span>Tamil Nadu, India</span>
+                <span>Tamil Nadu & Kerala, South India</span>
                 <span className="text-slate-300">•</span>
                 <span>Bus & Lorry Transport Owners Association Master Directory</span>
                 <span className="text-slate-300">•</span>
@@ -265,6 +318,22 @@ export const TransportHeader: React.FC<TransportHeaderProps> = ({
                 <span>Govt & STU</span>
               </button>
             </div>
+
+            {/* 1-Click Automated Circular Blast Button */}
+            {onOpenBlastModal && (
+              <button
+                onClick={onOpenBlastModal}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-lg shadow-sm shadow-emerald-600/30 transition-all hover:scale-102 cursor-pointer group"
+                title="1-Click Automated Circular Email Dispatch across South India"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                <Send className="w-3.5 h-3.5" />
+                <span>1-Click Dispatch</span>
+              </button>
+            )}
 
             <button
               onClick={onOpenWorker}

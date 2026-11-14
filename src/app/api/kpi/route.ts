@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMasterSchoolsFromMemoryOrDb } from '@/lib/db';
 import { getDistrictById, getStatewideTotals } from '@/lib/data/tamilNaduDistricts';
+import { getDistrictByAnyState, getKeralaDistrictById } from '@/lib/data/keralaDistricts';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const district = searchParams.get('district') || 'coimbatore';
+    const district = searchParams.get('district') || 'all';
+    const state = searchParams.get('state');
     const isStatewide = district.toLowerCase() === 'all' || district.toLowerCase() === 'statewide';
 
-    const schools = await getMasterSchoolsFromMemoryOrDb(isStatewide ? 'all' : district);
+    const schools = await getMasterSchoolsFromMemoryOrDb(isStatewide ? 'all' : district, state || undefined);
     const total = schools.length;
 
     let verified_any = 0;
@@ -39,11 +41,21 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const distMeta = !isStatewide ? getDistrictById(district) : null;
+    const distMeta = !isStatewide ? (getDistrictByAnyState(district) || getDistrictById(district)) : null;
     const target = isStatewide ? total : (distMeta?.total_schools || 2097);
 
+    let districtLabel = 'All South India (52 Districts)';
+    if (isStatewide) {
+      if (state === 'kerala') districtLabel = 'All Kerala (14 Districts)';
+      else if (state === 'tamil-nadu' || state === 'tamil nadu') districtLabel = 'All Tamil Nadu (38 Districts)';
+      else districtLabel = 'All South India (52 Districts)';
+    } else {
+      districtLabel = distMeta?.name || 'Selected District';
+    }
+
     const metrics = {
-      district: isStatewide ? 'All Tamil Nadu (38 Districts)' : (distMeta?.name || 'Coimbatore'),
+      district: districtLabel,
+      state: state || (distMeta ? ('state' in distMeta ? distMeta.state : 'Tamil Nadu') : 'All'),
       is_statewide: isStatewide,
       target_source_records: target,
       total_schools_discovered: total,

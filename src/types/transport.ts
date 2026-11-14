@@ -95,6 +95,8 @@ export interface TransportKPI {
   districts_covered: number;
   national_permits: number;
   total_branches_count: number;
+  kerala_fleets?: number;
+  tamil_nadu_fleets?: number;
 }
 
 export interface TransportCircular {
@@ -114,6 +116,7 @@ export interface TransportCircular {
     | 'LPG Tankers & Petroleum Fleets'
     | 'Customs Container Freight';
   target_districts: string[];
+  target_state?: 'all' | 'Tamil Nadu' | 'Kerala';
   subject: string;
   body: string;
   signatory_name: string;

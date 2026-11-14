@@ -18,6 +18,8 @@ import {
 interface TransportFilterBarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  selectedState?: string;
+  onSelectState?: (state: string) => void;
   category: string;
   onCategoryChange: (category: string) => void;
   district: string;
@@ -59,25 +61,37 @@ const PERMIT_TYPES = [
 ];
 
 const DISTRICT_HUBS = [
-  { id: 'all', name: 'All Districts' },
-  { id: 'coimbatore', name: 'Coimbatore' },
-  { id: 'namakkal', name: 'Namakkal' },
-  { id: 'salem', name: 'Salem' },
-  { id: 'chennai', name: 'Chennai' },
-  { id: 'tiruppur', name: 'Tiruppur' },
-  { id: 'madurai', name: 'Madurai' },
-  { id: 'tiruchirappalli', name: 'Trichy' },
-  { id: 'erode', name: 'Erode' },
-  { id: 'karur', name: 'Karur' },
-  { id: 'thoothukudi', name: 'Tuticorin' },
-  { id: 'tirunelveli', name: 'Tirunelveli' },
-  { id: 'krishnagiri', name: 'Krishnagiri / Hosur' },
-  { id: 'vellore', name: 'Vellore' }
+  { id: 'all', name: 'All Hubs & Districts' },
+  // Tamil Nadu
+  { id: 'coimbatore', name: 'Coimbatore (TN)' },
+  { id: 'namakkal', name: 'Namakkal (TN)' },
+  { id: 'salem', name: 'Salem (TN)' },
+  { id: 'chennai', name: 'Chennai (TN)' },
+  { id: 'tiruppur', name: 'Tiruppur (TN)' },
+  { id: 'madurai', name: 'Madurai (TN)' },
+  { id: 'tiruchirappalli', name: 'Trichy (TN)' },
+  { id: 'erode', name: 'Erode (TN)' },
+  { id: 'karur', name: 'Karur (TN)' },
+  { id: 'thoothukudi', name: 'Tuticorin (TN)' },
+  { id: 'tirunelveli', name: 'Tirunelveli (TN)' },
+  { id: 'krishnagiri', name: 'Hosur / Krishnagiri (TN)' },
+  { id: 'vellore', name: 'Vellore (TN)' },
+  // Kerala
+  { id: 'ernakulam', name: 'Ernakulam / Kochi (KL)' },
+  { id: 'palakkad', name: 'Palakkad & Walayar (KL)' },
+  { id: 'kozhikode', name: 'Kozhikode (KL)' },
+  { id: 'thiruvananthapuram', name: 'Thiruvananthapuram (KL)' },
+  { id: 'thrissur', name: 'Thrissur (KL)' },
+  { id: 'kottayam', name: 'Kottayam (KL)' },
+  { id: 'kollam', name: 'Kollam (KL)' },
+  { id: 'kannur', name: 'Kannur (KL)' }
 ];
 
 export const TransportFilterBar: React.FC<TransportFilterBarProps> = ({
   searchQuery,
   onSearchChange,
+  selectedState = 'all',
+  onSelectState,
   category,
   onCategoryChange,
   district,
@@ -104,7 +118,7 @@ export const TransportFilterBar: React.FC<TransportFilterBarProps> = ({
     <div className="bg-white rounded-xl border border-slate-200/90 p-3.5 mb-5 shadow-xs space-y-3">
       
       {/* Search Bar + Dropdowns */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
         
         {/* Search Input */}
         <div className="lg:col-span-2 relative">
@@ -124,6 +138,19 @@ export const TransportFilterBar: React.FC<TransportFilterBarProps> = ({
               <X className="w-3.5 h-3.5" />
             </button>
           )}
+        </div>
+
+        {/* State Select */}
+        <div>
+          <select
+            value={selectedState}
+            onChange={(e) => onSelectState && onSelectState(e.target.value)}
+            className="w-full py-2 px-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 font-semibold"
+          >
+            <option value="all">All States (TN & KL)</option>
+            <option value="Tamil Nadu">Tamil Nadu (TN)</option>
+            <option value="Kerala">Kerala (KL)</option>
+          </select>
         </div>
 
         {/* Category Select */}
@@ -177,6 +204,32 @@ export const TransportFilterBar: React.FC<TransportFilterBarProps> = ({
           <span className="text-slate-400 text-[11px] font-medium mr-1 flex items-center gap-1">
             <Filter className="w-3 h-3" /> Quick:
           </span>
+
+          {onSelectState && (
+            <>
+              <button
+                onClick={() => onSelectState(selectedState === 'Tamil Nadu' ? 'all' : 'Tamil Nadu')}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold transition-all ${
+                  selectedState === 'Tamil Nadu'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
+                }`}
+              >
+                <span>🏛️ Tamil Nadu Fleets</span>
+              </button>
+
+              <button
+                onClick={() => onSelectState(selectedState === 'Kerala' ? 'all' : 'Kerala')}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold transition-all ${
+                  selectedState === 'Kerala'
+                    ? 'bg-emerald-700 text-white shadow-xs'
+                    : 'bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-200'
+                }`}
+              >
+                <span>🌴 Kerala Fleets (SWIFT & Ports)</span>
+              </button>
+            </>
+          )}
 
           <button
             onClick={() => onQuickFilterChange(quickFilter === 'has_whatsapp' ? null : 'has_whatsapp')}

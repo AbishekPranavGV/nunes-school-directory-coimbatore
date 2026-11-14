@@ -35,6 +35,10 @@ export const TransportReportsView: React.FC<TransportReportsViewProps> = ({
     districtMap[op.district] = (districtMap[op.district] || 0) + 1;
   });
 
+  // State counts
+  const tnCount = operators.filter(o => o.state === 'Tamil Nadu').length;
+  const klCount = operators.filter(o => o.state === 'Kerala').length;
+
   const sortedCategories = Object.entries(categoryMap).sort((a, b) => b[1] - a[1]);
   const sortedDistricts = Object.entries(districtMap).sort((a, b) => b[1] - a[1]);
 
@@ -95,6 +99,33 @@ export const TransportReportsView: React.FC<TransportReportsViewProps> = ({
           </p>
         </div>
 
+      </div>
+
+      {/* State Geographical Distribution Strip */}
+      <div className="p-5 bg-gradient-to-r from-amber-500/10 via-teal-500/10 to-indigo-500/10 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            South India Inter-State Fleet Distribution
+          </span>
+          <h4 className="text-base font-bold text-slate-900 mt-0.5">
+            Tamil Nadu & Kerala Cross-Border Logistics Master Registry
+          </h4>
+          <p className="text-xs text-slate-500">
+            Interconnecting NH 544 (Salem-Coimbatore-Palakkad-Kochi) and NH 66 (Coastal Trivandrum-Kochi-Kozhikode) corridors.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="px-4 py-2 bg-white rounded-xl border border-amber-300 shadow-2xs text-center">
+            <span className="text-xs font-bold text-amber-900">🏛️ Tamil Nadu</span>
+            <p className="text-lg font-black text-amber-600">{tnCount} Fleets ({Math.round((tnCount / (operators.length || 1)) * 100)}%)</p>
+          </div>
+
+          <div className="px-4 py-2 bg-white rounded-xl border border-teal-300 shadow-2xs text-center">
+            <span className="text-xs font-bold text-teal-900">🌴 Kerala</span>
+            <p className="text-lg font-black text-teal-700">{klCount} Fleets ({Math.round((klCount / (operators.length || 1)) * 100)}%)</p>
+          </div>
+        </div>
       </div>
 
       {/* Breakdowns Grid */}

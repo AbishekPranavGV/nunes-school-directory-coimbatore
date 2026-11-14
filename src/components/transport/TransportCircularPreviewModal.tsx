@@ -19,13 +19,15 @@ interface TransportCircularPreviewModalProps {
   onClose: () => void;
   onEdit: (circular: TransportCircular) => void;
   onSendNow: (circular: TransportCircular) => void;
+  onOneClickBlast?: (circular: TransportCircular) => void;
 }
 
 export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewModalProps> = ({
   circular,
   onClose,
   onEdit,
-  onSendNow
+  onSendNow,
+  onOneClickBlast
 }) => {
   if (!circular) return null;
 
@@ -41,18 +43,18 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
       >
         
         {/* Top Control Bar */}
-        <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+        <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="p-1.5 rounded-lg bg-amber-100 text-amber-800">
               <FileText className="w-4 h-4" />
             </span>
             <div>
               <h3 className="font-bold text-slate-900 text-sm">Official Letterhead Preview</h3>
-              <p className="text-[11px] text-slate-500">Reference: {circular.ref_no}</p>
+              <p className="text-[11px] text-slate-500">Reference: {circular.ref_no} • Target: {circular.target_state || 'All South India'}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handlePrint}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold transition-all shadow-2xs"
@@ -71,6 +73,20 @@ export const TransportCircularPreviewModal: React.FC<TransportCircularPreviewMod
               <Edit3 className="w-3.5 h-3.5 text-amber-600" />
               <span>Edit Text</span>
             </button>
+
+            {onOneClickBlast && (
+              <button
+                onClick={() => {
+                  onOneClickBlast(circular);
+                  onClose();
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs hover:scale-102 cursor-pointer"
+                title="1-Click Dispatch to all registered fleet emails"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>⚡ 1-Click Automated Blast</span>
+              </button>
+            )}
 
             <button
               onClick={() => {

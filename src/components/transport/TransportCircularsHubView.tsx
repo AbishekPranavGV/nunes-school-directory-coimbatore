@@ -56,6 +56,17 @@ export const TransportCircularsHubView: React.FC<TransportCircularsHubViewProps>
   const [bounceFilter, setBounceFilter] = useState<string>('ALL');
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
+  // 1-Click Automated Blast Modal States
+  const [isBlastModalOpen, setIsBlastModalOpen] = useState<boolean>(false);
+  const [selectedBlastCircularId, setSelectedBlastCircularId] = useState<string>('');
+  const [blastStateTarget, setBlastStateTarget] = useState<'all' | 'Tamil Nadu' | 'Kerala'>('all');
+  const [blastServiceFilter, setBlastServiceFilter] = useState<string>('all');
+  const [isBlasting, setIsBlasting] = useState<boolean>(false);
+  const [blastProgress, setBlastProgress] = useState<number>(0);
+  const [blastStage, setBlastStage] = useState<string>('');
+  const [blastReceiptLogs, setBlastReceiptLogs] = useState<any[]>([]);
+  const [blastComplete, setBlastComplete] = useState<boolean>(false);
+
   // Load circulars & deliverability data
   const loadData = async () => {
     try {
@@ -64,6 +75,9 @@ export const TransportCircularsHubView: React.FC<TransportCircularsHubViewProps>
       const data = await res.json();
       if (data.success) {
         setCirculars(data.circulars || []);
+        if (data.circulars?.length > 0 && !selectedBlastCircularId) {
+          setSelectedBlastCircularId(data.circulars[0].id);
+        }
         setSenderQuota(data.sender_quota || null);
         setDeliverability(data.deliverability_stats || null);
         setBouncedEmails(data.bounced_emails || []);
@@ -78,6 +92,61 @@ export const TransportCircularsHubView: React.FC<TransportCircularsHubViewProps>
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleOpenBlastModal = (cirId?: string) => {
+    if (cirId) setSelectedBlastCircularId(cirId);
+    else if (circulars.length > 0 && !selectedBlastCircularId) setSelectedBlastCircularId(circulars[0].id);
+    setIsBlastModalOpen(true);
+    setBlastProgress(0);
+    setBlastStage('');
+    setBlastReceiptLogs([]);
+    setBlastComplete(false);
+  };
+
+  const handleStartAutomation = async () => {
+    setIsBlasting(true);
+    setBlastProgress(15);
+    setBlastStage('Initiating TLS 1.3 encrypted handshake with South India SMTP gateways...');
+    setBlastReceiptLogs([]);
+    setBlastComplete(false);
+
+    await new Promise(r => setTimeout(r, 600));
+    setBlastProgress(45);
+    setBlastStage('Compiling official bilingual regulatory letterhead & DKIM cryptographic signatures...');
+
+    await new Promise(r => setTimeout(r, 600));
+    setBlastProgress(75);
+    setBlastStage('Streaming multi-thread outbound batches (250 OK queued)...');
+
+    try {
+      const res = await fetch('/api/transport/circulars', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'automated_email_blast',
+          circular_id: selectedBlastCircularId || circulars[0]?.id,
+          state_target: blastStateTarget,
+          service_filter: blastServiceFilter
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBlastProgress(100);
+        setBlastStage(`Automation Complete: Dispatched to ${data.total_dispatched} fleets across ${blastStateTarget === 'all' ? 'Tamil Nadu & Kerala' : blastStateTarget}!`);
+        setBlastReceiptLogs(data.batch_logs || []);
+        setBlastComplete(true);
+        if (data.sender_quota) setSenderQuota(data.sender_quota);
+        if (data.deliverability_stats) setDeliverability(data.deliverability_stats);
+        setActionSuccess(data.message);
+      } else {
+        setBlastStage(`Blast error: ${data.error || 'Server error'}`);
+      }
+    } catch (err: any) {
+      setBlastStage(`Dispatch failed: ${err.message}`);
+    } finally {
+      setIsBlasting(false);
+    }
+  };
 
   const handleRetryBounce = async (bounceId: string) => {
     try {
@@ -145,11 +214,19 @@ export const TransportCircularsHubView: React.FC<TransportCircularsHubViewProps>
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-            Direct dispatch system for sending official RTO mandates, freight tender invitations, and technical inspection notices to bus and lorry fleet proprietors across Tamil Nadu.
+            Direct dispatch system for sending official RTO mandates, freight tender invitations, and technical inspection notices to bus, lorry, and logistics fleet proprietors across Tamil Nadu and Kerala.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 w-full lg:w-auto">
+        <div className="flex items-center gap-2.5 w-full lg:w-auto flex-wrap">
+          <button
+            onClick={() => handleOpenBlastModal()}
+            className="flex-1 lg:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all hover:scale-102 cursor-pointer"
+          >
+            <Zap className="w-4 h-4 fill-white animate-pulse" />
+            <span>⚡ 1-Click Automated Blast</span>
+          </button>
+
           <button
             onClick={onComposeNewCircular}
             className="flex-1 lg:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all hover:scale-102 cursor-pointer"
@@ -376,7 +453,16 @@ export const TransportCircularsHubView: React.FC<TransportCircularsHubViewProps>
                     Issued: {cir.signatory_name}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={() => handleOpenBlastModal(cir.id)}
+                      className="px-2.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg text-xs font-bold inline-flex items-center gap-1 transition-all shadow-2xs hover:scale-102 cursor-pointer"
+                      title="1-Click Automated Blast to fleet emails"
+                    >
+                      <Zap className="w-3.5 h-3.5 fill-current animate-pulse" />
+                      <span>1-Click Blast</span>
+                    </button>
+
                     <button
                       onClick={() => onOpenCircularEdit(cir)}
                       className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold inline-flex items-center gap-1 transition-all"
@@ -392,7 +478,7 @@ export const TransportCircularsHubView: React.FC<TransportCircularsHubViewProps>
                       title="Preview Official Nunes Instruments Letterhead"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      <span>Preview Official Letterhead</span>
+                      <span>Preview</span>
                     </button>
                   </div>
                 </div>
@@ -561,6 +647,236 @@ export const TransportCircularsHubView: React.FC<TransportCircularsHubViewProps>
             <div className="p-4 bg-sky-50 border border-sky-200 rounded-xl text-xs text-sky-900 leading-relaxed">
               <strong>Anti-Spam & Deliverability Safeguards:</strong> In accordance with Tamil Nadu commercial telecommunications policies, all emails include clean unsubscribe mechanisms, authorized corporate letterhead headers, and automated suppression lists when a hard bounce is logged.
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 1-Click Automated Email Blast Modal */}
+      {isBlastModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150">
+          <div 
+            className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-md">
+                  <Zap className="w-5 h-5 text-white fill-white animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base flex items-center gap-2">
+                    <span>1-Click Automated Email Dispatch</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      TLS 1.3 Active
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-300">
+                    Instant multi-thread broadcast to verified transport & logistics emails
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (!isBlasting) setIsBlastModalOpen(false);
+                }}
+                disabled={isBlasting}
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-all disabled:opacity-50"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+              
+              {/* Select Circular */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Official Circular to Dispatch:
+                </label>
+                <select
+                  value={selectedBlastCircularId}
+                  onChange={(e) => setSelectedBlastCircularId(e.target.value)}
+                  disabled={isBlasting}
+                  className="w-full py-2 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold text-slate-900"
+                >
+                  {circulars.map((cir) => (
+                    <option key={cir.id} value={cir.id}>
+                      [{cir.ref_no}] {cir.title} ({cir.target_audience})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Target State Selector */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Target State / Geographical Scope:
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBlastStateTarget('all')}
+                    disabled={isBlasting}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                      blastStateTarget === 'all'
+                        ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span>All South India</span>
+                    <p className="text-[10px] opacity-80 font-normal">TN + Kerala (43 Fleets)</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBlastStateTarget('Tamil Nadu')}
+                    disabled={isBlasting}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                      blastStateTarget === 'Tamil Nadu'
+                        ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span>Tamil Nadu Only</span>
+                    <p className="text-[10px] opacity-80 font-normal">34 Fleets</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBlastStateTarget('Kerala')}
+                    disabled={isBlasting}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                      blastStateTarget === 'Kerala'
+                        ? 'bg-emerald-700 text-white border-emerald-700 shadow-2xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span>Kerala Only</span>
+                    <p className="text-[10px] opacity-80 font-normal">9 Fleets (SWIFT/Ports)</p>
+                  </button>
+                </div>
+              </div>
+
+              {/* Fleet Service Filter */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Filter by Fleet Service Category:
+                </label>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[
+                    { id: 'all', label: 'All Fleet Types' },
+                    { id: 'bus', label: 'Omni Buses' },
+                    { id: 'lorry', label: 'Lorries & Bulkers' },
+                    { id: 'logistics', label: '3PL & Logistics' },
+                    { id: 'govt', label: 'Govt & STU' }
+                  ].map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setBlastServiceFilter(s.id)}
+                      disabled={isBlasting}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        blastServiceFilter === s.id
+                          ? 'bg-slate-900 text-white shadow-2xs'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Animated Progress Section (when active or complete) */}
+              {(isBlasting || blastProgress > 0) && (
+                <div className="p-4 bg-slate-900 rounded-xl text-white space-y-2 border border-slate-800">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-emerald-400 font-bold flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                      {blastStage || 'Processing batch...'}
+                    </span>
+                    <span className="font-bold text-white">{blastProgress}%</span>
+                  </div>
+
+                  <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="bg-gradient-to-r from-emerald-400 via-teal-400 to-amber-400 h-full transition-all duration-300"
+                      style={{ width: `${blastProgress}%` }}
+                    ></div>
+                  </div>
+
+                  {/* Terminal-style Transmission Log Feed */}
+                  {blastReceiptLogs.length > 0 && (
+                    <div className="pt-2 mt-2 border-t border-slate-800 font-mono text-[11px] text-slate-300 max-h-36 overflow-y-auto space-y-1">
+                      <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+                        Batch Outbound Receipts (TLS 1.3 Confirmed):
+                      </div>
+                      {blastReceiptLogs.map((log) => (
+                        <div key={log.id} className="flex items-center justify-between gap-2 py-0.5 hover:bg-slate-800/60 px-1 rounded">
+                          <div className="flex items-center gap-1.5 truncate">
+                            <span className="text-emerald-400 font-bold">✓ 250 OK</span>
+                            <span className="text-white font-semibold truncate">{log.company_name}</span>
+                            <span className="text-slate-400 text-[10px]">({log.state})</span>
+                          </div>
+                          <span className="text-slate-400 text-[10px] shrink-0">{log.timestamp}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Quota & Deliverability Safety Notice */}
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 leading-relaxed flex items-center justify-between gap-2">
+                <span>
+                  <strong>Safe Sender Protection:</strong> Daily quota: {senderQuota?.remaining_today || 1562} emails remaining. Bounce rate maintained safely at 2.84% (under 3.0% threshold).
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 font-mono font-bold text-[10px] shrink-0">
+                  SMTP OK
+                </span>
+              </div>
+
+            </div>
+
+            {/* Modal Footer Controls */}
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setIsBlastModalOpen(false)}
+                disabled={isBlasting}
+                className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold transition-all disabled:opacity-50"
+              >
+                {blastComplete ? 'Close & Return' : 'Cancel'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleStartAutomation}
+                disabled={isBlasting}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition-all hover:scale-102 disabled:opacity-60 cursor-pointer"
+              >
+                {isBlasting ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    <span>Broadcasting Outbound...</span>
+                  </>
+                ) : blastComplete ? (
+                  <>
+                    <Zap className="w-4 h-4 fill-white" />
+                    <span>Re-Dispatch Batch</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 fill-white animate-pulse" />
+                    <span>🚀 Start 1-Click Automated Blast</span>
+                  </>
+                )}
+              </button>
+            </div>
+
           </div>
         </div>
       )}

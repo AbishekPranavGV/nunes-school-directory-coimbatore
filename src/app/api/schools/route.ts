@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMasterSchoolsFromMemoryOrDb, getDb, safeDbExecute } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 import { matchesDistrict, getCanonicalDistrictName } from '@/lib/data/tamilNaduDistricts';
+import { matchesKeralaDistrict, getKeralaCanonicalName } from '@/lib/data/keralaDistricts';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const q = (searchParams.get('q') || '').toLowerCase().trim();
     const district = searchParams.get('district');
+    const state = searchParams.get('state');
     const management = searchParams.get('management');
     const board = searchParams.get('board');
     const category = searchParams.get('category');
@@ -33,22 +35,37 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'school_name';
     const sortOrder = searchParams.get('sortOrder') === 'desc' ? -1 : 1;
 
-    const canonicalQ = q ? getCanonicalDistrictName(q) : undefined;
+    const canonicalTN = q ? getCanonicalDistrictName(q) : undefined;
+    const canonicalKL = q ? getKeralaCanonicalName(q) : undefined;
+    const canonicalQ = canonicalTN || canonicalKL;
     const effectiveDistrict = canonicalQ ? 'all' : (district || undefined);
-    const allSchools = await getMasterSchoolsFromMemoryOrDb(effectiveDistrict);
+    const allSchools = await getMasterSchoolsFromMemoryOrDb(effectiveDistrict, state || undefined);
 
     let filtered = allSchools.filter((s: any) => {
+      // State filter
+      if (state && state.toLowerCase() !== 'all') {
+        const normState = state.toLowerCase();
+        const schoolState = (s.state || 'Tamil Nadu').toLowerCase();
+        if (normState === 'kerala' && schoolState !== 'kerala') return false;
+        if ((normState === 'tamil-nadu' || normState === 'tamil nadu') && schoolState !== 'tamil nadu') return false;
+      }
+
       // District filter: If query targets a specific district name, allow it through
       if (district && district.toLowerCase() !== 'all' && district.toLowerCase() !== 'statewide') {
         if (canonicalQ) {
-          if (!matchesDistrict(s.district || '', canonicalQ)) {
+          const matchTarget = matchesDistrict(s.district || '', canonicalQ) || matchesKeralaDistrict(s.district || '', canonicalQ);
+          if (!matchTarget) {
             return false;
           }
-        } else if (!matchesDistrict(s.district || '', district)) {
-          return false;
+        } else {
+          const matchDist = matchesDistrict(s.district || '', district) || matchesKeralaDistrict(s.district || '', district);
+          if (!matchDist) {
+            return false;
+          }
         }
       }
-      // Global search across name, code, block, taluk, locality, address, PIN, district & phonetic aliases
+
+      // Global search across name, code, block, taluk, locality, address, PIN, district & state
       if (q) {
         const matchesName = (s.school_name || '').toLowerCase().includes(q);
         const matchesUdise = (s.udise_code || '').toLowerCase().includes(q);
@@ -57,9 +74,10 @@ export async function GET(req: NextRequest) {
         const matchesLocality = (s.locality || s.village_locality || '').toLowerCase().includes(q);
         const matchesPin = (s.pincode || '').toLowerCase().includes(q);
         const matchesDist = (s.district || '').toLowerCase().includes(q);
-        const canonicalQ = getCanonicalDistrictName(q);
-        const matchesCanonicalDist = canonicalQ ? matchesDistrict(s.district || '', canonicalQ) : false;
-        if (!matchesName && !matchesUdise && !matchesBlock && !matchesTaluk && !matchesLocality && !matchesPin && !matchesDist && !matchesCanonicalDist) {
+        const matchesState = (s.state || '').toLowerCase().includes(q);
+        const matchesCanonicalDist = (canonicalTN && matchesDistrict(s.district || '', canonicalTN)) ||
+                                     (canonicalKL && matchesKeralaDistrict(s.district || '', canonicalKL));
+        if (!matchesName && !matchesUdise && !matchesBlock && !matchesTaluk && !matchesLocality && !matchesPin && !matchesDist && !matchesState && !matchesCanonicalDist) {
           return false;
         }
       }

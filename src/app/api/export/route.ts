@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMasterSchoolsFromMemoryOrDb } from '@/lib/db';
 import { matchesDistrict } from '@/lib/data/tamilNaduDistricts';
+import { matchesKeralaDistrict } from '@/lib/data/keralaDistricts';
 import ExcelJS from 'exceljs';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest) {
     const format = searchParams.get('format') || 'csv';   // 'csv', 'xlsx', 'json'
     const school_id = searchParams.get('school_id');
     const district = searchParams.get('district');
+    const state = searchParams.get('state');
     const q = (searchParams.get('q') || '').toLowerCase().trim();
     const management = searchParams.get('management');
     const board = searchParams.get('board');
@@ -29,7 +31,7 @@ export async function GET(req: NextRequest) {
     const taluk = searchParams.get('taluk');
     const quick_filter = searchParams.get('quick_filter');
 
-    const allSchools = await getMasterSchoolsFromMemoryOrDb(district || undefined);
+    const allSchools = await getMasterSchoolsFromMemoryOrDb(district || undefined, state || undefined);
 
     // Single school export
     if (type === 'single' && school_id) {
@@ -55,8 +57,14 @@ export async function GET(req: NextRequest) {
                           s.pincode.toLowerCase().includes(q);
           if (!matches) return false;
         }
+        if (state && state.toLowerCase() !== 'all') {
+          const normState = state.toLowerCase();
+          const schoolState = (s.state || 'Tamil Nadu').toLowerCase();
+          if (normState === 'kerala' && schoolState !== 'kerala') return false;
+          if ((normState === 'tamil-nadu' || normState === 'tamil nadu') && schoolState !== 'tamil nadu') return false;
+        }
         if (district && district.toLowerCase() !== 'all' && district.toLowerCase() !== 'statewide') {
-          if (!matchesDistrict(s.district || '', district)) {
+          if (!matchesDistrict(s.district || '', district) && !matchesKeralaDistrict(s.district || '', district)) {
             return false;
           }
         }

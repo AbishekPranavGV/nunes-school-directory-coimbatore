@@ -62,18 +62,22 @@ function pixelToLat(pixelY: number, zoom: number): number {
   return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 }
 
-// Major Tamil Nadu Hub Shortcuts for Quick Fly-To
-const TAMIL_NADU_HUBS = [
-  { id: 'all_tn', name: 'All Tamil Nadu', lat: 11.1271, lng: 78.6569, zoom: 7, desc: 'Statewide Corridors' },
-  { id: 'coimbatore', name: 'Coimbatore', lat: 11.0168, lng: 76.9558, zoom: 11, desc: 'Pumps & Omni Bus Hub' },
-  { id: 'namakkal', name: 'Namakkal', lat: 11.2189, lng: 78.1674, zoom: 12, desc: 'National Truck City' },
-  { id: 'salem', name: 'Salem & Sankagiri', lat: 11.6643, lng: 78.1460, zoom: 11, desc: 'Bulkers & Cement Hub' },
-  { id: 'chennai', name: 'Chennai Port', lat: 13.0827, lng: 80.2707, zoom: 11, desc: 'Port CFS & Koyambedu' },
-  { id: 'madurai', name: 'Madurai', lat: 9.9252, lng: 78.1198, zoom: 11, desc: 'South Highway Hub' },
-  { id: 'tiruppur', name: 'Tiruppur', lat: 11.1085, lng: 77.3411, zoom: 12, desc: 'Textile Export Drayage' },
-  { id: 'thoothukudi', name: 'Tuticorin', lat: 8.7642, lng: 78.1348, zoom: 12, desc: 'VOC Port Sea Container' },
-  { id: 'krishnagiri', name: 'Hosur SIPCOT', lat: 12.7409, lng: 77.8253, zoom: 12, desc: 'Auto Corridor' },
-  { id: 'trichy', name: 'Trichy BHEL', lat: 10.7905, lng: 78.7047, zoom: 11, desc: 'Heavy Boiler ODC' }
+// Major South India (Tamil Nadu & Kerala) Hub Shortcuts for Quick Fly-To
+const SOUTH_INDIA_HUBS = [
+  { id: 'all_south', name: 'All South India (TN & KL)', lat: 10.5000, lng: 77.2000, zoom: 7, desc: 'Inter-State Corridors' },
+  // Tamil Nadu
+  { id: 'coimbatore', name: 'Coimbatore (TN)', lat: 11.0168, lng: 76.9558, zoom: 11, desc: 'Pumps & Omni Bus Hub' },
+  { id: 'namakkal', name: 'Namakkal (TN)', lat: 11.2189, lng: 78.1674, zoom: 12, desc: 'National Truck City' },
+  { id: 'salem', name: 'Salem & Sankagiri (TN)', lat: 11.6643, lng: 78.1460, zoom: 11, desc: 'Bulkers & Cement Hub' },
+  { id: 'chennai', name: 'Chennai Port (TN)', lat: 13.0827, lng: 80.2707, zoom: 11, desc: 'Port CFS & Koyambedu' },
+  { id: 'madurai', name: 'Madurai (TN)', lat: 9.9252, lng: 78.1198, zoom: 11, desc: 'South Highway Hub' },
+  { id: 'thoothukudi', name: 'Tuticorin (TN)', lat: 8.7642, lng: 78.1348, zoom: 12, desc: 'VOC Port Sea Container' },
+  // Kerala
+  { id: 'kochi', name: 'Kochi Vallarpadam (KL)', lat: 9.9816, lng: 76.2490, zoom: 12, desc: 'ICTT Port & KSRTC SWIFT Hub' },
+  { id: 'palakkad', name: 'Palakkad Walayar (KL)', lat: 10.7867, lng: 76.6548, zoom: 12, desc: 'TN-KL Border Corridor & Goods Hub' },
+  { id: 'kozhikode', name: 'Kozhikode Mavoor (KL)', lat: 11.2588, lng: 75.7804, zoom: 12, desc: 'Malabar Freight Corridor' },
+  { id: 'trivandrum', name: 'Trivandrum Central (KL)', lat: 8.5241, lng: 76.9366, zoom: 12, desc: 'Vizhinjam Port Gateway' },
+  { id: 'thrissur', name: 'Thrissur Central (KL)', lat: 10.5276, lng: 76.2144, zoom: 12, desc: 'Commercial Transit Depot' }
 ];
 
 export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps> = ({
@@ -313,7 +317,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
   };
 
   // Quick Hub Fly-To
-  const flyToHub = (hub: typeof TAMIL_NADU_HUBS[0]) => {
+  const flyToHub = (hub: typeof SOUTH_INDIA_HUBS[0]) => {
     setCenterLat(hub.lat);
     setCenterLng(hub.lng);
     setZoom(hub.zoom);
@@ -378,8 +382,8 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
             <h2 className="text-xs sm:text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-              <span>Tamil Nadu Live Transport & Logistics Google Map</span>
-              <span className="hidden md:inline text-slate-400 font-normal">| RTO Highway Fleet Corridors</span>
+              <span>South India Live Transport & Logistics Google Map</span>
+              <span className="hidden md:inline text-slate-400 font-normal">| Tamil Nadu & Kerala RTO Highway Corridors</span>
             </h2>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
               {filteredOperators.length} Registered Fleets
@@ -538,7 +542,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
           <span className="text-[10px] font-bold uppercase text-slate-400 whitespace-nowrap">
             Fly to Hub:
           </span>
-          {TAMIL_NADU_HUBS.map(hub => (
+          {SOUTH_INDIA_HUBS.map(hub => (
             <button
               key={hub.id}
               onClick={() => flyToHub(hub)}
@@ -665,6 +669,11 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
                 {/* Google Maps Style Custom Pin Bubble */}
                 <div className="flex flex-col items-center">
                   <div className={`px-2 py-1 rounded-xl flex items-center gap-1.5 shadow-lg border-2 ${style.bg} ${style.border} ${style.text} ${style.shadow}`}>
+                    {operator.state === 'Kerala' ? (
+                      <span className="px-1 py-0.2 rounded bg-teal-950/80 text-[8px] font-bold text-teal-200">KL</span>
+                    ) : (
+                      <span className="px-1 py-0.2 rounded bg-amber-950/80 text-[8px] font-bold text-amber-200">TN</span>
+                    )}
                     <Icon className="w-3.5 h-3.5" />
                     <span className="text-[10px] font-bold max-w-[90px] truncate leading-none">
                       {operator.company_name.split(' ')[0]}
@@ -702,9 +711,9 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
                 {/* InfoWindow Header */}
                 <div className={`p-3 text-white flex items-start justify-between gap-2 ${style.bg}`}>
                   <div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/20 border border-white/30 uppercase tracking-wide">
-                        {br ? 'Regional Depot / Branch' : style.label}
+                        {br ? `Regional Depot • ${op.state}` : `${style.label} • ${op.state}`}
                       </span>
                       <span className="text-[10px] font-mono text-white/80">
                         Est. {op.established_year}
@@ -714,7 +723,7 @@ export const Transport2DGoogleMapModal: React.FC<Transport2DGoogleMapModalProps>
                       {br ? br.branch_name : op.company_name}
                     </h3>
                     <p className="text-[11px] text-white/90">
-                      {br ? `Parent Fleet: ${op.company_name}` : op.category}
+                      {br ? `Parent Fleet: ${op.company_name} (${op.state})` : `${op.category} • ${op.state}`}
                     </p>
                   </div>
 

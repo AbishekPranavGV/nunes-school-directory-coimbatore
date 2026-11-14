@@ -72,14 +72,14 @@ export const TransportBranchesView: React.FC<TransportBranchesViewProps> = ({
               <Building2 className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold tracking-tight">
-              Tamil Nadu Transport Regional Branch Network
+              South India Transport Regional Branch Network
             </h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white text-amber-900 shadow-2xs">
-              {allBranches.length} Active Regional Depots
+              {allBranches.length} Active Regional Depots (TN & KL)
             </span>
           </div>
           <p className="text-xs sm:text-sm text-amber-100 max-w-2xl leading-relaxed">
-            Direct depot contacts, regional booking lounges, container freight yards, and parcel transshipment hubs across all 38 districts of Tamil Nadu.
+            Direct depot contacts, regional booking lounges, container freight yards, and parcel transshipment hubs across key transport hubs in Tamil Nadu and Kerala.
           </p>
         </div>
 

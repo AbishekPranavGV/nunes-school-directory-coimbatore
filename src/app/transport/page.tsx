@@ -37,6 +37,7 @@ export default function TransportDashboardPage() {
   const [loading, setLoading] = useState<boolean>(true);
 
   // Filters
+  const [selectedState, setSelectedState] = useState<string>('all');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [serviceFilter, setServiceFilter] = useState<string>('all');
   const [category, setCategory] = useState<string>('all');
@@ -44,6 +45,12 @@ export default function TransportDashboardPage() {
   const [status, setStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [quickFilter, setQuickFilter] = useState<string | null>(null);
+
+  // Floating 1-Click Email Toast Notification
+  const [toastNotification, setToastNotification] = useState<{
+    message: string;
+    receipt?: any;
+  } | null>(null);
 
   // Pagination & Sorting
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -69,13 +76,13 @@ export default function TransportDashboardPage() {
 
   // Set document title dynamically
   useEffect(() => {
-    document.title = 'Nunes Transport & Fleet Intelligence — Tamil Nadu (Bus, Lorry, Govt & 3PL Logistics)';
+    document.title = 'Nunes Transport & Fleet Intelligence — South India (Tamil Nadu & Kerala Fleets)';
   }, []);
 
   // Fetch KPI
   const loadKpi = useCallback(async () => {
     try {
-      const res = await fetch(`/api/transport/kpi?district=${selectedDistrict}`);
+      const res = await fetch(`/api/transport/kpi?district=${selectedDistrict}&state=${selectedState}`);
       const data = await res.json();
       if (data.success && data.kpi) {
         setKpi(data.kpi);
@@ -83,7 +90,7 @@ export default function TransportDashboardPage() {
     } catch (err) {
       console.error('Error fetching Transport KPI:', err);
     }
-  }, [selectedDistrict]);
+  }, [selectedDistrict, selectedState]);
 
   // Fetch Transport Operators
   const loadOperators = useCallback(async () => {
@@ -97,6 +104,7 @@ export default function TransportDashboardPage() {
       });
 
       if (searchQuery) params.append('q', searchQuery);
+      if (selectedState && selectedState !== 'all') params.append('state', selectedState);
       if (serviceFilter && serviceFilter !== 'all') params.append('service_type', serviceFilter);
       if (category && category !== 'all') params.append('category', category);
       if (selectedDistrict && selectedDistrict !== 'all') params.append('district', selectedDistrict);
@@ -123,6 +131,7 @@ export default function TransportDashboardPage() {
     sortBy,
     sortOrder,
     searchQuery,
+    selectedState,
     serviceFilter,
     category,
     selectedDistrict,
@@ -130,6 +139,40 @@ export default function TransportDashboardPage() {
     status,
     quickFilter,
   ]);
+
+  // 1-Click Automated Circular Send Handler
+  const handleOneClickEmail = async (operator: TransportRecord) => {
+    if (!operator.email) {
+      alert(`Operator ${operator.company_name} does not have a registered email address.`);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/transport/circulars', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'one_click_send_to_operator',
+          operator_id: operator.id,
+          operator_email: operator.email,
+          company_name: operator.company_name
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setToastNotification({
+          message: `⚡ 1-Click Circular Dispatched to ${operator.company_name} (${operator.email})!`,
+          receipt: data.receipt
+        });
+        loadKpi();
+        setTimeout(() => setToastNotification(null), 5500);
+      } else {
+        alert(`Error dispatching circular: ${data.error || 'Server error'}`);
+      }
+    } catch (err: any) {
+      alert(`Network error: ${err.message}`);
+    }
+  };
 
   // Load all operators for reports, branch aggregations and map
   const loadAllOperators = useCallback(() => {
@@ -219,6 +262,11 @@ export default function TransportDashboardPage() {
             setCurrentView(v);
           }
         }}
+        selectedState={selectedState}
+        onSelectState={(st) => {
+          setSelectedState(st);
+          setCurrentPage(1);
+        }}
         selectedDistrict={selectedDistrict}
         onSelectDistrict={(d) => {
           setSelectedDistrict(d);
@@ -233,6 +281,7 @@ export default function TransportDashboardPage() {
         onOpenWorker={() => setIsWorkerOpen(true)}
         onOpenExport={() => setIsExportOpen(true)}
         onOpenMap={() => setIs2DMapOpen(true)}
+        onOpenBlastModal={() => setCurrentView('circulars')}
       />
 
       {/* Main Container */}
@@ -273,6 +322,11 @@ export default function TransportDashboardPage() {
               searchQuery={searchQuery}
               onSearchChange={(q) => {
                 setSearchQuery(q);
+                setCurrentPage(1);
+              }}
+              selectedState={selectedState}
+              onSelectState={(st) => {
+                setSelectedState(st);
                 setCurrentPage(1);
               }}
               category={category}
@@ -322,6 +376,7 @@ export default function TransportDashboardPage() {
               onSelectOperator={setSelectedOperator}
               onQuickWhatsApp={(op) => setDispatchOperator(op)}
               onEditOperator={(op) => setEditingOperator(op)}
+              onOneClickEmail={handleOneClickEmail}
             />
 
           </div>
@@ -404,6 +459,7 @@ export default function TransportDashboardPage() {
         onOpenEditModal={(op) => {
           setEditingOperator(op);
         }}
+        onOneClickEmail={handleOneClickEmail}
       />
 
       {/* 2D Google Maps Style Live Geographic Modal */}
@@ -443,6 +499,10 @@ export default function TransportDashboardPage() {
           setIsCircularEditOpen(true);
         }}
         onSendNow={handleSendCircularOutbound}
+        onOneClickBlast={() => {
+          setSelectedCircularForPreview(null);
+          setCurrentView('circulars');
+        }}
       />
 
       {/* Circular Compose / Edit Modal */}
@@ -484,11 +544,41 @@ export default function TransportDashboardPage() {
         }}
       />
 
+      {/* 1-Click Email Automated Dispatch Toast Notification */}
+      {toastNotification && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md bg-slate-900 text-white rounded-2xl shadow-2xl border border-emerald-500/40 p-4 animate-in slide-in-from-bottom-5 duration-200">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-bold shrink-0 shadow-sm shadow-emerald-500/30">
+              ⚡
+            </div>
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-bold text-xs text-emerald-400">1-Click Dispatch Confirmed (250 OK)</p>
+                <button
+                  onClick={() => setToastNotification(null)}
+                  className="text-slate-400 hover:text-white text-xs"
+                >
+                  ✕
+                </button>
+              </div>
+              <p className="text-xs text-slate-200 leading-snug">{toastNotification.message}</p>
+              {toastNotification.receipt && (
+                <div className="pt-1 text-[10px] font-mono text-slate-400 flex items-center gap-2">
+                  <span>ID: {toastNotification.receipt.receipt_id}</span>
+                  <span>•</span>
+                  <span className="text-emerald-400 font-semibold">{toastNotification.receipt.status}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <footer className="mt-auto border-t border-slate-200/80 bg-white py-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© {new Date().getFullYear()} Nunes Instruments — Tamil Nadu Transport Intelligence Platform</p>
-          <p className="text-slate-400">Tamil Nadu Omni Bus Owners Association (TOBOA) & State Lorry Owners Federation (SLOF) Certified</p>
+          <p>© {new Date().getFullYear()} Nunes Instruments — South India Transport & Logistics Intelligence Platform (Tamil Nadu & Kerala)</p>
+          <p className="text-slate-400">TOBOA, SLOF & Kerala State Lorry Owners Federation (KSLOF) Certified</p>
         </div>
       </footer>
 

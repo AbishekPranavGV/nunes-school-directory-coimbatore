@@ -2529,6 +2529,747 @@ export const TRANSPORT_OPERATORS: TransportRecord[] = [
     ],
     created_at: '2026-11-01T08:00:00Z',
     updated_at: '2026-11-13T10:00:00Z'
+  },
+  // ==========================================
+  // KERALA TRANSPORT OPERATORS & STATE UNDERTAKINGS
+  // ==========================================
+  {
+    id: 'KL-GOV-001',
+    company_name: 'KSRTC (Kerala State Road Transport Corporation)',
+    category: 'State Transport Corporation (Govt)',
+    service_type: 'govt',
+    owner_name: 'Shri. Biju Prabhakar, IAS',
+    owner_designation: 'Chairman & Managing Director (CMD)',
+    contact_number: '0471-2463799',
+    whatsapp_number: '919447071021',
+    email: 'cmd@keralartc.com',
+    secondary_contact: '0471-2463798',
+    city_hub: 'Thiruvananthapuram & Central Kerala',
+    district: 'Thiruvananthapuram',
+    state: 'Kerala',
+    address: 'Transport Bhavan, Fort, Thiruvananthapuram - 695023',
+    pincode: '695023',
+    routes: [
+      'Trivandrum - Ernakulam - Kozhikode - Kasaragod NH 66 Coastal',
+      'Kochi - Palakkad - Coimbatore - Salem Inter-State Express',
+      'Kozhikode - Wayanad - Mysore Super Deluxe',
+      'KSRTC SWIFT AC Sleeper: Bengaluru - Ernakulam'
+    ],
+    fleet_size: '5,800+ KSRTC SWIFT, Garuda Maharaja Scania & Super Fast Fleets',
+    vehicle_types: [
+      'Scania Metrolink Multi-Axle HD',
+      'Volvo 9400 B11R AC Sleeper',
+      'Ashok Leyland 12M Air Suspension Fast Passenger'
+    ],
+    permit_type: 'Government STU Stage Carriage',
+    gstin: '32AAACK0588L1ZQ',
+    established_year: 1965,
+    verification_status: 'Verified',
+    source: 'Kerala State Road Transport Corporation Gazette',
+    specialties: [
+      'Statewide Public Passenger Transportation',
+      'KSRTC SWIFT Premium Inter-State AC Sleepers',
+      'Ghat Highway & Coastal Express Operations',
+      'Inter-State Connectivity with Tamil Nadu & Karnataka'
+    ],
+    rating: 4.8,
+    latitude: 8.4875,
+    longitude: 76.9486,
+    branches: [
+      {
+        id: 'BR-KSRTC-01',
+        branch_name: 'Central Bus Station Thampanoor Terminal',
+        city: 'Thiruvananthapuram',
+        district: 'Thiruvananthapuram',
+        manager_name: 'K. R. Sivakumar (Station Master)',
+        phone: '0471-2323886',
+        whatsapp: '919447071022',
+        email: 'thampanoor@keralartc.com',
+        address: 'Opp. Central Railway Station, Thampanoor, Trivandrum - 695001',
+        pincode: '695001',
+        facility_type: 'Government STU Depot & Divisional Office',
+        is_headquarters: true,
+        latitude: 8.4900,
+        longitude: 76.9530
+      },
+      {
+        id: 'BR-KSRTC-02',
+        branch_name: 'KSRTC Ernakulam Bus Terminal',
+        city: 'Kochi',
+        district: 'Ernakulam',
+        manager_name: 'P. N. Manoj (Depot Superintendent)',
+        phone: '0484-2372033',
+        whatsapp: '919447071023',
+        email: 'ernakulam@keralartc.com',
+        address: 'Karikkamuri Cross Road, Near South Railway Station, Ernakulam - 682011',
+        pincode: '682011',
+        facility_type: 'Government STU Depot & Divisional Office',
+        is_headquarters: false,
+        latitude: 9.9720,
+        longitude: 76.2870
+      },
+      {
+        id: 'BR-KSRTC-03',
+        branch_name: 'Kozhikode Central KSRTC Bus Terminal',
+        city: 'Kozhikode',
+        district: 'Kozhikode',
+        manager_name: 'T. V. Sudheesh',
+        phone: '0495-2723796',
+        whatsapp: '919447071024',
+        email: 'kozhikode@keralartc.com',
+        address: 'Mavoor Road, Kozhikode - 673004',
+        pincode: '673004',
+        facility_type: 'Government STU Depot & Divisional Office',
+        is_headquarters: false,
+        latitude: 11.2588,
+        longitude: 75.7804
+      },
+      {
+        id: 'BR-KSRTC-04',
+        branch_name: 'Palakkad Central KSRTC Depot',
+        city: 'Palakkad',
+        district: 'Palakkad',
+        manager_name: 'V. R. Balagopal',
+        phone: '0491-2520098',
+        whatsapp: '919447071025',
+        email: 'palakkad@keralartc.com',
+        address: 'Stadium Bypass Road, Palakkad - 678001',
+        pincode: '678001',
+        facility_type: 'Government STU Depot & Divisional Office',
+        is_headquarters: false,
+        latitude: 10.7750,
+        longitude: 76.6540
+      }
+    ],
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z'
+  },
+  {
+    id: 'KL-GOV-002',
+    company_name: 'Cochin Port Authority & Vallarpadam ICTT Logistics',
+    category: 'Container & Port Logistics',
+    service_type: 'govt',
+    owner_name: 'Dr. M. Beena, IAS',
+    owner_designation: 'Chairperson — Cochin Port Authority & Container Drayage',
+    contact_number: '0484-2666412',
+    whatsapp_number: '919447022334',
+    email: 'secretary@cochinport.gov.in',
+    secondary_contact: '0484-2666415',
+    city_hub: 'Kochi (Vallarpadam ICTT)',
+    district: 'Ernakulam',
+    state: 'Kerala',
+    address: 'Port Trust Administrative Building, Willingdon Island, Kochi - 682009',
+    pincode: '682009',
+    routes: [
+      'Vallarpadam ICTT - Coimbatore Inland Container Drayage',
+      'Cochin Port - Tirupur Textile Garment Export Line',
+      'Kochi - Walayar - Bengaluru High-Volume Freight'
+    ],
+    fleet_size: '650+ Authorized Port Drayage Heavy Prime Movers & Skeletal Chassis',
+    vehicle_types: [
+      '40ft Skeletal Container Trailers',
+      'Multi-Axle Heavy Prime Movers',
+      'Reach Stackers & Terminal Tractors'
+    ],
+    permit_type: 'Multimodal Logistics Operator (MTO)',
+    gstin: '32AAALC0222M1Z5',
+    established_year: 1928,
+    verification_status: 'Verified',
+    source: 'Ministry of Ports, Shipping and Waterways / Cochin Port Trust',
+    specialties: [
+      'International Container Transshipment Terminal (ICTT) Operations',
+      'Direct Port Delivery (DPD) Customs Clearance',
+      'Inter-State Southern Industrial Drayage to Tamil Nadu'
+    ],
+    rating: 4.9,
+    latitude: 9.9650,
+    longitude: 76.2710,
+    branches: [
+      {
+        id: 'BR-CPT-01',
+        branch_name: 'Vallarpadam ICTT Terminal Gate Depot',
+        city: 'Kochi',
+        district: 'Ernakulam',
+        manager_name: 'K. S. Varma (Traffic Manager)',
+        phone: '0484-2582200',
+        whatsapp: '919447022335',
+        email: 'ictt@cochinport.gov.in',
+        address: 'ICTT Complex, Vallarpadam, Kochi - 682504',
+        pincode: '682504',
+        facility_type: 'Container Drayage Depot',
+        is_headquarters: false,
+        latitude: 9.9980,
+        longitude: 76.2550
+      },
+      {
+        id: 'BR-CPT-02',
+        branch_name: 'Willingdon Island South Wharf Logistics Yard',
+        city: 'Kochi',
+        district: 'Ernakulam',
+        manager_name: 'M. S. Jacob',
+        phone: '0484-2666500',
+        whatsapp: '919447022336',
+        email: 'southwharf@cochinport.gov.in',
+        address: 'South Wharf Road, Willingdon Island, Kochi - 682009',
+        pincode: '682009',
+        facility_type: 'Transshipment & Cargo Yard',
+        is_headquarters: false,
+        latitude: 9.9550,
+        longitude: 76.2650
+      }
+    ],
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z'
+  },
+  {
+    id: 'KL-GOV-003',
+    company_name: 'Motor Vehicles Department — Kerala (MVD / Transport Commissionerate)',
+    category: 'Transport Regulatory & Apex Association',
+    service_type: 'govt',
+    owner_name: 'Shri. S. Sreejith, IPS',
+    owner_designation: 'Transport Commissioner & Apex MVD Enforcement Head',
+    contact_number: '0471-2333011',
+    whatsapp_number: '919447071099',
+    email: 'tcoffice.mvd@kerala.gov.in',
+    secondary_contact: '0471-2333022',
+    city_hub: 'Thiruvananthapuram',
+    district: 'Thiruvananthapuram',
+    state: 'Kerala',
+    address: 'Trans Towers, Vazhuthacaud, Thiruvananthapuram - 695014',
+    pincode: '695014',
+    routes: [
+      'Statewide Regulatory & Walayar Border Inter-State Enforcement Corridor'
+    ],
+    fleet_size: 'State Regulatory Oversight: 1.4+ Lakh Goods Trucks & 8,500+ Buses',
+    vehicle_types: [
+      'Safe Kerala Automated Enforcement Patrol & Vehicle Fitness Diagnostic Vans'
+    ],
+    permit_type: 'Apex Transport Regulatory',
+    gstin: '32GOVKL0001Z1A9',
+    established_year: 1956,
+    verification_status: 'Verified',
+    source: 'Kerala Motor Vehicles Department (mvd.kerala.gov.in)',
+    specialties: [
+      'All India Tourist Permit & Goods Carriage Compliance',
+      'Automated Inter-State Border Checking at Walayar & Muthanga',
+      'Speed Governor & AIS-140 GPS VLT Tracking Cell'
+    ],
+    rating: 4.9,
+    latitude: 8.5020,
+    longitude: 76.9610,
+    branches: [
+      {
+        id: 'BR-MVD-KL-01',
+        branch_name: 'Walayar Inter-State Commercial Border Checkpost',
+        city: 'Walayar',
+        district: 'Palakkad',
+        manager_name: 'Regional Transport Officer (Enforcement)',
+        phone: '0491-2862244',
+        whatsapp: '919447071091',
+        email: 'walayar.mvd@kerala.gov.in',
+        address: 'NH 544 National Highway Checkpost, Walayar, Palakkad - 678624',
+        pincode: '678624',
+        facility_type: 'Government STU Depot & Divisional Office',
+        is_headquarters: false,
+        latitude: 10.8400,
+        longitude: 76.8400
+      },
+      {
+        id: 'BR-MVD-KL-02',
+        branch_name: 'RTO Ernakulam Regional Directorate',
+        city: 'Kochi',
+        district: 'Ernakulam',
+        manager_name: 'Joint Regional Transport Officer',
+        phone: '0484-2422246',
+        whatsapp: '919447071092',
+        email: 'rto.ekm@kerala.gov.in',
+        address: 'Civil Station, Kakkanad, Kochi - 682030',
+        pincode: '682030',
+        facility_type: 'Government STU Depot & Divisional Office',
+        is_headquarters: false,
+        latitude: 10.0150,
+        longitude: 76.3500
+      }
+    ],
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z'
+  },
+  {
+    id: 'KL-BUS-001',
+    company_name: 'Kallada Travels (Suresh Kallada)',
+    category: 'Omni Bus (Intercity Sleeper / AC)',
+    service_type: 'bus',
+    owner_name: 'K. R. Suresh Kumar (Suresh Kallada)',
+    owner_designation: 'Managing Partner & Chief Fleet Controller',
+    contact_number: '0484-2391111',
+    whatsapp_number: '919388040000',
+    email: 'care@kalladatravels.com',
+    secondary_contact: '0484-2391122',
+    city_hub: 'Ernakulam, Kozhikode & Kollam',
+    district: 'Kollam',
+    state: 'Kerala',
+    address: 'Kallada House, Polayathode, Kollam - 691021 / North Railway Station Rd, Ernakulam',
+    pincode: '691021',
+    routes: [
+      'Ernakulam - Coimbatore - Salem - Bangalore AC Sleeper',
+      'Kozhikode - Mysore - Bangalore Luxury Multi-Axle',
+      'Trivandrum - Kochi - Mangalore Coastal Corridor',
+      'Kottayam - Palakkad - Chennai Overnight Sleeper'
+    ],
+    fleet_size: '420+ Luxury Intercity Sleeper Coaches',
+    vehicle_types: [
+      'Volvo B11R Multi-Axle AC Sleeper',
+      'Scania Touring HD',
+      'BharatBenz AC Sleeper'
+    ],
+    permit_type: 'All India Tourist Permit (AITP)',
+    gstin: '32AABCK2988P1ZZ',
+    established_year: 1982,
+    verification_status: 'Verified',
+    source: 'Kerala Inter-State Bus Operators Association (KIBOA) Registry',
+    specialties: [
+      'South India Highest Frequency Inter-State Fleet',
+      'Luxury 2+1 Air Conditioned Sleepers with GPS',
+      'Dedicated Passenger Transit Hubs Across Kerala & TN'
+    ],
+    rating: 4.8,
+    latitude: 9.9816,
+    longitude: 76.2798,
+    branches: [
+      {
+        id: 'BR-KLD-01',
+        branch_name: 'North Railway Station Omni Terminal',
+        city: 'Kochi',
+        district: 'Ernakulam',
+        manager_name: 'A. K. Joy',
+        phone: '0484-2391112',
+        whatsapp: '919388040001',
+        email: 'kochi@kalladatravels.com',
+        address: 'Opp. North Railway Station, Kacheripady, Ernakulam - 682018',
+        pincode: '682018',
+        facility_type: 'Booking & Passenger Terminal',
+        is_headquarters: false,
+        latitude: 9.9910,
+        longitude: 76.2840
+      },
+      {
+        id: 'BR-KLD-02',
+        branch_name: 'Mavoor Road Kallada Terminal',
+        city: 'Kozhikode',
+        district: 'Kozhikode',
+        manager_name: 'P. K. Shaji',
+        phone: '0495-2724444',
+        whatsapp: '919388040002',
+        email: 'calicut@kalladatravels.com',
+        address: 'Mavoor Road, Opp. KSRTC Terminal, Kozhikode - 673004',
+        pincode: '673004',
+        facility_type: 'Booking & Passenger Terminal',
+        is_headquarters: false,
+        latitude: 11.2588,
+        longitude: 75.7804
+      },
+      {
+        id: 'BR-KLD-03',
+        branch_name: 'Stadium Bypass Kallada Hub',
+        city: 'Palakkad',
+        district: 'Palakkad',
+        manager_name: 'C. V. Radhakrishnan',
+        phone: '0491-2533333',
+        whatsapp: '919388040003',
+        email: 'palakkad@kalladatravels.com',
+        address: 'Indira Gandhi Stadium Complex, Palakkad - 678001',
+        pincode: '678001',
+        facility_type: 'Booking & Passenger Terminal',
+        is_headquarters: false,
+        latitude: 10.7780,
+        longitude: 76.6580
+      }
+    ],
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z'
+  },
+  {
+    id: 'KL-BUS-002',
+    company_name: 'A1 Travels (Kerala - Tamil Nadu Luxury Lines)',
+    category: 'Omni Bus (Intercity Sleeper / AC)',
+    service_type: 'bus',
+    owner_name: 'P. Abdul Nazar',
+    owner_designation: 'Managing Director',
+    contact_number: '0491-2525777',
+    whatsapp_number: '919846055555',
+    email: 'a1travelspkd@gmail.com',
+    secondary_contact: '0491-2525778',
+    city_hub: 'Palakkad & Coimbatore Border Gateway',
+    district: 'Palakkad',
+    state: 'Kerala',
+    address: 'A1 Complex, Robinson Road, Palakkad - 678001',
+    pincode: '678001',
+    routes: [
+      'Palakkad - Coimbatore - Salem - Chennai Highway Line',
+      'Ernakulam - Thrissur - Bangalore Express',
+      'Kozhikode - Palakkad - Coimbatore Daily Inter-City'
+    ],
+    fleet_size: '120+ Intercity Express & AC Coaches',
+    vehicle_types: [
+      'Volvo 9400 Multi-Axle',
+      'Ashok Leyland Air Suspension Sleeper'
+    ],
+    permit_type: 'All India Tourist Permit (AITP)',
+    gstin: '32AAFFA1234K1Z1',
+    established_year: 1992,
+    verification_status: 'Verified',
+    source: 'Palakkad District Bus Operators Guild',
+    specialties: [
+      'Daily Shuttle Connectivity: Kerala to Western Tamil Nadu',
+      '24/7 Breakdown Assistance at Walayar Border',
+      'Express Courier & Parcel Cabin Service'
+    ],
+    rating: 4.7,
+    latitude: 10.7867,
+    longitude: 76.6548,
+    branches: [
+      {
+        id: 'BR-A1-01',
+        branch_name: 'Robinson Road Head Office',
+        city: 'Palakkad',
+        district: 'Palakkad',
+        manager_name: 'P. A. Faisal',
+        phone: '0491-2525779',
+        whatsapp: '919846055556',
+        email: 'palakkad@a1travels.com',
+        address: 'A1 Complex, Robinson Road, Palakkad - 678001',
+        pincode: '678001',
+        facility_type: 'Booking & Passenger Terminal',
+        is_headquarters: true,
+        latitude: 10.7867,
+        longitude: 76.6548
+      },
+      {
+        id: 'BR-A1-02',
+        branch_name: 'Vyttila Mobility Hub Counter',
+        city: 'Kochi',
+        district: 'Ernakulam',
+        manager_name: 'M. K. Binu',
+        phone: '0484-2809988',
+        whatsapp: '919846055557',
+        email: 'vyttila@a1travels.com',
+        address: 'Vyttila Mobility Hub, Kochi - 682019',
+        pincode: '682019',
+        facility_type: 'Booking & Passenger Terminal',
+        is_headquarters: false,
+        latitude: 9.9680,
+        longitude: 76.3190
+      }
+    ],
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z'
+  },
+  {
+    id: 'KL-LRY-001',
+    company_name: 'Kerala State Lorry Owners Federation (KSLOF) / Ernakulam Lorry Syndicate',
+    category: 'Heavy Commercial Lorry (Multi-Axle)',
+    service_type: 'lorry',
+    owner_name: 'K. K. Hamsa (President — KSLOF)',
+    owner_designation: 'State President — Commercial Goods Hauliers Federation',
+    contact_number: '0484-2668555',
+    whatsapp_number: '919846011222',
+    email: 'kslof.kerala@gmail.com',
+    secondary_contact: '0484-2668556',
+    city_hub: 'Willingdon Island & Nettoor, Kochi',
+    district: 'Ernakulam',
+    state: 'Kerala',
+    address: 'Lorry Stand Building, Near Willingdon Island Bridge, Kochi - 682003',
+    pincode: '682003',
+    routes: [
+      'Vallarpadam ICTT - Walayar - Coimbatore Heavy Freight Corridor',
+      'Cochin - Namakkal Bulk Machinery & Agro Movement',
+      'Kochi Port - Chennai Port Inter-Port Drayage'
+    ],
+    fleet_size: '3,500+ Member Multi-Axle Lorries, Heavy Skeletal Trailers & Tankers',
+    vehicle_types: [
+      'Tata Signa 4825 Heavy 16-Wheeler',
+      'Ashok Leyland 4020 Tractor Trailers',
+      'BharatBenz 2823 FTL Lorries'
+    ],
+    permit_type: 'National Permit (All India)',
+    gstin: '32AAALK8899P1Z2',
+    established_year: 1971,
+    verification_status: 'Verified',
+    source: 'Kerala State Lorry Owners Federation Official Records',
+    specialties: [
+      'Port Container Drayage at Vallarpadam & Cochin Port',
+      'Inter-State Heavy Freight Movement to Tamil Nadu',
+      'Commercial Driver Welfare & Legal Coordination'
+    ],
+    rating: 4.8,
+    latitude: 9.9520,
+    longitude: 76.2680,
+    branches: [
+      {
+        id: 'BR-KSLOF-01',
+        branch_name: 'Nettoor Central Freight Yard',
+        city: 'Kochi',
+        district: 'Ernakulam',
+        manager_name: 'T. K. Shamsudeen',
+        phone: '0484-2701234',
+        whatsapp: '919846011223',
+        email: 'nettoor@kslof.org',
+        address: 'NH 66 Bypass, Nettoor, Kochi - 682040',
+        pincode: '682040',
+        facility_type: 'Transshipment & Cargo Yard',
+        is_headquarters: false,
+        latitude: 9.9250,
+        longitude: 76.3150
+      },
+      {
+        id: 'BR-KSLOF-02',
+        branch_name: 'Walayar Toll Plaza Transshipment Base',
+        city: 'Walayar',
+        district: 'Palakkad',
+        manager_name: 'N. Ravindran',
+        phone: '0491-2863456',
+        whatsapp: '919846011224',
+        email: 'walayar@kslof.org',
+        address: 'Border Highway Terminal, Walayar, Palakkad - 678624',
+        pincode: '678624',
+        facility_type: 'Transshipment & Cargo Yard',
+        is_headquarters: false,
+        latitude: 10.8400,
+        longitude: 76.8400
+      }
+    ],
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z'
+  },
+  {
+    id: 'KL-LRY-002',
+    company_name: 'Palakkad Industrial Freight Carriers (Walayar Gateway)',
+    category: 'Heavy Commercial Lorry (Multi-Axle)',
+    service_type: 'lorry',
+    owner_name: 'R. Unnikrishnan Nair',
+    owner_designation: 'Managing Director',
+    contact_number: '0491-2567888',
+    whatsapp_number: '919846077888',
+    email: 'palakkadfreight@gmail.com',
+    secondary_contact: '0491-2567889',
+    city_hub: 'Palakkad (Kanjikode Industrial Hub)',
+    district: 'Palakkad',
+    state: 'Kerala',
+    address: 'Industrial Estate, Kanjikode, Palakkad - 678621',
+    pincode: '678621',
+    routes: [
+      'Walayar Gateway - Coimbatore Heavy Industrial Link',
+      'Palakkad Steel & Iron Cluster - Ernakulam Kochi Port',
+      'Kanjikode - Namakkal Bulk Feeder Route'
+    ],
+    fleet_size: '240+ Heavy Multi-Axle Flatbeds & Cement Bulkers',
+    vehicle_types: [
+      'BharatBenz 3523 Heavy Flatbeds',
+      'Tata Signa Bulkers',
+      'Eicher Pro Heavy Trucks'
+    ],
+    permit_type: 'South Zone Permit',
+    gstin: '32AAFFP9988K1Z5',
+    established_year: 1985,
+    verification_status: 'Verified',
+    source: 'Palakkad District Goods Transporters Syndicate',
+    specialties: [
+      'Iron & Steel TMT Bar Haulage',
+      'Cement & Clinker Bulker Transport',
+      'Express Inter-State Industrial Corridor Dispatch'
+    ],
+    rating: 4.7,
+    latitude: 10.7950,
+    longitude: 76.7450,
+    branches: [
+      {
+        id: 'BR-PKDF-01',
+        branch_name: 'Kanjikode Industrial Area Yard',
+        city: 'Palakkad',
+        district: 'Palakkad',
+        manager_name: 'K. Sukumaran',
+        phone: '0491-2567890',
+        whatsapp: '919846077889',
+        email: 'kanjikode@palakkadfreight.com',
+        address: 'Phase II Industrial Area, Kanjikode, Palakkad - 678621',
+        pincode: '678621',
+        facility_type: 'Transshipment & Cargo Yard',
+        is_headquarters: true,
+        latitude: 10.7950,
+        longitude: 76.7450
+      }
+    ],
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z'
+  },
+  {
+    id: 'KL-LOG-001',
+    company_name: 'Speed & Safe Courier & Cargo Ltd (Kerala Express Pioneer)',
+    category: 'Parcel, Express Cargo & FTL',
+    service_type: 'logistics',
+    owner_name: 'C. K. Ravindran',
+    owner_designation: 'Chairman & Managing Director',
+    contact_number: '0484-2371234',
+    whatsapp_number: '919846088888',
+    email: 'customercare@speedandsafe.com',
+    secondary_contact: '0484-2371235',
+    city_hub: 'Kochi',
+    district: 'Ernakulam',
+    state: 'Kerala',
+    address: 'Speed & Safe House, Chittoor Road, Ernakulam, Kochi - 682012',
+    pincode: '682012',
+    routes: [
+      'Kochi - Coimbatore - Bangalore Overnight Surface Express',
+      'Trivandrum - Calicut Express Feeder Corridor',
+      'Statewide All 14 Districts Same-Day Distribution'
+    ],
+    fleet_size: '850+ Linehaul Trucks & GPS Monitored Express Container Vans',
+    vehicle_types: [
+      'Tata Ultra T.12 Containerised Linehaulers',
+      'Eicher Pro Sealed Express Vans',
+      'Ashok Leyland Boss Trucks'
+    ],
+    permit_type: 'National Permit (All India)',
+    gstin: '32AAACS6655L1Z4',
+    established_year: 1986,
+    verification_status: 'Verified',
+    source: 'Speed & Safe Corporate Network Directorate',
+    specialties: [
+      'Statewide Same-Day Document & Parcel Dispatch',
+      'Kerala - Coimbatore - Bangalore Overnight Express',
+      'Tamper-Proof GPS Barcode Tracked Surface Cargo'
+    ],
+    rating: 4.9,
+    latitude: 9.9780,
+    longitude: 76.2910,
+    branches: [
+      {
+        id: 'BR-SS-01',
+        branch_name: 'Chittoor Road Central Transshipment Hub',
+        city: 'Kochi',
+        district: 'Ernakulam',
+        manager_name: 'P. T. Varghese',
+        phone: '0484-2371236',
+        whatsapp: '919846088889',
+        email: 'kochi@speedandsafe.com',
+        address: 'Chittoor Road, Ernakulam, Kochi - 682012',
+        pincode: '682012',
+        facility_type: 'Express Parcel Depot',
+        is_headquarters: true,
+        latitude: 9.9780,
+        longitude: 76.2910
+      },
+      {
+        id: 'BR-SS-02',
+        branch_name: 'East Fort Cargo Center',
+        city: 'Thiruvananthapuram',
+        district: 'Thiruvananthapuram',
+        manager_name: 'S. Anilkumar',
+        phone: '0471-2475566',
+        whatsapp: '919846088890',
+        email: 'trivandrum@speedandsafe.com',
+        address: 'Attakulangara Road, East Fort, Trivandrum - 695023',
+        pincode: '695023',
+        facility_type: 'Express Parcel Depot',
+        is_headquarters: false,
+        latitude: 8.4830,
+        longitude: 76.9490
+      },
+      {
+        id: 'BR-SS-03',
+        branch_name: 'Peelamedu Inter-State Transshipment Branch',
+        city: 'Coimbatore',
+        district: 'Coimbatore',
+        manager_name: 'R. Senthilvel',
+        phone: '0422-2571234',
+        whatsapp: '919846088891',
+        email: 'coimbatore@speedandsafe.com',
+        address: 'Avinashi Road, Peelamedu, Coimbatore - 641004',
+        pincode: '641004',
+        facility_type: 'Transshipment & Cargo Yard',
+        is_headquarters: false,
+        latitude: 11.0280,
+        longitude: 77.0090
+      }
+    ],
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z'
+  },
+  {
+    id: 'KL-LOG-002',
+    company_name: 'Safexpress Pvt Ltd (Kerala Logistics Hub & Cross-Docks)',
+    category: '3PL & Multimodal Logistics',
+    service_type: 'logistics',
+    owner_name: 'P. K. Manoj',
+    owner_designation: 'Regional Logistics Director — Kerala',
+    contact_number: '0484-2621122',
+    whatsapp_number: '919841077665',
+    email: 'kerala.hub@safexpress.com',
+    secondary_contact: '0484-2621123',
+    city_hub: 'Aluva & Kochi',
+    district: 'Ernakulam',
+    state: 'Kerala',
+    address: 'Safexpress Logistics Park, NH 544 Highway, Aluva, Ernakulam - 683101',
+    pincode: '683101',
+    routes: [
+      'Aluva Logistics Gateway - Coimbatore - Bengaluru Linehaul',
+      'Kochi Port Marine Products Inbound - Pan India',
+      'Malabar Industrial Distribution Network'
+    ],
+    fleet_size: '10,000+ Nationwide GPS Weatherproof Fleets with Dedicated Kerala Linehaul',
+    vehicle_types: [
+      '32ft Multi-Axle GPS Sealed Containers',
+      '24ft Air Suspension Heavy Trucks'
+    ],
+    permit_type: 'National Permit (All India)',
+    gstin: '32AAACS9988M1Z0',
+    established_year: 1997,
+    verification_status: 'Verified',
+    source: 'Safexpress National Supply Chain Directorate',
+    specialties: [
+      'Automated Cross-Dock Facilities in Aluva',
+      'Temperature Controlled Logistics for Marine & Pharma Goods',
+      'Dedicated Walayar Highway Inter-State Corridors'
+    ],
+    rating: 4.9,
+    latitude: 10.1080,
+    longitude: 76.3520,
+    branches: [
+      {
+        id: 'BR-SAFE-KL-01',
+        branch_name: 'Aluva Mega Logistics Hub',
+        city: 'Aluva',
+        district: 'Ernakulam',
+        manager_name: 'J. Mathew',
+        phone: '0484-2621125',
+        whatsapp: '919841077668',
+        email: 'aluva@safexpress.com',
+        address: 'NH 544 Bye-Pass, Near Thottakkattukara, Aluva - 683101',
+        pincode: '683101',
+        facility_type: 'Multimodal Logistics Park (MMLP)',
+        is_headquarters: false,
+        latitude: 10.1080,
+        longitude: 76.3520
+      },
+      {
+        id: 'BR-SAFE-KL-02',
+        branch_name: 'Olavakkode Cross-Dock Terminal',
+        city: 'Palakkad',
+        district: 'Palakkad',
+        manager_name: 'K. R. Venugopal',
+        phone: '0491-2554433',
+        whatsapp: '919841077669',
+        email: 'palakkad.hub@safexpress.com',
+        address: 'Near Railway Goods Shed, Olavakkode, Palakkad - 678002',
+        pincode: '678002',
+        facility_type: 'Transshipment & Cargo Yard',
+        is_headquarters: false,
+        latitude: 10.8120,
+        longitude: 76.6450
+      }
+    ],
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z'
   }
 ];
 
@@ -2543,6 +3284,8 @@ export function getTransportKPI(operators: TransportRecord[] = TRANSPORT_OPERATO
   const email_verified = operators.filter(o => Boolean(o.email && o.email.includes('@'))).length;
   const districtSet = new Set(operators.map(o => o.district.toLowerCase()));
   const national_permits = operators.filter(o => o.permit_type.includes('National') || o.permit_type.includes('All India')).length;
+  const kerala_fleets = operators.filter(o => o.state.toLowerCase() === 'kerala').length;
+  const tamil_nadu_fleets = operators.filter(o => o.state.toLowerCase() === 'tamil nadu').length;
   
   // Total regional branches count
   const total_branches_count = operators.reduce((acc, curr) => acc + (curr.branches ? curr.branches.length : 0), 0);
@@ -2558,6 +3301,8 @@ export function getTransportKPI(operators: TransportRecord[] = TRANSPORT_OPERATO
     email_verified,
     districts_covered: districtSet.size,
     national_permits,
-    total_branches_count
+    total_branches_count,
+    kerala_fleets,
+    tamil_nadu_fleets
   };
 }

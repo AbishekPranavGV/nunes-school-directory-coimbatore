@@ -77,13 +77,33 @@ export async function safeDbExecute(client: Client, stmt: any): Promise<any> {
 }
 
 import { matchesDistrict } from './data/tamilNaduDistricts';
+import { matchesKeralaDistrict, getKeralaDistrictById } from './data/keralaDistricts';
 
-// Helper to query master schools with in-memory caching and statewide multi-district filtering
-export async function getMasterSchoolsFromMemoryOrDb(district?: string): Promise<any[]> {
+let memoryCacheKerala: any[] | null = null;
+
+// Helper to query master schools with in-memory caching and multi-state (TN + Kerala) filtering
+export async function getMasterSchoolsFromMemoryOrDb(district?: string, state?: string): Promise<any[]> {
   const normDistrict = (district || '').toLowerCase().trim();
+  const normState = (state || '').toLowerCase().trim();
 
-  // Load statewide dataset if needed
-  if (normDistrict === 'all' || normDistrict === 'statewide' || (normDistrict && !matchesDistrict('Coimbatore', normDistrict))) {
+  // Helper to load Kerala dataset
+  const getKeralaSchools = () => {
+    if (!memoryCacheKerala) {
+      const keralaPath = path.join(process.cwd(), 'data', 'master_kerala_schools.json');
+      if (fs.existsSync(keralaPath)) {
+        try {
+          const raw = fs.readFileSync(keralaPath, 'utf8');
+          memoryCacheKerala = JSON.parse(raw);
+        } catch (e) {
+          console.warn('[DB] Error loading master_kerala_schools.json:', e);
+        }
+      }
+    }
+    return memoryCacheKerala || [];
+  };
+
+  // Helper to load Statewide Tamil Nadu dataset
+  const getTamilNaduSchools = () => {
     if (!memoryCacheStatewide) {
       const statewidePath = path.join(process.cwd(), 'data', 'master_statewide_schools.json');
       if (fs.existsSync(statewidePath)) {
@@ -95,31 +115,48 @@ export async function getMasterSchoolsFromMemoryOrDb(district?: string): Promise
         }
       }
     }
+    return memoryCacheStatewide || [];
+  };
 
-    if (memoryCacheStatewide && memoryCacheStatewide.length > 0) {
-      if (normDistrict === 'all' || normDistrict === 'statewide') {
-        return memoryCacheStatewide;
+  const isKeralaQuery = normState === 'kerala' || (normDistrict && getKeralaDistrictById(normDistrict) !== undefined);
+  const isTamilNaduQuery = normState === 'tamil-nadu' || normState === 'tamil nadu' || (normDistrict && !isKeralaQuery && normDistrict !== 'all' && normDistrict !== 'statewide');
+
+  // Case 1: Kerala Query
+  if (isKeralaQuery) {
+    const keralaSchools = getKeralaSchools();
+    if (normDistrict === 'all' || normDistrict === 'statewide' || !normDistrict) {
+      return keralaSchools;
+    }
+    return keralaSchools.filter((s: any) => matchesKeralaDistrict(s.district || '', normDistrict));
+  }
+
+  // Case 2: Tamil Nadu Query
+  if (isTamilNaduQuery) {
+    if (normDistrict === 'coimbatore' || matchesDistrict('Coimbatore', normDistrict)) {
+      if (memoryCacheCoimbatore) return memoryCacheCoimbatore;
+      const jsonPath = path.join(process.cwd(), 'data', 'master_coimbatore_schools.json');
+      if (fs.existsSync(jsonPath)) {
+        try {
+          const raw = fs.readFileSync(jsonPath, 'utf8');
+          memoryCacheCoimbatore = JSON.parse(raw);
+          return memoryCacheCoimbatore!;
+        } catch (e) {
+          console.warn('[DB] Error loading master_coimbatore_schools.json:', e);
+        }
       }
-      return memoryCacheStatewide.filter((s: any) => 
-        matchesDistrict(s.district || '', normDistrict)
-      );
     }
+    const tnSchools = getTamilNaduSchools();
+    if (normDistrict === 'all' || normDistrict === 'statewide' || !normDistrict) {
+      return tnSchools;
+    }
+    return tnSchools.filter((s: any) => matchesDistrict(s.district || '', normDistrict));
   }
 
-  // Default / Coimbatore: Return cached 2,097 schools
-  if (memoryCacheCoimbatore) {
-    return memoryCacheCoimbatore;
-  }
-
-  const jsonPath = path.join(process.cwd(), 'data', 'master_coimbatore_schools.json');
-  if (fs.existsSync(jsonPath)) {
-    try {
-      const raw = fs.readFileSync(jsonPath, 'utf8');
-      memoryCacheCoimbatore = JSON.parse(raw);
-      return memoryCacheCoimbatore!;
-    } catch (e) {
-      console.warn('[DB] Error loading master_coimbatore_schools.json:', e);
-    }
+  // Case 3: All South India (Combined TN 16,300 + Kerala 4,820 = 21,120 schools)
+  const tn = getTamilNaduSchools();
+  const kl = getKeralaSchools();
+  if (tn.length > 0 || kl.length > 0) {
+    return [...tn, ...kl];
   }
   
   // Fallback to SQLite DB query with join on normalized contacts

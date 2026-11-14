@@ -21,7 +21,8 @@ import {
   Edit3,
   Building2,
   Package,
-  Landmark
+  Landmark,
+  Zap
 } from 'lucide-react';
 import { TransportRecord } from '@/types/transport';
 
@@ -39,6 +40,7 @@ interface TransportTableProps {
   onSelectOperator: (operator: TransportRecord) => void;
   onQuickWhatsApp: (operator: TransportRecord) => void;
   onEditOperator?: (operator: TransportRecord) => void;
+  onOneClickEmail?: (operator: TransportRecord) => void;
 }
 
 export const TransportTable: React.FC<TransportTableProps> = ({
@@ -54,7 +56,8 @@ export const TransportTable: React.FC<TransportTableProps> = ({
   onSort,
   onSelectOperator,
   onQuickWhatsApp,
-  onEditOperator
+  onEditOperator,
+  onOneClickEmail
 }) => {
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
@@ -215,6 +218,15 @@ export const TransportTable: React.FC<TransportTableProps> = ({
                             <span className="font-bold text-slate-900 text-xs sm:text-sm hover:text-amber-700 transition-colors">
                               {item.company_name}
                             </span>
+                            {item.state === 'Kerala' ? (
+                              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
+                                🌴 Kerala
+                              </span>
+                            ) : (
+                              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                🏛️ Tamil Nadu
+                              </span>
+                            )}
                             <span className="text-[10px] text-slate-400 font-mono">
                               (Est. {item.established_year})
                             </span>
@@ -232,7 +244,7 @@ export const TransportTable: React.FC<TransportTableProps> = ({
                             {item.branches && item.branches.length > 0 && (
                               <span className="px-1.5 py-0.5 bg-orange-50 text-orange-800 border border-orange-200 rounded text-[10px] font-bold flex items-center gap-1">
                                 <Building2 className="w-3 h-3 text-orange-600" />
-                                <span>{item.branches.length} Branches Across TN</span>
+                                <span>{item.branches.length} Branches ({item.state === 'Kerala' ? 'Kerala' : 'Across TN'})</span>
                               </span>
                             )}
                           </div>
@@ -291,14 +303,27 @@ export const TransportTable: React.FC<TransportTableProps> = ({
                     {/* Email / Gmail ID */}
                     <td className="py-3.5 px-3" onClick={(e) => e.stopPropagation()}>
                       {item.email ? (
-                        <a
-                          href={`mailto:${item.email}?subject=Transport Fleet Inquiry - ${item.company_name}&body=Dear ${item.owner_name},%0D%0A%0D%0AWe are reaching out regarding transport services.%0D%0A%0D%0ABest regards,%0D%0ANunes Instruments`}
-                          className="inline-flex items-center gap-1 text-sky-700 hover:text-sky-900 hover:underline max-w-[180px] truncate"
-                          title="Send Email"
-                        >
-                          <Mail className="w-3 h-3 shrink-0 text-sky-500" />
-                          <span className="truncate">{item.email}</span>
-                        </a>
+                        <div className="flex flex-col items-start gap-1">
+                          <a
+                            href={`mailto:${item.email}?subject=Transport Fleet Inquiry - ${item.company_name}&body=Dear ${item.owner_name},%0D%0A%0D%0AWe are reaching out regarding transport services.%0D%0A%0D%0ABest regards,%0D%0ANunes Instruments`}
+                            className="inline-flex items-center gap-1 text-sky-700 hover:text-sky-900 hover:underline max-w-[180px] truncate"
+                            title="Send Email"
+                          >
+                            <Mail className="w-3 h-3 shrink-0 text-sky-500" />
+                            <span className="truncate">{item.email}</span>
+                          </a>
+
+                          {onOneClickEmail && (
+                            <button
+                              onClick={() => onOneClickEmail(item)}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-[10px] font-bold transition-all shadow-2xs hover:scale-102 cursor-pointer"
+                              title={`1-Click Automated Circular Send to ${item.email}`}
+                            >
+                              <Zap className="w-2.5 h-2.5 fill-current animate-pulse" />
+                              <span>1-Click Email</span>
+                            </button>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-[10px] text-slate-400">N/A</span>
                       )}
@@ -334,6 +359,16 @@ export const TransportTable: React.FC<TransportTableProps> = ({
                     {/* Actions */}
                     <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1.5">
+                        {onOneClickEmail && item.email && (
+                          <button
+                            onClick={() => onOneClickEmail(item)}
+                            className="p-1.5 text-teal-600 hover:text-white hover:bg-teal-600 rounded-lg transition-all shadow-2xs"
+                            title={`⚡ 1-Click Instant Circular Dispatch to ${item.email}`}
+                          >
+                            <Zap className="w-4 h-4 fill-teal-500/20" />
+                          </button>
+                        )}
+
                         {onEditOperator && (
                           <button
                             onClick={() => onEditOperator?.(item)}
