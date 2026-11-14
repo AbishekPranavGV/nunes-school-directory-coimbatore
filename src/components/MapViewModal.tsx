@@ -74,7 +74,26 @@ const TAMIL_NADU_REGION_PLACES: RegionPlace[] = [
   { id: 'namakkal', name: 'Namakkal', lat: 11.2189, lng: 78.1674, zoom: 11, district: 'Namakkal', count: 410 },
 ];
 
-// 2. Coimbatore Educational Blocks (15 Blocks Baseline)
+// 2. Statewide Kerala Major Hubs & Districts (14 Districts)
+const KERALA_REGION_PLACES: RegionPlace[] = [
+  { id: 'all_kl', name: 'All Kerala (14 Districts)', lat: 10.8505, lng: 76.2711, zoom: 7, count: 4820 },
+  { id: 'ernakulam', name: 'Ernakulam / Kochi', lat: 9.9816, lng: 76.2999, zoom: 11, district: 'Ernakulam', count: 440 },
+  { id: 'thiruvananthapuram', name: 'Thiruvananthapuram Capital', lat: 8.5241, lng: 76.9366, zoom: 11, district: 'Thiruvananthapuram', count: 480 },
+  { id: 'kozhikode', name: 'Kozhikode Malabar', lat: 11.2588, lng: 75.7804, zoom: 11, district: 'Kozhikode', count: 420 },
+  { id: 'thrissur', name: 'Thrissur Cultural Capital', lat: 10.5276, lng: 76.2144, zoom: 11, district: 'Thrissur', count: 410 },
+  { id: 'palakkad', name: 'Palakkad Gateway', lat: 10.7867, lng: 76.6548, zoom: 11, district: 'Palakkad', count: 390 },
+  { id: 'malappuram', name: 'Malappuram District', lat: 11.0732, lng: 76.0740, zoom: 11, district: 'Malappuram', count: 490 },
+  { id: 'kollam', name: 'Kollam Coastal', lat: 8.8932, lng: 76.6141, zoom: 11, district: 'Kollam', count: 380 },
+  { id: 'kottayam', name: 'Kottayam Highlands', lat: 9.5916, lng: 76.5222, zoom: 11, district: 'Kottayam', count: 360 },
+  { id: 'kannur', name: 'Kannur District', lat: 11.8745, lng: 75.3704, zoom: 11, district: 'Kannur', count: 370 },
+  { id: 'alappuzha', name: 'Alappuzha Backwaters', lat: 9.4981, lng: 76.3388, zoom: 11, district: 'Alappuzha', count: 320 },
+  { id: 'pathanamthitta', name: 'Pathanamthitta', lat: 9.2648, lng: 76.7870, zoom: 11, district: 'Pathanamthitta', count: 280 },
+  { id: 'idukki', name: 'Idukki Hill Ranges', lat: 9.8500, lng: 76.9700, zoom: 10, district: 'Idukki', count: 260 },
+  { id: 'wayanad', name: 'Wayanad Ghats', lat: 11.6854, lng: 76.1320, zoom: 10, district: 'Wayanad', count: 240 },
+  { id: 'kasaragod', name: 'Kasaragod North', lat: 12.5102, lng: 74.9852, zoom: 11, district: 'Kasaragod', count: 250 },
+];
+
+// 3. Coimbatore Educational Blocks (15 Blocks Baseline)
 const COIMBATORE_BLOCK_PLACES: BlockPlace[] = [
   { name: 'All Blocks', lat: 11.0168, lng: 76.9558, count: 2097 },
   { name: 'Coimbatore City', lat: 11.0168, lng: 76.9558, count: 238 },
@@ -126,9 +145,9 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
   onSelectSchool,
   selectedDistrict = 'coimbatore'
 }) => {
-  // Region Navigation Tab: 'tamil_nadu' (Statewide 38 districts) vs 'coimbatore_blocks'
-  const [regionTab, setRegionTab] = useState<'tamil_nadu' | 'coimbatore_blocks'>(
-    selectedDistrict === 'all' || selectedDistrict === 'statewide' ? 'tamil_nadu' : 'tamil_nadu'
+  // Region Navigation Tab: 'kerala' | 'tamil_nadu' | 'coimbatore_blocks'
+  const [regionTab, setRegionTab] = useState<'kerala' | 'tamil_nadu' | 'coimbatore_blocks'>(
+    selectedDistrict && (selectedDistrict === 'ernakulam' || selectedDistrict.startsWith('kl_')) ? 'kerala' : 'tamil_nadu'
   );
 
   // Live Google Map Coordinates & Zoom State
@@ -759,7 +778,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
           <div className="absolute bottom-20 left-3 z-30 pointer-events-none flex items-center gap-2 text-[10px] text-slate-600 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md border border-slate-200/60 shadow-xs">
             <span className="font-bold text-slate-800">Google</span>
             <span className="text-slate-400">•</span>
-            <span>Map data ©2026 Google • Tamil Nadu Statewide UDISE+ & TNEA Master Register</span>
+            <span>Map data ©2026 Google • South India (Tamil Nadu & Kerala) UDISE+, Sametham KITE & TNEA Master Register</span>
           </div>
 
         </div>
@@ -773,14 +792,31 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
           <div className="bg-slate-100 p-0.5 rounded-lg flex items-center shrink-0">
             <button
               onClick={() => {
-                setRegionTab('tamil_nadu');
-                setSelectedRegionId('all_tn');
+                setRegionTab('kerala');
+                setSelectedRegionId('all_kl');
+                setCenterLat(10.8505);
+                setCenterLng(76.2711);
+                setZoom(7);
               }}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                regionTab === 'tamil_nadu' ? 'bg-white text-sky-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                regionTab === 'kerala' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Tamil Nadu (38 Districts)
+              🌴 Kerala (14 Districts)
+            </button>
+            <button
+              onClick={() => {
+                setRegionTab('tamil_nadu');
+                setSelectedRegionId('all_tn');
+                setCenterLat(11.1271);
+                setCenterLng(78.6569);
+                setZoom(7);
+              }}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                regionTab === 'tamil_nadu' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🌿 Tamil Nadu (38 Districts)
             </button>
             <button
               onClick={() => {
@@ -790,8 +826,8 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
                 setCenterLng(76.9558);
                 setZoom(11);
               }}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                regionTab === 'coimbatore_blocks' ? 'bg-white text-sky-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                regionTab === 'coimbatore_blocks' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Coimbatore Blocks (15)
@@ -802,7 +838,29 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
 
           {/* Chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-            {regionTab === 'tamil_nadu' ? (
+            {regionTab === 'kerala' ? (
+              KERALA_REGION_PLACES.map((r) => {
+                const isSelected = selectedRegionId === r.id;
+                return (
+                  <button
+                    key={r.id}
+                    onClick={() => handleSelectRegion(r)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-emerald-700 text-white shadow-xs ring-2 ring-emerald-300'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    <span>{r.name}</span>
+                    <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                      isSelected ? 'bg-emerald-900 text-white' : 'bg-white text-slate-600'
+                    }`}>
+                      {r.count.toLocaleString()}
+                    </span>
+                  </button>
+                );
+              })
+            ) : regionTab === 'tamil_nadu' ? (
               TAMIL_NADU_REGION_PLACES.map((r) => {
                 const isSelected = selectedRegionId === r.id;
                 return (

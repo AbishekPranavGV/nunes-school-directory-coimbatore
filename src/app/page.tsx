@@ -24,6 +24,7 @@ import { WorkerModal } from '@/components/WorkerModal';
 import { SchoolRecord, KPIMetrics, UserSession, WorkspaceView } from '@/types';
 import { LayoutGrid, AlertTriangle, Sparkles, X, PhoneCall } from 'lucide-react';
 import { getDistrictById } from '@/lib/data/tamilNaduDistricts';
+import { getKeralaDistrictById } from '@/lib/data/keralaDistricts';
 
 export default function DashboardPage() {
   // Navigation view state (9 Primary Workspaces)
@@ -49,6 +50,7 @@ export default function DashboardPage() {
 
   // District state (defaults to 'all' for statewide 38 districts)
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
+  const [selectedState, setSelectedState] = useState<string>('all');
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -106,13 +108,16 @@ export default function DashboardPage() {
   // Fetch KPI
   const loadKpi = useCallback(async () => {
     try {
-      const res = await fetch(`/api/kpi?district=${selectedDistrict}`);
+      const params = new URLSearchParams();
+      if (selectedDistrict) params.set('district', selectedDistrict);
+      if (selectedState && selectedState !== 'all') params.set('state', selectedState);
+      const res = await fetch(`/api/kpi?${params.toString()}`);
       const data = await res.json();
       setKpi(data);
     } catch (err) {
       console.error('Error fetching KPI:', err);
     }
-  }, [selectedDistrict]);
+  }, [selectedDistrict, selectedState]);
 
   useEffect(() => {
     loadKpi();
@@ -121,13 +126,18 @@ export default function DashboardPage() {
   // Load missing queue schools specifically when needed
   const loadAllSchoolsForMissing = useCallback(async () => {
     try {
-      const res = await fetch(`/api/schools?pageSize=3000&quick_filter=no_contact&district=${selectedDistrict}`);
+      const params = new URLSearchParams();
+      params.set('pageSize', '3000');
+      params.set('quick_filter', 'no_contact');
+      if (selectedDistrict) params.set('district', selectedDistrict);
+      if (selectedState && selectedState !== 'all') params.set('state', selectedState);
+      const res = await fetch(`/api/schools?${params.toString()}`);
       const data = await res.json();
       setAllSchoolsForMissing(data.data || []);
     } catch (err) {
       console.error('Error loading missing schools:', err);
     }
-  }, [selectedDistrict]);
+  }, [selectedDistrict, selectedState]);
 
   useEffect(() => {
     if ((currentView === 'verification' || currentView === 'dashboard') && allSchoolsForMissing.length === 0) {
@@ -141,6 +151,7 @@ export default function DashboardPage() {
     try {
       const params = new URLSearchParams();
       if (selectedDistrict) params.set('district', selectedDistrict);
+      if (selectedState && selectedState !== 'all') params.set('state', selectedState);
       if (searchQuery) params.set('q', searchQuery);
       if (management) params.set('management', management);
       if (board) params.set('board', board);
@@ -168,7 +179,7 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }, [
-    selectedDistrict, searchQuery, management, board, category, block, taluk, urbanRural, 
+    selectedDistrict, selectedState, searchQuery, management, board, category, block, taluk, urbanRural, 
     status, quickFilter, currentPage, pageSize, sortBy, sortOrder
   ]);
 
@@ -297,8 +308,18 @@ export default function DashboardPage() {
     setAllSchoolsForMissing([]);
   };
 
+  const handleSelectState = (state: string) => {
+    setSelectedState(state);
+    setSelectedDistrict('all');
+    setBlock('');
+    setTaluk('');
+    setCurrentPage(1);
+    setAllSchoolsForMissing([]);
+  };
+
   // Query string for exports
   const currentFilterParams = new URLSearchParams({
+    ...(selectedState && selectedState !== 'all' && { state: selectedState }),
     ...(selectedDistrict && { district: selectedDistrict }),
     ...(searchQuery && { q: searchQuery }),
     ...(management && { management }),
@@ -323,6 +344,8 @@ export default function DashboardPage() {
         onViewChange={setCurrentView}
         selectedDistrict={selectedDistrict}
         onSelectDistrict={handleSelectDistrict}
+        selectedState={selectedState}
+        onSelectState={handleSelectState}
         missingCount={kpi?.high_priority_missing_contacts || 2020}
         totalCount={kpi?.total_imported_schools || 2097}
         onOpenWorker={() => setIsWorkerOpen(true)}
@@ -376,6 +399,8 @@ export default function DashboardPage() {
             onNavigate={setCurrentView}
             selectedDistrict={selectedDistrict}
             onSelectDistrict={handleSelectDistrict}
+            selectedState={selectedState}
+            onSelectState={handleSelectState}
             onSelectQuickFilter={(qf) => {
               if (qf === 'no_contact') {
                 setCurrentView('verification');
@@ -410,6 +435,8 @@ export default function DashboardPage() {
           <CircularCenterView
             schools={allSchoolsForMissing.length > 0 ? allSchoolsForMissing : schools}
             onNavigateToCommunications={() => setCurrentView('communications')}
+            selectedState={selectedState}
+            selectedDistrict={selectedDistrict}
           />
         ) : currentView === 'communications' ? (
           <CommunicationsView
@@ -440,12 +467,19 @@ export default function DashboardPage() {
                 setSearchQuery(q);
                 setCurrentPage(1);
                 if (q.trim().length >= 3) {
-                  const matched = getDistrictById(q.trim());
-                  if (matched && selectedDistrict !== matched.id) {
-                    setSelectedDistrict(matched.id);
+                  const matchedTN = getDistrictById(q.trim());
+                  if (matchedTN && selectedDistrict !== matchedTN.id) {
+                    setSelectedDistrict(matchedTN.id);
+                  } else {
+                    const matchedKL = getKeralaDistrictById(q.trim());
+                    if (matchedKL && selectedDistrict !== matchedKL.id) {
+                      setSelectedDistrict(matchedKL.id);
+                    }
                   }
                 }
               }}
+              selectedState={selectedState}
+              setSelectedState={handleSelectState}
               selectedDistrict={selectedDistrict}
               setSelectedDistrict={handleSelectDistrict}
               management={management}
@@ -509,6 +543,7 @@ export default function DashboardPage() {
               onSort={handleSort}
               onSelectSchool={setSelectedSchool}
               selectedDistrict={selectedDistrict}
+              selectedState={selectedState}
             />
           </div>
         )}
@@ -518,9 +553,9 @@ export default function DashboardPage() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
         <div className="max-w-[1600px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 Nunes Instruments — AI School Directory (Coimbatore District, Tamil Nadu)</p>
+          <p>© 2026 Nunes Instruments — AI School Directory (South India: Tamil Nadu & Kerala)</p>
           <p className="flex items-center gap-2">
-            <span>UDISE+ & TNEA 2026 Authenticated Register</span>
+            <span>UDISE+, Sametham KITE & TNEA 2026 Authenticated Register</span>
             <span>•</span>
             <span className="text-emerald-700 font-medium">100% Zero-Fabrication Guarantee</span>
           </p>

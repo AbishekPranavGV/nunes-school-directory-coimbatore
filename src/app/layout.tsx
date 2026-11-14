@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Nunes AI School Directory — Tamil Nadu (All 38 Districts)',
-  description: 'Production-ready official school intelligence directory for all 38 districts of Tamil Nadu, India. Curated by Nunes Instruments.',
+  title: 'Nunes AI School Directory — South India (Tamil Nadu & Kerala)',
+  description: 'Production-ready official school intelligence directory for all 52 districts across Tamil Nadu and Kerala, India. Curated by Nunes Instruments with 1-click circular automation.',
   icons: {
     icon: '/favicon.ico',
   },
