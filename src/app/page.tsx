@@ -140,7 +140,13 @@ export default function DashboardPage() {
   }, [selectedDistrict, selectedState]);
 
   useEffect(() => {
-    if ((currentView === 'verification' || currentView === 'dashboard') && allSchoolsForMissing.length === 0) {
+    if (currentView === 'verification') {
+      setCurrentView('directory');
+    }
+  }, [currentView]);
+
+  useEffect(() => {
+    if (currentView === 'dashboard' && allSchoolsForMissing.length === 0) {
       loadAllSchoolsForMissing();
     }
   }, [currentView, allSchoolsForMissing.length, loadAllSchoolsForMissing]);
@@ -346,7 +352,7 @@ export default function DashboardPage() {
         onSelectDistrict={handleSelectDistrict}
         selectedState={selectedState}
         onSelectState={handleSelectState}
-        missingCount={kpi?.high_priority_missing_contacts || 2020}
+        missingCount={kpi?.high_priority_missing_contacts || 0}
         totalCount={kpi?.total_imported_schools || 2097}
         onOpenWorker={() => setIsWorkerOpen(true)}
         onOpenImport={() => setIsImportOpen(true)}
@@ -391,7 +397,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Conditional Workspace View (9 Primary Workspaces) */}
+        {/* Conditional Workspace View (Primary Workspaces) */}
         {currentView === 'dashboard' ? (
           <DashboardView
             kpi={kpi}
@@ -402,13 +408,9 @@ export default function DashboardPage() {
             selectedState={selectedState}
             onSelectState={handleSelectState}
             onSelectQuickFilter={(qf) => {
-              if (qf === 'no_contact') {
-                setCurrentView('verification');
-              } else {
-                setCurrentView('directory');
-                setQuickFilter(qf || null);
-                setCurrentPage(1);
-              }
+              setCurrentView('directory');
+              setQuickFilter(qf || null);
+              setCurrentPage(1);
             }}
             activeQuickFilter={quickFilter}
             onSelectSchool={setSelectedSchool}
@@ -424,13 +426,80 @@ export default function DashboardPage() {
             onSelectSchool={setSelectedSchool}
           />
         ) : currentView === 'verification' ? (
-          <MissingContactsDashboard
-            schools={missingSchoolsList}
-            onSelectSchool={setSelectedSchool}
-            onTriggerResearch={handleTriggerResearch}
-            onExportMissing={() => setIsExportOpen(true)}
-            selectedDistrict={selectedDistrict}
-          />
+          /* Verification Queue removed from UI - navigate to directory */
+          <div className="space-y-4">
+            <FilterBar
+              searchQuery={searchQuery}
+              setSearchQuery={(q) => {
+                setSearchQuery(q);
+                setCurrentPage(1);
+              }}
+              selectedState={selectedState}
+              setSelectedState={handleSelectState}
+              selectedDistrict={selectedDistrict}
+              setSelectedDistrict={handleSelectDistrict}
+              management={management}
+              setManagement={(m) => {
+                setManagement(m);
+                setCurrentPage(1);
+              }}
+              board={board}
+              setBoard={(b) => {
+                setBoard(b);
+                setCurrentPage(1);
+              }}
+              category={category}
+              setCategory={(c) => {
+                setCategory(c);
+                setCurrentPage(1);
+              }}
+              block={block}
+              setBlock={(bl) => {
+                setBlock(bl);
+                setCurrentPage(1);
+              }}
+              taluk={taluk}
+              setTaluk={(t) => {
+                setTaluk(t);
+                setCurrentPage(1);
+              }}
+              urbanRural={urbanRural}
+              setUrbanRural={(ur) => {
+                setUrbanRural(ur);
+                setCurrentPage(1);
+              }}
+              status={status}
+              setStatus={(s) => {
+                setStatus(s);
+                setCurrentPage(1);
+              }}
+              quickFilter={quickFilter}
+              setQuickFilter={(qf) => {
+                setQuickFilter(qf);
+                setCurrentPage(1);
+              }}
+              onReset={handleResetFilters}
+              totalFiltered={totalFiltered}
+            />
+            <SchoolTable
+              schools={schools}
+              totalCount={totalFiltered}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setCurrentPage(1);
+              }}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+              onSelectSchool={setSelectedSchool}
+              selectedDistrict={selectedDistrict}
+              selectedState={selectedState}
+            />
+          </div>
         ) : currentView === 'circulars' ? (
           <CircularCenterView
             schools={allSchoolsForMissing.length > 0 ? allSchoolsForMissing : schools}

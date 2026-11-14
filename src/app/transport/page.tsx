@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { TransportSidebar } from '@/components/transport/TransportSidebar';
 import { TransportHeader } from '@/components/transport/TransportHeader';
+import { TransportDashboardOverview } from '@/components/transport/TransportDashboardOverview';
 import { TransportKPICards } from '@/components/transport/TransportKPICards';
 import { TransportFilterBar } from '@/components/transport/TransportFilterBar';
 import { TransportTable } from '@/components/transport/TransportTable';
+import { TransportContactsView } from '@/components/transport/TransportContactsView';
 import { TransportDetailDrawer } from '@/components/transport/TransportDetailDrawer';
 import { TransportMapViewModal } from '@/components/transport/TransportMapViewModal';
 import { Transport2DGoogleMapModal } from '@/components/transport/Transport2DGoogleMapModal';
@@ -27,6 +30,7 @@ import {
 
 export default function TransportDashboardPage() {
   const [currentView, setCurrentView] = useState<TransportWorkspaceView>('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   // Data states
   const [operators, setOperators] = useState<TransportRecord[]>([]);
@@ -76,7 +80,7 @@ export default function TransportDashboardPage() {
 
   // Set document title dynamically
   useEffect(() => {
-    document.title = 'Nunes Transport & Fleet Intelligence — South India (Tamil Nadu & Kerala Fleets)';
+    document.title = 'FleetTrack Pro — Nunes Transport & Fleet Intelligence';
   }, []);
 
   // Fetch KPI
@@ -241,7 +245,7 @@ export default function TransportDashboardPage() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(`Circular "${cir.title}" dispatched successfully to ${cir.recipient_count || 320} transport fleets across Tamil Nadu.`);
+        alert(`Circular "${cir.title}" dispatched successfully to ${cir.recipient_count || 320} transport fleets.`);
         loadKpi();
       }
     } catch (err: any) {
@@ -250,10 +254,10 @@ export default function TransportDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/60 flex flex-col font-sans">
+    <div className="flex h-screen bg-[#f8fafc] text-slate-800 font-sans overflow-hidden">
       
-      {/* Top Header */}
-      <TransportHeader
+      {/* 1. Fixed Left Enterprise Navigation Sidebar */}
+      <TransportSidebar
         currentView={currentView}
         onViewChange={(v) => {
           if (v === 'map') {
@@ -262,191 +266,258 @@ export default function TransportDashboardPage() {
             setCurrentView(v);
           }
         }}
-        selectedState={selectedState}
-        onSelectState={(st) => {
-          setSelectedState(st);
-          setCurrentPage(1);
-        }}
-        selectedDistrict={selectedDistrict}
-        onSelectDistrict={(d) => {
-          setSelectedDistrict(d);
-          setCurrentPage(1);
-        }}
-        serviceFilter={serviceFilter}
-        onServiceFilterChange={(sf) => {
-          setServiceFilter(sf);
-          setCurrentPage(1);
-        }}
-        totalFleets={totalFiltered}
-        onOpenWorker={() => setIsWorkerOpen(true)}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        totalOperatorsCount={allOperators.length || 33}
+        totalBranchesCount={kpi?.total_branches_count || 103}
         onOpenExport={() => setIsExportOpen(true)}
-        onOpenMap={() => setIs2DMapOpen(true)}
-        onOpenBlastModal={() => setCurrentView('circulars')}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* 2. Main Right Application Pane */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         
-        {/* KPI Summary Cards */}
-        <TransportKPICards
-          kpi={kpi}
-          activeQuickFilter={quickFilter}
-          onSelectQuickFilter={(qf) => {
-            if (qf === 'bus_services') {
-              setServiceFilter('bus');
-              setQuickFilter(null);
-            } else if (qf === 'lorry_services') {
-              setServiceFilter('lorry');
-              setQuickFilter(null);
-            } else if (qf === 'logistics_services') {
-              setServiceFilter('logistics');
-              setQuickFilter(null);
-            } else if (qf === 'govt_services') {
-              setServiceFilter('govt');
-              setQuickFilter(null);
-            } else if (qf === 'has_branches') {
-              setCurrentView('branches');
+        {/* Top Header Application Bar */}
+        <TransportHeader
+          currentView={currentView}
+          onViewChange={(v) => {
+            if (v === 'map') {
+              setIs2DMapOpen(true);
             } else {
-              setQuickFilter(prev => (prev === qf ? null : qf));
+              setCurrentView(v);
             }
+          }}
+          selectedState={selectedState}
+          onSelectState={(st) => {
+            setSelectedState(st);
+            setCurrentPage(1);
+          }}
+          selectedDistrict={selectedDistrict}
+          onSelectDistrict={(d) => {
+            setSelectedDistrict(d);
+            setCurrentPage(1);
+          }}
+          serviceFilter={serviceFilter}
+          onServiceFilterChange={(sf) => {
+            setServiceFilter(sf);
+            setCurrentPage(1);
+          }}
+          totalFleets={totalFiltered}
+          onOpenWorker={() => setIsWorkerOpen(true)}
+          onOpenExport={() => setIsExportOpen(true)}
+          onOpenMap={() => setIs2DMapOpen(true)}
+          onOpenBlastModal={() => setCurrentView('circulars')}
+          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+          searchQuery={searchQuery}
+          onSearchChange={(q) => {
+            setSearchQuery(q);
             setCurrentPage(1);
           }}
         />
 
-        {/* WORKSPACE VIEW 1: FLEET REGISTER & TABLE */}
-        {currentView === 'dashboard' && (
-          <div className="space-y-4">
-            
-            {/* Filter Bar */}
-            <TransportFilterBar
-              searchQuery={searchQuery}
-              onSearchChange={(q) => {
-                setSearchQuery(q);
-                setCurrentPage(1);
-              }}
+        {/* Scrollable Work Area */}
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          
+          {/* VIEW 1: ENTERPRISE OVERVIEW DASHBOARD (Matching reference layout) */}
+          {currentView === 'dashboard' && (
+            <TransportDashboardOverview
+              operators={operators}
+              allOperators={allOperators}
+              kpi={kpi}
               selectedState={selectedState}
               onSelectState={(st) => {
                 setSelectedState(st);
                 setCurrentPage(1);
               }}
-              category={category}
-              onCategoryChange={(c) => {
-                setCategory(c);
+              serviceFilter={serviceFilter}
+              onServiceFilterChange={(sf) => {
+                setServiceFilter(sf);
                 setCurrentPage(1);
               }}
-              district={selectedDistrict}
-              onDistrictChange={(d) => {
-                setSelectedDistrict(d);
+              searchQuery={searchQuery}
+              onSearchChange={(q) => {
+                setSearchQuery(q);
                 setCurrentPage(1);
               }}
-              permitType={permitType}
-              onPermitTypeChange={(p) => {
-                setPermitType(p);
-                setCurrentPage(1);
-              }}
-              status={status}
-              onStatusChange={(s) => {
-                setStatus(s);
-                setCurrentPage(1);
-              }}
-              quickFilter={quickFilter}
-              onQuickFilterChange={(qf) => {
-                setQuickFilter(qf);
-                setCurrentPage(1);
-              }}
-              onResetFilters={handleResetFilters}
-              totalFiltered={totalFiltered}
-            />
-
-            {/* Main Interactive Fleet Table with Edit & Branch Capabilities */}
-            <TransportTable
-              operators={operators}
-              totalCount={totalFiltered}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              onPageSizeChange={(s) => {
-                setPageSize(s);
-                setCurrentPage(1);
-              }}
-              sortBy={sortBy}
-              sortOrder={sortOrder}
-              onSort={handleSort}
               onSelectOperator={setSelectedOperator}
               onQuickWhatsApp={(op) => setDispatchOperator(op)}
-              onEditOperator={(op) => setEditingOperator(op)}
+              onOneClickEmail={handleOneClickEmail}
+              onOpen2DMap={() => setIs2DMapOpen(true)}
+              onOpenExport={() => setIsExportOpen(true)}
+              onOpenBlastModal={() => setCurrentView('circulars')}
+              onViewAllDirectory={() => setCurrentView('directory')}
+              onViewAllCirculars={() => setCurrentView('circulars')}
+              onViewAllBranches={() => setCurrentView('branches')}
+            />
+          )}
+
+          {/* VIEW 2: FULL-WIDTH FLEET DIRECTORY TABLE */}
+          {currentView === 'directory' && (
+            <div className="space-y-4 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between pb-1">
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                    Fleet Directory
+                  </h1>
+                  <p className="text-xs text-slate-500">
+                    Comprehensive commercial operators registry across Tamil Nadu and Kerala
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsExportOpen(true)}
+                  className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                >
+                  Export Data
+                </button>
+              </div>
+
+              {/* Filter Bar */}
+              <TransportFilterBar
+                searchQuery={searchQuery}
+                onSearchChange={(q) => {
+                  setSearchQuery(q);
+                  setCurrentPage(1);
+                }}
+                selectedState={selectedState}
+                onSelectState={(st) => {
+                  setSelectedState(st);
+                  setCurrentPage(1);
+                }}
+                category={category}
+                onCategoryChange={(c) => {
+                  setCategory(c);
+                  setCurrentPage(1);
+                }}
+                district={selectedDistrict}
+                onDistrictChange={(d) => {
+                  setSelectedDistrict(d);
+                  setCurrentPage(1);
+                }}
+                permitType={permitType}
+                onPermitTypeChange={(p) => {
+                  setPermitType(p);
+                  setCurrentPage(1);
+                }}
+                status={status}
+                onStatusChange={(s) => {
+                  setStatus(s);
+                  setCurrentPage(1);
+                }}
+                quickFilter={quickFilter}
+                onQuickFilterChange={(qf) => {
+                  setQuickFilter(qf);
+                  setCurrentPage(1);
+                }}
+                onResetFilters={handleResetFilters}
+                totalFiltered={totalFiltered}
+              />
+
+              {/* Main Interactive Fleet Table */}
+              <TransportTable
+                operators={operators}
+                totalCount={totalFiltered}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(s) => {
+                  setPageSize(s);
+                  setCurrentPage(1);
+                }}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSort={handleSort}
+                onSelectOperator={setSelectedOperator}
+                onQuickWhatsApp={(op) => setDispatchOperator(op)}
+                onEditOperator={(op) => setEditingOperator(op)}
+                onOneClickEmail={handleOneClickEmail}
+              />
+            </div>
+          )}
+
+          {/* VIEW 3: VERIFIED CONTACTS SWITCHBOARD */}
+          {currentView === 'contacts' && (
+            <TransportContactsView
+              operators={allOperators.length > 0 ? allOperators : operators}
+              onSelectOperator={setSelectedOperator}
               onOneClickEmail={handleOneClickEmail}
             />
+          )}
 
-          </div>
-        )}
+          {/* VIEW 4: CIRCULARS & DELIVERABILITY HUB */}
+          {currentView === 'circulars' && (
+            <TransportCircularsHubView
+              operators={allOperators.length > 0 ? allOperators : operators}
+              onOpenCircularPreview={(cir) => setSelectedCircularForPreview(cir)}
+              onOpenCircularEdit={(cir) => {
+                setEditingCircular(cir);
+                setIsCircularEditOpen(true);
+              }}
+              onComposeNewCircular={() => {
+                setEditingCircular(null);
+                setIsCircularEditOpen(true);
+              }}
+            />
+          )}
 
-        {/* WORKSPACE VIEW 2: CIRCULARS & DELIVERABILITY HUB */}
-        {currentView === 'circulars' && (
-          <TransportCircularsHubView
-            operators={allOperators.length > 0 ? allOperators : operators}
-            onOpenCircularPreview={(cir) => setSelectedCircularForPreview(cir)}
-            onOpenCircularEdit={(cir) => {
-              setEditingCircular(cir);
-              setIsCircularEditOpen(true);
-            }}
-            onComposeNewCircular={() => {
-              setEditingCircular(null);
-              setIsCircularEditOpen(true);
-            }}
-          />
-        )}
+          {/* VIEW 5: REGIONAL BRANCHES & DEPOTS ACROSS TAMIL NADU & KERALA */}
+          {currentView === 'branches' && (
+            <TransportBranchesView
+              operators={allOperators.length > 0 ? allOperators : operators}
+              onSelectOperator={(op) => setSelectedOperator(op)}
+            />
+          )}
 
-        {/* WORKSPACE VIEW 3: REGIONAL BRANCHES & DEPOTS ACROSS TAMIL NADU */}
-        {currentView === 'branches' && (
-          <TransportBranchesView
-            operators={allOperators.length > 0 ? allOperators : operators}
-            onSelectOperator={(op) => setSelectedOperator(op)}
-          />
-        )}
-
-        {/* WORKSPACE VIEW 4: MISSING CONTACTS / ENRICHMENT QUEUE */}
-        {currentView === 'missing' && (
-          <TransportMissingContactsView
-            operators={allOperators.length > 0 ? allOperators : operators}
-            onSelectOperator={setSelectedOperator}
-            onOpenDispatchModal={(op) => setDispatchOperator(op)}
-          />
-        )}
-
-        {/* WORKSPACE VIEW 5: DISPATCHER */}
-        {currentView === 'dispatch' && (
-          <div className="space-y-4">
-            <div className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm">Official WhatsApp & Email Inquiries Dispatcher</h3>
-                <p className="text-xs text-slate-500">Select any fleet operator below to preview pre-filled template messages and trigger live wa.me dispatch.</p>
-              </div>
-              <button
-                onClick={() => setCurrentView('circulars')}
-                className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-bold transition-all"
-              >
-                Switch to Circulars Hub →
-              </button>
-            </div>
+          {/* VIEW 6: DATA QUALITY / MISSING CONTACTS / ENRICHMENT QUEUE */}
+          {currentView === 'missing' && (
             <TransportMissingContactsView
               operators={allOperators.length > 0 ? allOperators : operators}
               onSelectOperator={setSelectedOperator}
               onOpenDispatchModal={(op) => setDispatchOperator(op)}
             />
+          )}
+
+          {/* VIEW 7: DISPATCHER */}
+          {currentView === 'dispatch' && (
+            <div className="space-y-4">
+              <div className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Official WhatsApp & Email Inquiries Dispatcher</h3>
+                  <p className="text-xs text-slate-500">Select any fleet operator below to preview pre-filled template messages and trigger live wa.me dispatch.</p>
+                </div>
+                <button
+                  onClick={() => setCurrentView('circulars')}
+                  className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  Switch to Circulars Hub →
+                </button>
+              </div>
+              <TransportMissingContactsView
+                operators={allOperators.length > 0 ? allOperators : operators}
+                onSelectOperator={setSelectedOperator}
+                onOpenDispatchModal={(op) => setDispatchOperator(op)}
+              />
+            </div>
+          )}
+
+          {/* VIEW 8: ANALYTICS & REPORTS */}
+          {currentView === 'reports' && (
+            <TransportReportsView
+              operators={allOperators.length > 0 ? allOperators : operators}
+              kpi={kpi}
+            />
+          )}
+
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-slate-200/80 bg-white py-3 px-6 text-xs text-slate-500 shrink-0">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© {new Date().getFullYear()} Nunes Instruments — FleetTrack Pro v2.0 (Tamil Nadu & Kerala Corridors)</p>
+            <p className="text-slate-400 font-mono text-[11px]">TOBOA, SLOF & KSLOF Inter-State Certified Network</p>
           </div>
-        )}
+        </footer>
 
-        {/* WORKSPACE VIEW 6: ANALYTICS & REPORTS */}
-        {currentView === 'reports' && (
-          <TransportReportsView
-            operators={allOperators.length > 0 ? allOperators : operators}
-            kpi={kpi}
-          />
-        )}
-
-      </main>
+      </div>
 
       {/* Detail Drawer Modal */}
       <TransportDetailDrawer
@@ -556,7 +627,7 @@ export default function TransportDashboardPage() {
                 <p className="font-bold text-xs text-emerald-400">1-Click Dispatch Confirmed (250 OK)</p>
                 <button
                   onClick={() => setToastNotification(null)}
-                  className="text-slate-400 hover:text-white text-xs"
+                  className="text-slate-400 hover:text-white text-xs cursor-pointer"
                 >
                   ✕
                 </button>
@@ -573,14 +644,6 @@ export default function TransportDashboardPage() {
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="mt-auto border-t border-slate-200/80 bg-white py-4 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© {new Date().getFullYear()} Nunes Instruments — South India Transport & Logistics Intelligence Platform (Tamil Nadu & Kerala)</p>
-          <p className="text-slate-400">TOBOA, SLOF & Kerala State Lorry Owners Federation (KSLOF) Certified</p>
-        </div>
-      </footer>
 
     </div>
   );

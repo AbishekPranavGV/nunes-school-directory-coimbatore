@@ -175,6 +175,8 @@ export interface BouncedEmailRecord {
 
 export type TransportWorkspaceView =
   | 'dashboard'
+  | 'directory'
+  | 'contacts'
   | 'circulars'
   | 'branches'
   | 'map'

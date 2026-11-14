@@ -120,7 +120,6 @@ export const Header: React.FC<HeaderProps> = ({
   const workspaces: { id: WorkspaceView; label: string; icon: any; badge?: string; badgeColor?: string }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'directory', label: 'School Directory', icon: Building2, badge: (totalCount || 2097).toLocaleString(), badgeColor: 'bg-sky-100 text-sky-800' },
-    { id: 'verification', label: 'Verification Queue', icon: AlertTriangle, badge: (missingCount || 2020).toLocaleString(), badgeColor: 'bg-rose-100 text-rose-800' },
     { id: 'circulars', label: 'Circular Center', icon: Send, badge: 'New', badgeColor: 'bg-amber-100 text-amber-800' },
     { id: 'communications', label: 'Sent & Replies', icon: Mail, badge: 'Inbox', badgeColor: 'bg-emerald-100 text-emerald-800' },
     { id: 'staff', label: 'Staff Workspace', icon: PhoneCall },

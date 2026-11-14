@@ -480,14 +480,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </button>
 
           <button
-            onClick={() => onNavigate('verification')}
-            className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5"
-          >
-            <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-            <span>Missing Queue ({(kpi?.high_priority_missing_contacts || 2020).toLocaleString()})</span>
-          </button>
-
-          <button
             onClick={() => onNavigate('staff')}
             className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5"
           >
@@ -646,10 +638,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             <button
-              onClick={() => onNavigate('verification')}
+              onClick={() => onNavigate('directory')}
               className="text-xs text-sky-600 hover:text-sky-800 font-semibold"
             >
-              Verification Queue &rarr;
+              School Directory &rarr;
             </button>
           </div>
 

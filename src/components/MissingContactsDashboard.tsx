@@ -103,7 +103,7 @@ export const MissingContactsDashboard: React.FC<MissingContactsDashboardProps> =
               Missing-Contact Recovery System
             </h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
-              {(missingSchools.length || 2020).toLocaleString()} Priority Schools
+              {missingSchools.length.toLocaleString()} Priority Schools
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">

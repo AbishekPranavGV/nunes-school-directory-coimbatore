@@ -24,6 +24,19 @@ interface KPICardsProps {
   onViewMissingDashboard?: () => void;
 }
 
+interface CardItem {
+  id: string;
+  title: string;
+  value: string;
+  subtext: string;
+  icon: any;
+  iconColor: string;
+  iconBg: string;
+  borderColor: string;
+  filterValue: string;
+  badge?: string;
+}
+
 export const KPICards: React.FC<KPICardsProps> = ({
   kpi,
   onSelectQuickFilter,
@@ -32,15 +45,15 @@ export const KPICards: React.FC<KPICardsProps> = ({
 }) => {
   if (!kpi) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6 animate-pulse">
-        {[...Array(6)].map((_, i) => (
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6 animate-pulse">
+        {[...Array(7)].map((_, i) => (
           <div key={i} className="h-24 bg-white/70 border border-slate-200/60 rounded-xl"></div>
         ))}
       </div>
     );
   }
 
-  const cards = [
+  const cards: CardItem[] = [
     {
       id: 'all',
       title: 'Discovered Schools',
@@ -62,18 +75,6 @@ export const KPICards: React.FC<KPICardsProps> = ({
       iconBg: 'bg-emerald-50',
       borderColor: activeQuickFilter === 'complete' ? 'ring-2 ring-emerald-500 border-emerald-400' : 'border-slate-200',
       filterValue: 'complete'
-    },
-    {
-      id: 'missing',
-      title: 'Missing Contacts',
-      value: (kpi.high_priority_missing_contacts || 2020).toLocaleString(),
-      subtext: 'High Priority Recovery Queue',
-      icon: AlertTriangle,
-      iconColor: 'text-rose-600',
-      iconBg: 'bg-rose-50',
-      borderColor: activeQuickFilter === 'no_contact' ? 'ring-2 ring-rose-500 border-rose-400' : 'border-slate-200',
-      filterValue: 'no_contact',
-      badge: 'Priority Queue'
     },
     {
       id: 'phone',
@@ -134,7 +135,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
 
   return (
     <div className="mb-6">
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {cards.map((c) => {
           const Icon = c.icon;
           const isSelected = activeQuickFilter === c.filterValue && c.filterValue !== '';
