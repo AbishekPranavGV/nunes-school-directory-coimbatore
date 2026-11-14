@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Nunes Transport & Fleet Intelligence — Tamil Nadu (Bus & Lorry Services)',
-  description: 'Tamil Nadu Bus and Lorry Transport Owners Association Master Directory. Certified fleet data, verified owner WhatsApp & phone contacts, regional branch depots, official circulars, and live 2D fleet maps across Tamil Nadu.',
+  title: 'Nunes Transport & Fleet Intelligence — Tamil Nadu (Bus, Lorry, Govt & 3PL Logistics)',
+  description: 'Tamil Nadu Bus, Lorry, Govt STUs and 3PL Logistics Master Directory. Certified fleet data, verified owner WhatsApp & phone contacts, regional branch depots, official circulars, and live Google Maps fleet corridors across Tamil Nadu.',
   keywords: [
     'Tamil Nadu transport directory',
     'lorry owners association',

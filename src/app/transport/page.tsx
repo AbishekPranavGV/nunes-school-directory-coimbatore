@@ -69,7 +69,7 @@ export default function TransportDashboardPage() {
 
   // Set document title dynamically
   useEffect(() => {
-    document.title = 'Nunes Instruments — Tamil Nadu Transport & Logistics Fleet Intelligence';
+    document.title = 'Nunes Transport & Fleet Intelligence — Tamil Nadu (Bus, Lorry, Govt & 3PL Logistics)';
   }, []);
 
   // Fetch KPI

@@ -22,7 +22,9 @@ import {
   Clock,
   Sparkles,
   Edit3,
-  Building2
+  Building2,
+  Package,
+  Landmark
 } from 'lucide-react';
 import { TransportRecord } from '@/types/transport';
 
@@ -45,8 +47,19 @@ export const TransportDetailDrawer: React.FC<TransportDetailDrawerProps> = ({
   if (!operator) return null;
 
   const isBus = operator.service_type === 'bus';
+  const isLogistics = operator.service_type === 'logistics';
+  const isGovt = operator.service_type === 'govt';
   const cleanPhone = operator.contact_number.replace(/[^0-9+]/g, '');
   const cleanWhatsApp = operator.whatsapp_number.replace(/[^0-9]/g, '');
+
+  const getHeaderIcon = () => {
+    if (isGovt) return { icon: <Landmark className="w-6 h-6" />, bg: 'bg-purple-600 text-white' };
+    if (isLogistics) return { icon: <Package className="w-6 h-6" />, bg: 'bg-emerald-600 text-white' };
+    if (isBus) return { icon: <Bus className="w-6 h-6" />, bg: 'bg-sky-600 text-white' };
+    return { icon: <Truck className="w-6 h-6" />, bg: 'bg-amber-600 text-white' };
+  };
+
+  const headerStyle = getHeaderIcon();
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -64,10 +77,8 @@ export const TransportDetailDrawer: React.FC<TransportDetailDrawerProps> = ({
         {/* Drawer Header */}
         <div className="p-5 border-b border-slate-200 bg-slate-50/70 flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
-              isBus ? 'bg-sky-600 text-white' : 'bg-amber-600 text-white'
-            }`}>
-              {isBus ? <Bus className="w-6 h-6" /> : <Truck className="w-6 h-6" />}
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${headerStyle.bg}`}>
+              {headerStyle.icon}
             </div>
 
             <div>
