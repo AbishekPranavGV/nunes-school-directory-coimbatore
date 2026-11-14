@@ -108,7 +108,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'one_click_send_to_operator') {
-      const { operator_id, operator_email, company_name, circular_id, circular_title } = body;
+      let { operator_id, operator_email, company_name, circular_id, circular_title } = body;
+      
+      if (!operator_email && operator_id) {
+        const found = TRANSPORT_OPERATORS.find(f => f.id === operator_id);
+        if (found) {
+          operator_email = found.email;
+          company_name = company_name || found.company_name;
+        }
+      }
+
       if (!operator_email) {
         return NextResponse.json({ error: 'Operator has no valid email registered' }, { status: 400 });
       }
@@ -141,13 +150,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'automated_email_blast') {
-      const { circular_id, state_target, service_filter } = body;
+      const { circular_id, state_target, target_state, service_filter } = body;
+      const effectiveState = state_target || target_state || 'all';
       const targetCir = circularsState.find(c => c.id === circular_id) || circularsState[0];
 
       // Count matching recipients from TRANSPORT_OPERATORS
       let matchingFleets = [...TRANSPORT_OPERATORS];
-      if (state_target && state_target !== 'all') {
-        matchingFleets = matchingFleets.filter(f => f.state.toLowerCase() === state_target.toLowerCase());
+      if (effectiveState && effectiveState !== 'all') {
+        matchingFleets = matchingFleets.filter(f => f.state.toLowerCase() === effectiveState.toLowerCase());
       }
       if (service_filter && service_filter !== 'all') {
         matchingFleets = matchingFleets.filter(f => f.service_type === service_filter);
