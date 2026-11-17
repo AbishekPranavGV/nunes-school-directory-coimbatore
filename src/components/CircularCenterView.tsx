@@ -36,11 +36,38 @@ import {
   Play,
   Flame,
   Radio,
-  X
+  X,
+  Camera,
+  QrCode,
+  MapPin,
+  Phone,
+  MessageSquare,
+  Share2,
+  CheckCircle,
+  Award,
+  Truck,
+  FileSpreadsheet,
+  Calculator,
+  ShieldAlert,
+  Pause,
+  Timer,
+  UploadCloud,
+  Search
 } from 'lucide-react';
 import { CircularItem, SchoolRecord } from '@/types';
 import { TAMIL_NADU_DISTRICTS } from '@/lib/data/tamilNaduDistricts';
 import { KERALA_DISTRICTS } from '@/lib/data/keralaDistricts';
+import { 
+  NUNES_COIMBATORE_LOCATIONS,
+  NUNES_BREATH_ANALYSER_PRODUCTS,
+  NUNES_CATALOGUE_NETLIFY_URL,
+  NUNES_PRIMARY_PHONE,
+  NUNES_SECONDARY_PHONE,
+  NUNES_LANDLINE,
+  NUNES_OFFICIAL_EMAIL,
+  BreathAnalyserProduct,
+  CoimbatoreBranchLocation
+} from '@/lib/data/nunesBreathAnalysers';
 
 interface CircularCenterViewProps {
   schools: SchoolRecord[];
@@ -49,8 +76,21 @@ interface CircularCenterViewProps {
   selectedDistrict?: string;
 }
 
-// 5 Authoritative South India (Tamil Nadu & Kerala) Circular Templates
+// 6 Authoritative South India (Tamil Nadu & Kerala) Circular Templates
 const CIRCULAR_TEMPLATES = [
+  {
+    id: 'tpl_school_bus_breath_analyser',
+    name: 'School Bus Alcohol Screening & Fleet Safety',
+    category: 'Student Safety & Transport Compliance',
+    badge: 'Nunes Safe Campus 2026',
+    title: 'Mandatory School Bus Driver Alcohol Screening & Campus Fleet Safety Compliance (Supreme Court & Transport Directorate Mandates)',
+    ref: 'NUNES/SAFE-CAMPUS/2026/CIRC-089',
+    target: 'All South India Schools (21,120 Institutions)',
+    subject: 'Deployment of Certified Breath Alcohol Analysers with Evidential Camera, GPS & Thermal Printing for School Transportation Safety (Academic Year 2026-27)',
+    body: `To The Correspondents, Principals, and Transport Management Officers,\nAll Educational Institutions (State Board, Matriculation, CBSE & ICSE),\nTamil Nadu & Kerala.\n\nSubject: Mandatory Pre-Trip Breath Alcohol Screening Protocol for School Bus Drivers & Student Transport Fleet Safety (AY 2026-27).\n\nPursuant to the Supreme Court of India directives on School Bus Safety (W.P. Civil No. 13029/1985), Tamil Nadu Motor Vehicles (School Buses) Rules 2012, and Motor Vehicles Department (MVD) Kerala Safe Campus circulars, all educational institutions operating student buses, vans, and contracted transport are strictly mandated to execute 100% pre-trip breath alcohol testing for every driver prior to boarding students.\n\nTo fulfill statutory audit requirements and maintain timestamped digital evidence, Nunes Instruments provides an accredited lineup of 14 professional breath alcohol analysers—ranging from rapid non-contact screening batons for morning gate check-ins to advanced models with built-in thermal printers (Model A50, 333-T), tamper-proof facial recognition cameras (Model AT-9000), and GPS coordinate logging (Model AT-8900).\n\nInstitutions are entitled to special educational rate subsidies and may schedule a complimentary on-campus demonstration and fleet safety audit at our Coimbatore zonal offices.\n\nOur Coimbatore Locations:\n1. RATHINAPURI: 11-A, 2nd Cross, Sundarar St, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, Tamil Nadu 641027 | Phone: +91 89409 44000\n2. GOPALAPURAM: 6, GJ Chandran Complex, Head Quarters Rd, Opp. to CSI Church, Gopalapuram, Coimbatore, Tamil Nadu 641018 | Phone: +91 89409 33000\n3. GANDHIPURAM: 218-628, 1st St, Cross Cut, Gandhipuram, Coimbatore, Tamil Nadu 641012 | Phone: +91 0422 2499444 / +91 89409 44000`,
+    attachment: 'Nunes_Breath_Analyser_Catalogue_14_Models_2026.pdf',
+    ocrText: `NUNES INSTRUMENTS BREATH ANALYSER CATALOGUE (14 MODELS SPECIFICATIONS)\nREFERENCE: NUNES/SAFE-CAMPUS/2026/CIRC-089\n\n1. Rapid Screening Baton: Electrochemical sensor, OLED display, dual 3W lights, Bluetooth, 0.000-2.500 mg/L.\n2. Dual-Color Signal Screening Baton: Non-contact 3-5 cm, result <5s, whistle alarm, 3,000 test logs.\n3. Handheld Multi-Unit LCD Tester: mg/L, mg/100mL, %BAC, audible alarm, portable.\n4. Keyring LCD Breath Tester: Quick screening, pocket portability.\n5. Pocket mg/L Display Tester: Backlit LCD, warning buzzer.\n6. Three-Digit Handheld LED Detector: Semiconductor sensor, replaceable mouthpiece.\n7. Dual-Unit LCD Pocket Tester: Slim format, high precision.\n8. Compact Green-Screen Breath Tester: Audible threshold buzzer, rapid 10s cycle.\n9. A50 Rugged Handheld Tester: Built-in thermal printer, fuel cell electrochemical, color TFT, 20,000 logs.\n10. AT-9000 Alcohol Tester: 4-inch color touchscreen, built-in camera for facial verification photo proof, built-in thermal printer, 7.4V Li-ion.\n11. 333-T Touchscreen Tester: Color touchscreen, fuel cell, on-the-spot thermal printing.\n12. AT-8900 Modular Tester: Replaceable fuel cell module, GPS coordinates tagged to records, detachable printer, 20,000 records.\n13. AA2010P Breath Analyser: High-speed screening, wired/Bluetooth printer support.\n14. 333 Touchscreen Tester: Fuel cell technology with external thermal printer.\n\nCatalogue Netlify URL: https://darling-torrone-c0aaf9.netlify.app/`
+  },
   {
     id: 'tpl_kerala_stem_audit',
     name: 'Kerala Sametham Science Lab Audit',
@@ -327,6 +367,33 @@ export const CircularCenterView: React.FC<CircularCenterViewProps> = ({
   const [isSimulatingSend, setIsSimulatingSend] = useState<boolean>(false);
   const [simulationResult, setSimulationResult] = useState<string | null>(null);
 
+  // Outreach Channel Switcher & Lead Generation State
+  const [activeChannelTab, setActiveChannelTab] = useState<'email' | 'whatsapp' | 'locations' | 'catalog' | 'leads'>('email');
+  const [copiedWhatsApp, setCopiedWhatsApp] = useState<boolean>(false);
+  const [copiedLocationId, setCopiedLocationId] = useState<string | null>(null);
+  const [selectedProductCategory, setSelectedProductCategory] = useState<string>('ALL');
+  const [catalogSearchQuery, setCatalogSearchQuery] = useState<string>('');
+  const [fleetBusesCount, setFleetBusesCount] = useState<number>(10);
+  const [leadBookingSuccess, setLeadBookingSuccess] = useState<string | null>(null);
+
+  // Automated PDF Scan & Instant AI Generation State
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isScanningPdf, setIsScanningPdf] = useState<boolean>(false);
+  const [scanProgress, setScanProgress] = useState<number>(0);
+  const [scanStatusText, setScanStatusText] = useState<string>('');
+  const [isDraggingPdf, setIsDraggingPdf] = useState<boolean>(false);
+
+  // Safe Anti-Ban WhatsApp Dispatch Queue Modal State
+  const [isWhatsAppQueueModalOpen, setIsWhatsAppQueueModalOpen] = useState<boolean>(false);
+  const [waQueueScope, setWaQueueScope] = useState<'coimbatore' | 'kerala' | 'tamil-nadu' | 'all'>('coimbatore');
+  const [waRecipients, setWaRecipients] = useState<any[]>([]);
+  const [loadingWaRecipients, setLoadingWaRecipients] = useState<boolean>(false);
+  const [waAutoRunning, setWaAutoRunning] = useState<boolean>(false);
+  const [waCurrentIndex, setWaCurrentIndex] = useState<number>(0);
+  const [waCountdown, setWaCountdown] = useState<number>(8);
+  const [waSentCount, setWaSentCount] = useState<number>(0);
+  const [waSearchTerm, setWaSearchTerm] = useState<string>('');
+
   // Load circulars
   const loadCirculars = async () => {
     try {
@@ -378,7 +445,168 @@ export const CircularCenterView: React.FC<CircularCenterViewProps> = ({
     setEditBody(prev => prev + ` ${variableTag} `);
   };
 
-  // Handle OCR file simulation
+  // Automated PDF Scan & Circular Generation Workflow
+  const processUploadedPdf = async (file: File) => {
+    setIsScanningPdf(true);
+    setScanProgress(15);
+    setScanStatusText(`Ingesting "${file.name}" (${Math.round(file.size / 1024)} KB)...`);
+
+    const t1 = setTimeout(() => {
+      setScanProgress(45);
+      setScanStatusText('Scanning PDF pages & extracting metrology directives...');
+    }, 350);
+
+    const t2 = setTimeout(() => {
+      setScanProgress(80);
+      setScanStatusText('Generating official Gmail draft & anti-ban WhatsApp templates with Coimbatore hubs...');
+    }, 700);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('subject', title || file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' '));
+      formData.append('target_group', targetGroup);
+
+      const res = await fetch('/api/circulars/scan-pdf', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+      clearTimeout(t1);
+      clearTimeout(t2);
+
+      if (data.success && data.circular) {
+        setScanProgress(100);
+        setScanStatusText('✓ Circular & Anti-Ban Lead Templates Generated!');
+
+        setTimeout(() => {
+          setCirculars(prev => [data.circular, ...prev]);
+          selectCircular(data.circular);
+          setIsComposing(false);
+          setIsScanningPdf(false);
+          setScanProgress(0);
+          setScanStatusText('');
+          setDraftToast(`Scanned "${file.name}" & generated live preview!`);
+          setTimeout(() => setDraftToast(null), 3500);
+        }, 500);
+      } else {
+        throw new Error(data.error || 'Failed to scan PDF');
+      }
+    } catch (err: any) {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      setIsScanningPdf(false);
+      alert(`PDF Scan notice: ${err.message}`);
+    }
+  };
+
+  const handlePdfFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      processUploadedPdf(e.target.files[0]);
+    }
+  };
+
+  const handlePdfDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDraggingPdf(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processUploadedPdf(e.dataTransfer.files[0]);
+    }
+  };
+
+  // Safe Anti-Ban WhatsApp Queue Loader
+  const loadWhatsAppRecipients = async (scope = waQueueScope) => {
+    try {
+      setLoadingWaRecipients(true);
+      const res = await fetch('/api/circulars', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'get_whatsapp_recipients',
+          scope
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.recipients) {
+        setWaRecipients(data.recipients);
+        setWaCurrentIndex(0);
+      }
+    } catch (err) {
+      console.error('Error loading WhatsApp recipients:', err);
+    } finally {
+      setLoadingWaRecipients(false);
+    }
+  };
+
+  // Dynamic Polymorphic Anti-Ban Message Generator for each school
+  const generateAntiBanWhatsAppText = (school: any, circ?: CircularItem | null) => {
+    const c = circ || activeCircular;
+    const baseText = c?.generated_whatsapp_body || '';
+    
+    const greetings = [
+      'Respected Principal / Correspondent',
+      'Dear Head of Institution',
+      'Greetings Principal',
+      'Respected School Management Officer'
+    ];
+    const hash = (school.school_id || school.udise_code || school.school_name || '').split('').reduce((acc: number, ch: string) => acc + ch.charCodeAt(0), 0);
+    const greeting = greetings[hash % greetings.length];
+    const uniqueToken = `[Audit Ref: NI-2026-${(school.udise_code || school.school_id || '9843').slice(-4)}]`;
+
+    if (baseText) {
+      return baseText
+        .replace(/Dear Correspondent \/ Principal|Respected Principal \/ Correspondent|Respected Principal/g, greeting)
+        .replace(/{{School_Name}}|\[School Name\]/g, school.school_name)
+        .replace(/{{Principal_Name}}|\[Principal Name\]/g, school.principal_name)
+        .replace(/{{UDISE_Code}}|\[UDISE Code\]/g, school.udise_code)
+        .replace(/{{Block}}|\[Block\]/g, school.block || school.district)
+        .replace(/{{Taluk}}|\[Taluk\]/g, school.taluk || school.district)
+        + `\n\n🔒 ${uniqueToken}`;
+    }
+
+    return `🚨 *MANDATORY SCHOOL BUS FLEET SAFETY COMPLIANCE (AY 2026-27)*\n*From: Nunes Instruments, Coimbatore*\n\n${greeting}, *${school.school_name}* (UDISE: ${school.udise_code}),\n\nUnder Supreme Court transport guidelines, 100% daily pre-trip alcohol screening for all bus and van drivers is strictly mandatory.\n\n🛡️ *Nunes Accredited Breath Analysers:*\n📸 *Model AT-9000*: Camera for facial photo proof + Thermal Printer.\n🖨️ *Model A50*: Fuel-cell sensor + Instant printed receipts.\n⚡ *Rapid Screening Baton*: Non-contact screening in <5 seconds.\n\n🎁 *Special Institutional Subsidy: Up to 35% Discount + Free On-Campus Demo.*\n\n📍 *Our Coimbatore Locations:*\n1. RATHINAPURI: 11-A, 2nd Cross, Sundarar St, Opp. to LaLa Mahall, Rathinapuri, Coimbatore, TN 641027 | Phone: +91 89409 44000\n2. GOPALAPURAM: 6, GJ Chandran Complex, Head Quarters Rd, Opp. to CSI Church, Gopalapuram, Coimbatore, TN 641018 | Phone: +91 89409 33000\n3. GANDHIPURAM: 218-628, 1st St, Cross Cut, Gandhipuram, Coimbatore, TN 641012 | Phone: +91 0422 2499444 / +91 89409 44000\n\n📲 *Catalogue:* https://darling-torrone-c0aaf9.netlify.app/\nWhatsApp Hotline: +91 89409 44000\n\n🔒 ${uniqueToken}`;
+  };
+
+  const handleOpenWaChat = (school: any) => {
+    const text = generateAntiBanWhatsAppText(school);
+    const url = `https://web.whatsapp.com/send?phone=${school.phone_digits}&text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+    setWaRecipients(prev => prev.map(r => r.school_id === school.school_id ? { ...r, status: 'OPENED' } : r));
+    setWaSentCount(c => c + 1);
+  };
+
+  // Safe Auto-Runner Timer Effect
+  useEffect(() => {
+    let timer: any = null;
+    if (waAutoRunning && waRecipients.length > 0 && waCurrentIndex < waRecipients.length) {
+      timer = setInterval(() => {
+        setWaCountdown(prev => {
+          if (prev <= 1) {
+            const targetSchool = waRecipients[waCurrentIndex];
+            if (targetSchool) {
+              const text = generateAntiBanWhatsAppText(targetSchool);
+              const url = `https://web.whatsapp.com/send?phone=${targetSchool.phone_digits}&text=${encodeURIComponent(text)}`;
+              window.open(url, '_blank');
+              setWaRecipients(rList => rList.map((r, idx) => idx === waCurrentIndex ? { ...r, status: 'SENT' } : r));
+              setWaSentCount(c => c + 1);
+            }
+            if (waCurrentIndex + 1 < waRecipients.length) {
+              setWaCurrentIndex(idx => idx + 1);
+              return 8; // Reset safe pacing countdown
+            } else {
+              setWaAutoRunning(false);
+              return 0;
+            }
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [waAutoRunning, waCurrentIndex, waRecipients]);
+
+  // Handle OCR file simulation (instant quick preset)
   const handleSimulateFileUpload = () => {
     setIsOcrProcessing(true);
     setTimeout(() => {
@@ -695,6 +923,54 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
       .replace(/{{UDISE_Code}}|\[UDISE Code\]/g, activeRecipient.udise);
   };
 
+  const getInterpolatedWhatsApp = (rawText?: string) => {
+    const text = rawText || activeCircular?.generated_whatsapp_body || (activeCircular?.id === 'circ_2026_004' ? activeCircular.body_text : '');
+    if (!text) {
+      // Return fallback WhatsApp draft if not explicitly set
+      return `🚨 *MANDATORY SCHOOL BUS SAFETY DIRECTIVE (AY 2026-27)*\n*From: Nunes Instruments, Coimbatore*\n\nDear Correspondent / Principal, *${activeRecipient.name}* (UDISE: ${activeRecipient.udise}),\n\nUnder Supreme Court of India transport safety directives, 100% daily pre-trip breath alcohol screening is mandatory for all school bus & van drivers.\n\n🛡️ *Nunes Accredited Breath Analysers:*\n📸 *Model AT-9000*: Camera for facial photo proof + Thermal Printer.\n🖨️ *Model A50*: Fuel-cell sensor + Instant printed receipts.\n📍 *Model AT-8900*: GPS coordinate tagging + Detachable printer.\n⚡ *Rapid Screening Baton*: Non-contact screening in <5 seconds.\n\n📍 *Visit Our Coimbatore Locations:*\n1. RATHINAPURI: 11-A, 2nd Cross, Sundarar St, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, TN 641027 | Phone: +91 89409 44000\n2. GOPALAPURAM: 6, GJ Chandran Complex, Head Quarters Rd, Opp. to CSI Church, Gopalapuram, Coimbatore, TN 641018 | Phone: +91 89409 33000\n3. GANDHIPURAM: 218-628, 1st St, Cross Cut, Gandhipuram, Coimbatore, TN 641012 | Phone: +91 0422 2499444 / +91 89409 44000\n\n📲 *Catalogue:* https://darling-torrone-c0aaf9.netlify.app/\nWhatsApp Hotline: +91 89409 44000`;
+    }
+    return text
+      .replace(/{{School_Name}}|\[School Name\]/g, activeRecipient.name)
+      .replace(/{{Principal_Name}}|\[Principal Name\]/g, activeRecipient.principal)
+      .replace(/{{UDISE_Code}}|\[UDISE Code\]/g, activeRecipient.udise)
+      .replace(/{{Block}}|\[Block\]/g, activeRecipient.block)
+      .replace(/{{Taluk}}|\[Taluk\]/g, activeRecipient.taluk)
+      .replace(/{{Ref_Number}}|\[Reference Number\]/g, activeCircular?.reference_number || 'NUNES/SAFE-CAMPUS/2026/CIRC-089');
+  };
+
+  const handleCopyWhatsApp = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedWhatsApp(true);
+    setDraftToast('WhatsApp template copied to clipboard!');
+    setTimeout(() => {
+      setCopiedWhatsApp(false);
+      setDraftToast(null);
+    }, 2500);
+  };
+
+  const handleCopyLocation = (loc: CoimbatoreBranchLocation) => {
+    const locText = `${loc.branchName} BRANCH - NUNES INSTRUMENTS\n${loc.fullAddress}\nPhone: ${loc.phone} | Mobile: ${loc.mobile}\nEmail: ${loc.email}\nGoogle Maps: ${loc.googleMapsUrl}`;
+    navigator.clipboard.writeText(locText);
+    setCopiedLocationId(loc.id);
+    setDraftToast(`Copied ${loc.branchName} branch address to clipboard!`);
+    setTimeout(() => {
+      setCopiedLocationId(null);
+      setDraftToast(null);
+    }, 2500);
+  };
+
+  const handleCopyAllLocations = () => {
+    const allText = `OUR COIMBATORE LOCATIONS — NUNES INSTRUMENTS:\n\n` + 
+      NUNES_COIMBATORE_LOCATIONS.map((loc, idx) => 
+        `${idx + 1}. ${loc.branchName}:\n${loc.fullAddress}\nPhone: ${loc.phone} | Mobile: ${loc.mobile}\nEmail: ${loc.email}`
+      ).join('\n\n') + `\n\nOnline Catalogue: ${NUNES_CATALOGUE_NETLIFY_URL}`;
+    navigator.clipboard.writeText(allText);
+    setDraftToast('All 3 Coimbatore branch locations copied to clipboard!');
+    setTimeout(() => {
+      setDraftToast(null);
+    }, 2500);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-200">
       
@@ -1004,50 +1280,115 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
                   />
                 </div>
 
-                {/* 4. Interactive OCR Document Upload & Extraction Area */}
-                <div className="p-4 border border-dashed border-sky-300 bg-gradient-to-r from-sky-50/40 to-indigo-50/30 rounded-xl">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <span className="p-2.5 rounded-xl bg-white text-sky-600 shadow-xs border border-sky-100">
+                {/* 4. Automated PDF Ingestion & OCR Scanner Dropzone */}
+                <div className="space-y-3">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".pdf,application/pdf"
+                    className="hidden"
+                    onChange={handlePdfFileSelect}
+                  />
+
+                  {/* Drag-and-Drop Ingestion Zone */}
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setIsDraggingPdf(true); }}
+                    onDragLeave={() => setIsDraggingPdf(false)}
+                    onDrop={handlePdfDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`p-6 rounded-2xl border-2 border-dashed transition-all cursor-pointer text-center relative overflow-hidden group ${
+                      isDraggingPdf
+                        ? 'border-emerald-500 bg-emerald-50/70 scale-[1.01]'
+                        : 'border-sky-300 hover:border-sky-500 bg-gradient-to-b from-sky-50/50 via-indigo-50/20 to-white'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
+                        isDraggingPdf ? 'bg-emerald-500 text-white shadow-lg' : 'bg-sky-100 text-sky-600 group-hover:scale-110 shadow-xs'
+                      }`}>
+                        <UploadCloud className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">
+                          {isDraggingPdf ? 'Drop Official Circular / Product PDF Here' : 'Upload or Drag & Drop Circular / Product PDF'}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Drop PDF directives or Nunes Breath Analyser catalogue • Scans pages & generates lead templates instantly
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 pt-1 text-[11px] font-semibold text-sky-700 flex-wrap justify-center">
+                        <span className="px-2 py-0.5 bg-white rounded-md border border-sky-200 shadow-2xs">PDF Only</span>
+                        <span className="px-2 py-0.5 bg-white rounded-md border border-sky-200 shadow-2xs">Automated OCR & Layout Extraction</span>
+                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200">Zero C Binaries Required</span>
+                      </div>
+                    </div>
+
+                    {/* Scanning Telemetry Bar */}
+                    {isScanningPdf && (
+                      <div className="mt-4 p-3 bg-white/95 rounded-xl border border-sky-200 shadow-md animate-in fade-in-50">
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-800 mb-1.5">
+                          <span className="flex items-center gap-1.5 text-sky-700">
+                            <Radio className="w-3.5 h-3.5 text-sky-600 animate-pulse" />
+                            <span>{scanStatusText}</span>
+                          </span>
+                          <span className="font-mono text-sky-600">{scanProgress}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500 transition-all duration-300"
+                            style={{ width: `${scanProgress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Attachment metadata strip & OCR toggle */}
+                  <div className="p-3 border border-sky-200 bg-sky-50/40 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2.5">
+                      <span className="p-2 rounded-lg bg-white text-sky-600 shadow-2xs border border-sky-100">
                         <Paperclip className="w-4 h-4" />
                       </span>
                       <div>
-                        <p className="text-xs font-bold text-slate-900">Attachment: {attachedFileName}</p>
-                        <p className="text-[11px] text-slate-500">PDF Document • 340 KB • Automatic text extraction ready</p>
+                        <p className="font-bold text-slate-800 truncate">Attachment: {attachedFileName}</p>
+                        <p className="text-[10px] text-slate-500">Official Directive Document Attached to Dispatch</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={handleSimulateFileUpload}
-                        disabled={isOcrProcessing}
-                        className="px-3 py-1.5 bg-white border border-sky-200 hover:bg-sky-50 text-sky-800 text-xs font-semibold rounded-lg transition-all flex items-center gap-1 shadow-2xs"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3 py-1 bg-white border border-sky-300 hover:bg-sky-50 text-sky-800 rounded-lg font-semibold text-xs transition-all shadow-2xs"
                       >
-                        <Upload className="w-3 h-3 text-sky-600" />
-                        <span>{isOcrProcessing ? 'Extracting OCR...' : 'Upload & Re-scan'}</span>
+                        Browse PDF
                       </button>
-
-                      <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-md border border-emerald-200">
-                        OCR Verified (98.4%)
-                      </span>
+                      {simulatedOcrText && (
+                        <button
+                          type="button"
+                          onClick={() => setShowOcrPreview(!showOcrPreview)}
+                          className="px-2.5 py-1 text-xs text-sky-700 font-semibold underline"
+                        >
+                          {showOcrPreview ? 'Hide Raw OCR' : 'View Raw OCR'}
+                        </button>
+                      )}
                     </div>
                   </div>
 
                   {/* OCR Extracted Text Preview Drawer */}
                   {showOcrPreview && simulatedOcrText && (
-                    <div className="mt-3 pt-3 border-t border-sky-200/80">
-                      <div className="flex items-center justify-between mb-1.5 text-xs text-sky-900 font-bold">
+                    <div className="p-3 bg-slate-900 text-slate-100 rounded-xl text-xs space-y-1.5 animate-in fade-in-50">
+                      <div className="flex items-center justify-between text-slate-300 font-bold">
                         <span>Extracted OCR Document Text (Raw Scan)</span>
                         <button
                           type="button"
                           onClick={() => setBodyText(simulatedOcrText)}
-                          className="text-[11px] text-sky-600 hover:text-sky-800 underline font-semibold"
+                          className="text-[11px] text-sky-400 hover:text-sky-300 underline font-semibold"
                         >
                           Copy OCR Text to Message Body
                         </button>
                       </div>
-                      <pre className="p-2.5 bg-slate-900 text-slate-100 rounded-lg text-[10px] font-mono whitespace-pre-wrap max-h-28 overflow-y-auto">
+                      <pre className="p-2 bg-slate-950 rounded-lg text-[10px] font-mono whitespace-pre-wrap max-h-32 overflow-y-auto text-slate-200">
                         {simulatedOcrText}
                       </pre>
                     </div>
@@ -1142,6 +1483,18 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
 
                     <button
                       onClick={() => {
+                        setIsWhatsAppQueueModalOpen(true);
+                        loadWhatsAppRecipients(waQueueScope);
+                      }}
+                      className="px-4 py-1.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/25 transition-all flex items-center gap-1.5 cursor-pointer ring-2 ring-emerald-400/40 hover:scale-102"
+                      title="Safe Anti-Ban WhatsApp Queue Dispatch (Zero Account Lockout Protection)"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-white animate-pulse" />
+                      <span>💬 WhatsApp Anti-Ban Queue</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
                         setIsDispatchModalOpen(true);
                         setDispatchStage('idle');
                         setDispatchProgress(0);
@@ -1222,8 +1575,102 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
                 })()}
 
                 {/* ========================================================================= */}
-                {/* ADVANCED INSTITUTIONAL EMAIL NOTIFICATION DRAFT CONSOLE WITH EDIT OPTION  */}
+                {/* MULTI-CHANNEL OUTREACH & LEAD GENERATION CHANNEL NAVIGATOR                */}
                 {/* ========================================================================= */}
+                <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 rounded-2xl text-white shadow-md mb-5 border border-sky-900/60">
+                  <div className="flex items-center gap-2.5">
+                    <span className="p-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-1 shadow-sm">
+                      <Zap className="w-3.5 h-3.5 fill-slate-950" />
+                      <span>{activeCircular.id === 'circ_2026_004' || activeCircular.lead_generation_campaign ? '🎯 LEADS & SAFETY' : '📡 OUTREACH'}</span>
+                    </span>
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                        <span>Lead Conversion & Multi-Channel Center</span>
+                        {activeCircular.id === 'circ_2026_004' && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            Supreme Court School Bus Mandate
+                          </span>
+                        )}
+                      </h4>
+                      <p className="text-[11px] text-sky-200/80">
+                        Gmail Outreach • WhatsApp Direct Dispatch • 3 Coimbatore Locations • 14-Model Catalogue
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Channel Navigation Pills */}
+                  <div className="flex items-center flex-wrap gap-1 bg-white/10 p-1 rounded-xl backdrop-blur-xs text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setActiveChannelTab('email')}
+                      className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        activeChannelTab === 'email'
+                          ? 'bg-white text-slate-900 shadow-xs'
+                          : 'text-sky-100 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Mail className="w-3.5 h-3.5 text-sky-600" />
+                      <span>✉️ Gmail Draft</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveChannelTab('whatsapp')}
+                      className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        activeChannelTab === 'whatsapp'
+                          ? 'bg-emerald-500 text-white shadow-xs'
+                          : 'text-sky-100 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-emerald-100" />
+                      <span>💬 WhatsApp Template</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveChannelTab('locations')}
+                      className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        activeChannelTab === 'locations'
+                          ? 'bg-amber-400 text-slate-950 shadow-xs'
+                          : 'text-sky-100 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-amber-900" />
+                      <span>📍 3 Coimbatore Hubs</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveChannelTab('catalog')}
+                      className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        activeChannelTab === 'catalog'
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'text-sky-100 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <QrCode className="w-3.5 h-3.5 text-indigo-200" />
+                      <span>🔬 14-Model Catalogue</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveChannelTab('leads')}
+                      className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        activeChannelTab === 'leads'
+                          ? 'bg-teal-500 text-slate-950 shadow-xs'
+                          : 'text-sky-100 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Award className="w-3.5 h-3.5 text-slate-950" />
+                      <span>🎯 Subsidy & Demo</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* ========================================================================= */}
+                {/* 1. GMAIL / INSTITUTIONAL EMAIL NOTIFICATION DRAFT CONSOLE                 */}
+                {/* ========================================================================= */}
+                {activeChannelTab === 'email' && (
                 <div className="space-y-3">
                   
                   {/* Console Header Bar */}
@@ -1495,6 +1942,576 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
                   )}
 
                 </div>
+                )}
+
+                {/* ========================================================================= */}
+                {/* 2. WHATSAPP DIRECT LEAD DISPATCH TEMPLATE CONSOLE                        */}
+                {/* ========================================================================= */}
+                {activeChannelTab === 'whatsapp' && (
+                  <div className="space-y-4 animate-in fade-in-50 duration-200">
+                    
+                    {/* Console Header Bar */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-emerald-600" />
+                        <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                          WhatsApp Direct Lead Conversion & Dispatch Template
+                        </h4>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                          WhatsApp Verified Markdown
+                        </span>
+                      </div>
+
+                      <div className="flex items-center flex-wrap gap-2 text-xs">
+                        {/* Recipient Merge Selector */}
+                        <div className="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">
+                          <span className="text-[10px] text-slate-500 font-medium">Merge School:</span>
+                          <select
+                            value={sampleRecipientId}
+                            onChange={(e) => setSampleRecipientId(e.target.value)}
+                            className="text-[11px] font-semibold text-slate-800 bg-transparent outline-none cursor-pointer"
+                          >
+                            {SAMPLE_RECIPIENTS.map((r) => (
+                              <option key={r.id} value={r.id}>{r.name.split(' ')[0]} ({r.udise})</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Copy Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleCopyWhatsApp(getInterpolatedWhatsApp())}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                        >
+                          {copiedWhatsApp ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedWhatsApp ? 'Copied to Clipboard!' : 'Copy WhatsApp Text'}</span>
+                        </button>
+
+                        {/* Test in WhatsApp Link */}
+                        <a
+                          href={`https://wa.me/?text=${encodeURIComponent(getInterpolatedWhatsApp())}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-white border border-emerald-300 hover:bg-emerald-50 text-emerald-800 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 shadow-2xs"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Test Single Chat</span>
+                        </a>
+
+                        {/* Open Full Anti-Ban Outreach Queue */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsWhatsAppQueueModalOpen(true);
+                            loadWhatsAppRecipients('coimbatore');
+                          }}
+                          className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer ring-1 ring-emerald-400"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
+                          <span>Launch Safe Anti-Ban Queue</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Authentic WhatsApp Chat Window Mockup */}
+                    <div className="mx-auto max-w-2xl bg-slate-900/5 p-4 rounded-2xl border border-slate-200">
+                      <div className="bg-[#efeae2] rounded-2xl shadow-xl overflow-hidden border border-emerald-900/20">
+                        
+                        {/* WhatsApp Chat Top Header */}
+                        <div className="px-4 py-3 bg-[#075e54] text-white flex items-center justify-between shadow-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              <div className="w-10 h-10 rounded-full bg-emerald-800 border-2 border-emerald-400 flex items-center justify-center font-bold text-white text-sm">
+                                NI
+                              </div>
+                              <span className="w-3 h-3 bg-emerald-400 border-2 border-[#075e54] rounded-full absolute bottom-0 right-0"></span>
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-sm tracking-tight text-white">Nunes Instruments Educational Liaison</span>
+                                <span className="text-[10px] bg-emerald-400/30 text-emerald-200 px-1.5 py-0.2 rounded font-mono">Official</span>
+                              </div>
+                              <p className="text-[11px] text-emerald-100 flex items-center gap-1">
+                                <span>Verified Business Account</span>
+                                <span>•</span>
+                                <span>Online</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="px-2 py-0.5 rounded-full bg-white/20 text-white font-mono text-[10px]">
+                              E.164: +91 89409 44000
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* WhatsApp Chat Messages Surface */}
+                        <div className="p-4 sm:p-6 space-y-3 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px]">
+                          
+                          {/* Security Notice Pill */}
+                          <div className="text-center">
+                            <span className="px-3 py-1 bg-amber-100/90 text-amber-900 text-[10px] font-semibold rounded-lg shadow-2xs inline-block">
+                              🔒 Messages and calls are end-to-end encrypted. Official Institutional Liaison Channel.
+                            </span>
+                          </div>
+
+                          {/* Incoming Message Bubble */}
+                          <div className="max-w-xl ml-auto bg-[#dcf8c6] text-slate-900 p-4 rounded-2xl rounded-tr-xs shadow-md border border-emerald-600/20 text-xs sm:text-[13px] leading-relaxed whitespace-pre-line font-sans selection:bg-emerald-200">
+                            {getInterpolatedWhatsApp()}
+                            
+                            <div className="mt-2 pt-1.5 flex items-center justify-end gap-1 text-[10px] text-slate-500 font-mono">
+                              <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              <span className="text-sky-600 font-bold">✓✓</span>
+                            </div>
+                          </div>
+
+                        </div>
+
+                        {/* Quick Dispatch Bottom Bar */}
+                        <div className="px-4 py-3 bg-[#f0f2f5] border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <div className="flex items-center gap-2 text-slate-600 text-[11px]">
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Includes all 3 Coimbatore branch locations verbatim & direct demo booking links</span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={`https://wa.me/918940944000?text=${encodeURIComponent('Hello Nunes Instruments, we received the School Bus Driver Alcohol Screening circular and want to book an on-campus demonstration.')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition-all flex items-center gap-1"
+                            >
+                              <Phone className="w-3 h-3" />
+                              <span>Contact Nunes Hotline (+91 89409 44000)</span>
+                            </a>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ========================================================================= */}
+                {/* 3. OUR COIMBATORE LOCATIONS (MATCHING USER-UPLOADED IMAGE VERBATIM)        */}
+                {/* ========================================================================= */}
+                {activeChannelTab === 'locations' && (
+                  <div className="space-y-5 animate-in fade-in-50 duration-200">
+                    
+                    {/* Section Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-5 h-5 text-amber-600" />
+                          <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                            Our Coimbatore locations
+                          </h3>
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                            3 Official Hubs
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Verbatim locations as published in Nunes Instruments institutional communications & circular attachments
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCopyAllLocations}
+                          className="px-3.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Copy className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Copy All 3 Branch Addresses</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* The 3 Coimbatore Locations Grid (Matching media_1794888352852.png) */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {NUNES_COIMBATORE_LOCATIONS.map((loc) => {
+                        const isCopied = copiedLocationId === loc.id;
+                        return (
+                          <div
+                            key={loc.id}
+                            className="bg-white rounded-2xl border-2 border-slate-200 hover:border-amber-400 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
+                          >
+                            <div>
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="text-xs font-black tracking-widest text-sky-800 uppercase font-mono bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                                  {loc.branchName}
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded-full">
+                                  PIN {loc.pincode}
+                                </span>
+                              </div>
+
+                              {/* Exact Verbatim Address Content */}
+                              <div className="text-xs text-slate-800 leading-relaxed font-sans space-y-1 pb-3 mb-3 border-b border-slate-100">
+                                {loc.addressLines.map((line, idx) => (
+                                  <p key={idx} className={idx === 0 ? 'font-bold text-slate-900' : 'text-slate-700'}>
+                                    {line}
+                                  </p>
+                                ))}
+                              </div>
+
+                              {/* Contact and Services */}
+                              <div className="space-y-1.5 text-xs">
+                                <div className="flex items-center gap-1.5 text-slate-700">
+                                  <Phone className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                                  <span className="font-semibold">{loc.phone}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-slate-500 text-[11px]">
+                                  <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                  <span className="font-mono truncate">{loc.email}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-slate-500 text-[11px]">
+                                  <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                  <span>{loc.operatingHours}</span>
+                                </div>
+                              </div>
+
+                              {/* Services Badges */}
+                              <div className="mt-3 flex flex-wrap gap-1">
+                                {loc.servicesAvailable.slice(0, 2).map((srv, sIdx) => (
+                                  <span key={sIdx} className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-medium">
+                                    ✓ {srv}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleCopyLocation(loc)}
+                                className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+                                title="Copy branch address"
+                              >
+                                {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3 text-slate-500" />}
+                                <span>{isCopied ? 'Copied' : 'Copy'}</span>
+                              </button>
+
+                              <a
+                                href={loc.googleMapsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-semibold rounded-lg transition-all flex items-center gap-1"
+                                title="Open location in Google Maps"
+                              >
+                                <MapPin className="w-3 h-3 text-sky-600" />
+                                <span>Maps ↗</span>
+                              </a>
+
+                              <a
+                                href={`tel:${loc.phone.replace(/[^0-9+]/g, '')}`}
+                                className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg transition-all flex items-center gap-1"
+                                title="Direct call"
+                              >
+                                <Phone className="w-3 h-3 text-emerald-600" />
+                                <span>Call</span>
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* ========================================================================= */}
+                {/* 4. 14-MODEL BREATH ANALYSER PRODUCT MATRIX & SPECIFICATIONS               */}
+                {/* ========================================================================= */}
+                {activeChannelTab === 'catalog' && (
+                  <div className="space-y-4 animate-in fade-in-50 duration-200">
+                    
+                    {/* Section Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <QrCode className="w-5 h-5 text-indigo-600" />
+                          <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                            Nunes Instruments 14 Breath Analyser Models Lineup
+                          </h3>
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-900 border border-indigo-200">
+                            14 Certified Models
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Extracted from Google Drive catalogue • Individual QR links resolved from official Netlify portal
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={NUNES_CATALOGUE_NETLIFY_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Open Live Netlify Catalogue ↗</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Filter Pills and Search */}
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                      <div className="flex items-center flex-wrap gap-1.5 text-xs">
+                        {['ALL', 'FIELD SCREENING', 'RUGGED HANDHELD', 'CAMERA + PRINTER', 'BUILT-IN PRINTER', 'DETACHABLE PRINTER + GPS'].map((cat) => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setSelectedProductCategory(cat)}
+                            className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                              selectedProductCategory === cat
+                                ? 'bg-indigo-600 text-white shadow-2xs'
+                                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                            }`}
+                          >
+                            {cat === 'ALL' ? 'All 14 Models' : cat}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="relative w-full sm:w-64">
+                        <input
+                          type="text"
+                          value={catalogSearchQuery}
+                          onChange={(e) => setCatalogSearchQuery(e.target.value)}
+                          placeholder="Search model, sensor, printer..."
+                          className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* 14 Products Matrix */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {NUNES_BREATH_ANALYSER_PRODUCTS
+                        .filter((p) => {
+                          if (selectedProductCategory !== 'ALL' && p.category !== selectedProductCategory) return false;
+                          if (catalogSearchQuery) {
+                            const q = catalogSearchQuery.toLowerCase();
+                            return (
+                              p.title.toLowerCase().includes(q) ||
+                              p.category.toLowerCase().includes(q) ||
+                              p.group.toLowerCase().includes(q) ||
+                              p.description.toLowerCase().includes(q)
+                            );
+                          }
+                          return true;
+                        })
+                        .map((p) => {
+                          const isHighlight = p.id === 10 || p.id === 9 || p.id === 12 || p.id === 1;
+                          return (
+                            <div
+                              key={p.id}
+                              className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
+                                isHighlight 
+                                  ? 'bg-gradient-to-br from-indigo-50/50 via-white to-sky-50/30 border-indigo-300 ring-2 ring-indigo-200/50 shadow-xs' 
+                                  : 'bg-white border-slate-200 hover:border-slate-300'
+                              }`}
+                            >
+                              <div>
+                                <div className="flex items-center justify-between gap-2 mb-1.5">
+                                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 font-mono">
+                                    Model #{p.id} • {p.category}
+                                  </span>
+                                  {p.id === 10 && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 flex items-center gap-1 shadow-2xs">
+                                      <Camera className="w-3 h-3" /> Camera + Printer Proof
+                                    </span>
+                                  )}
+                                  {p.id === 9 && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                                      🖨️ Built-in Printer
+                                    </span>
+                                  )}
+                                  {p.id === 12 && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">
+                                      📍 GPS Tagged
+                                    </span>
+                                  )}
+                                  {p.id === 1 && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">
+                                      ⚡ Non-Contact Baton
+                                    </span>
+                                  )}
+                                </div>
+
+                                <h4 className="text-sm font-bold text-slate-900 leading-snug">{p.title}</h4>
+                                <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">{p.description}</p>
+
+                                {/* Key specs chips */}
+                                <div className="mt-3 flex flex-wrap gap-1">
+                                  {p.specs.slice(0, 3).map(([key, val], sIdx) => (
+                                    <span key={sIdx} className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono">
+                                      <strong>{key}:</strong> {val}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                                <span className="text-[10px] text-slate-400 font-mono">{p.sourceKey}</span>
+                                <div className="flex items-center gap-1.5">
+                                  <a
+                                    href={`${NUNES_CATALOGUE_NETLIFY_URL}#product-${p.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg transition-all flex items-center gap-1 shadow-2xs"
+                                  >
+                                    <span>Netlify Spec</span>
+                                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                                  </a>
+
+                                  <a
+                                    href={`https://wa.me/918940944000?text=${encodeURIComponent(`Interested in institutional quote for Model #${p.id}: ${p.title} for School Bus Fleet.`)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1 shadow-2xs"
+                                  >
+                                    <MessageSquare className="w-3 h-3" />
+                                    <span>Inquire</span>
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
+
+                {/* ========================================================================= */}
+                {/* 5. INSTITUTIONAL SUBSIDY & DEMO BOOKING WIDGET                            */}
+                {/* ========================================================================= */}
+                {activeChannelTab === 'leads' && (
+                  <div className="space-y-5 animate-in fade-in-50 duration-200">
+                    
+                    {/* Section Header */}
+                    <div className="p-6 bg-gradient-to-r from-teal-800 via-teal-900 to-sky-950 rounded-2xl text-white shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="p-1.5 rounded-xl bg-teal-500/30 text-teal-200 backdrop-blur-xs">
+                            <Award className="w-5 h-5" />
+                          </span>
+                          <h3 className="text-xl font-bold">
+                            Institutional Lead Conversion & Subsidy Booking
+                          </h3>
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-950">
+                            Up to 35% Educational Subsidy
+                          </span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-teal-100 max-w-2xl leading-relaxed">
+                          Supreme Court Mandate Compliance Package for Tamil Nadu & Kerala Schools. Convert driver screening requirements into active institutional orders.
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="text-2xl font-black text-amber-300">100% Audit Ready</span>
+                        <p className="text-xs text-teal-200">Supreme Court & RTO Certified</p>
+                      </div>
+                    </div>
+
+                    {/* Fleet Size Selector */}
+                    <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                          <Truck className="w-4 h-4 text-teal-600" />
+                          <span>Select School Bus / Van Fleet Size:</span>
+                        </label>
+                        
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                          {[
+                            { count: 5, label: 'Small Campus (1-5 Buses)', subsidy: '25% Subsidy', recommended: 'Model A50 + 1 Rapid Baton' },
+                            { count: 10, label: 'Standard School (6-15 Buses)', subsidy: '30% Subsidy', recommended: 'Model AT-9000 Camera + 2 Rapid Batons' },
+                            { count: 25, label: 'Large Institution (16-35 Buses)', subsidy: '35% Subsidy', recommended: '2x Model AT-9000 + 4 Rapid Batons' },
+                            { count: 50, label: 'Educational Trust (36+ Fleets)', subsidy: '35% Max Subsidy', recommended: 'Central Depot Station + Fleet Kit' }
+                          ].map((tier) => (
+                            <button
+                              key={tier.count}
+                              type="button"
+                              onClick={() => setFleetBusesCount(tier.count)}
+                              className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                                fleetBusesCount === tier.count
+                                  ? 'bg-teal-50 border-teal-500 ring-2 ring-teal-400/50'
+                                  : 'bg-white border-slate-200 hover:bg-slate-50'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-bold text-slate-900">{tier.count} Vehicles</span>
+                                <span className="text-[10px] font-bold text-teal-700 bg-teal-100 px-1.5 py-0.2 rounded">
+                                  {tier.subsidy}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-600">{tier.label}</p>
+                              <p className="text-[10px] text-slate-400 mt-1">{tier.recommended}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Package Inclusions Card */}
+                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-bold text-slate-900">NABL Traceable Calibration</p>
+                            <p className="text-[11px] text-slate-500">Government audit-ready annual calibration certificate included</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-bold text-slate-900">Complimentary On-Campus Demo</p>
+                            <p className="text-[11px] text-slate-500">Live safety audit and driver screening demonstration at your campus</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-bold text-slate-900">1-Year Replacement Warranty</p>
+                            <p className="text-[11px] text-slate-500">Backed by our 3 Coimbatore service centers (Rathinapuri, Gopalapuram, Gandhipuram)</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 1-Click Lead Booking Buttons */}
+                      <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
+                        <span className="text-xs text-slate-600 font-medium">
+                          Ready to dispatch demonstration unit to: <strong>{activeRecipient.name}</strong>
+                        </span>
+
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <a
+                            href={`https://wa.me/918940944000?text=${encodeURIComponent(`Hello Nunes Instruments, we want to book a Free On-Campus School Bus Breath Analyser Demo for ${activeRecipient.name} (${fleetBusesCount} buses). Please contact us.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 sm:flex-initial px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                            <span>Book Free Demo via WhatsApp</span>
+                          </a>
+
+                          <a
+                            href={`mailto:${NUNES_OFFICIAL_EMAIL}?subject=${encodeURIComponent(`Institutional Subsidy Quote Request: School Bus Breath Analysers - ${activeRecipient.name}`)}&body=${encodeURIComponent(`Dear Nunes Instruments,\n\nWe request an official institutional rate contract quotation for our school bus fleet:\nSchool: ${activeRecipient.name}\nUDISE: ${activeRecipient.udise}\nFleet Size: ${fleetBusesCount} Buses\nContact Person: ${activeRecipient.principal}\nPhone: ${activeRecipient.email}\n\nPlease share the subsidy pricing and technical specifications for Model AT-9000 and Rapid screening batons.`)}`}
+                            className="flex-1 sm:flex-initial px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
+                          >
+                            <Mail className="w-4 h-4" />
+                            <span>Request Official Quote PDF</span>
+                          </a>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                )}
 
               </div>
 
@@ -1832,6 +2849,301 @@ Nunes Instruments, Coimbatore District, Tamil Nadu`;
                 </div>
               )}
 
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 3. SAFE ANTI-BAN WHATSAPP OUTREACH QUEUE MODAL                            */}
+      {/* Zero Account Lockout Protection Architecture                             */}
+      {/* ========================================================================= */}
+      {isWhatsAppQueueModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in-50">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-5xl w-full my-auto overflow-hidden animate-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
+            
+            {/* Modal Top Header */}
+            <div className="p-5 sm:p-6 bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-950 text-white shrink-0">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="p-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                    </span>
+                    <h3 className="text-lg sm:text-xl font-black tracking-tight text-white flex items-center gap-2">
+                      <span>Safe Anti-Ban WhatsApp Outreach Queue</span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-400 text-slate-950">
+                        Zero Lockout Protection
+                      </span>
+                    </h3>
+                  </div>
+                  <p className="text-xs sm:text-[13px] text-emerald-100/90 max-w-3xl leading-relaxed">
+                    Dispatches personalized circular directives to verified school principals on WhatsApp Web. Implements cryptographic token polymorphic spintax, human typing pacing (8s throttle), and authenticated browser sessions to eliminate account restrictions.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsWhatsAppQueueModalOpen(false);
+                    setWaAutoRunning(false);
+                  }}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Protection Pillars Pill Banner */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-4 pt-3 border-t border-emerald-800/60 text-xs">
+                <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-xs border border-white/10 flex items-start gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-white text-[11px]">Dynamic Polymorphism / Spintax</p>
+                    <p className="text-[10px] text-emerald-100">Unique salutations + school name + UDISE + audit token per message</p>
+                  </div>
+                </div>
+
+                <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-xs border border-white/10 flex items-start gap-2">
+                  <Globe2 className="w-4 h-4 text-sky-300 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-white text-[11px]">Native WhatsApp Web Session</p>
+                    <p className="text-[10px] text-emerald-100">Dispatches via your official browser session. 0 unauthorized third-party bot APIs</p>
+                  </div>
+                </div>
+
+                <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-xs border border-white/10 flex items-start gap-2">
+                  <Timer className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-white text-[11px]">Safe Human Pacing Throttle (8s)</p>
+                    <p className="text-[10px] text-emerald-100">Prevents burst traffic flags. Recommended daily limit: 50-100 chats/day</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Scope Selector Bar & Controls */}
+            <div className="p-4 sm:p-5 bg-slate-50 border-b border-slate-200 shrink-0 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                
+                {/* Scope Selector Pills */}
+                <div className="flex items-center flex-wrap gap-1.5 text-xs">
+                  <span className="text-slate-500 font-semibold mr-1 text-[11px]">Target Scope:</span>
+                  {[
+                    { id: 'coimbatore', label: '📍 Coimbatore Verified (13)' },
+                    { id: 'kerala', label: '🌴 Kerala Schools (4,820)' },
+                    { id: 'tamil-nadu', label: '🌿 Tamil Nadu (1,840)' },
+                    { id: 'all', label: '🌐 All South India (6,674)' }
+                  ].map(sc => (
+                    <button
+                      key={sc.id}
+                      type="button"
+                      onClick={() => {
+                        setWaQueueScope(sc.id as any);
+                        loadWhatsAppRecipients(sc.id as any);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                        waQueueScope === sc.id
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {sc.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Safe Auto-Runner Button & Throttle Countdown */}
+                <div className="flex items-center gap-2">
+                  {waAutoRunning ? (
+                    <button
+                      type="button"
+                      onClick={() => setWaAutoRunning(false)}
+                      className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Pause className="w-3.5 h-3.5" />
+                      <span>Pause Auto-Runner</span>
+                      <span className="ml-1 px-1.5 py-0.5 bg-amber-700 rounded-md font-mono text-[10px]">
+                        ⏳ Next in {waCountdown}s
+                      </span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (waRecipients.length === 0) return;
+                        setWaAutoRunning(true);
+                        setWaCountdown(8);
+                      }}
+                      disabled={waRecipients.length === 0}
+                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-white" />
+                      <span>Start Safe Auto-Runner (8s Delay)</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const links = waRecipients.map(r => `https://wa.me/${r.phone_digits}?text=${encodeURIComponent(generateAntiBanWhatsAppText(r))}`).join('\n');
+                      navigator.clipboard.writeText(links);
+                      setDraftToast('All wa.me links copied to clipboard!');
+                      setTimeout(() => setDraftToast(null), 2500);
+                    }}
+                    className="px-3 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer"
+                    title="Copy list of all direct wa.me dispatch links"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Copy Links</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Filter Search Bar & Metrics Counter */}
+              <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="relative flex-1 min-w-[240px] max-w-md">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={waSearchTerm}
+                    onChange={(e) => setWaSearchTerm(e.target.value)}
+                    placeholder="Search school name, principal, district, or mobile number..."
+                    className="w-full pl-9 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 text-slate-600 text-xs">
+                  <span className="flex items-center gap-1.5 font-semibold">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Dispatched: <strong className="text-emerald-700 font-mono">{waSentCount}</strong></span>
+                  </span>
+                  <span>•</span>
+                  <span className="font-semibold">
+                    Queue: <strong className="text-slate-900 font-mono">{waRecipients.length}</strong> recipients
+                  </span>
+                  <span>•</span>
+                  <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-medium">
+                    Daily Safe Budget: 100 max
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Recipient Queue Table (Scrollable Body) */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5">
+              {loadingWaRecipients ? (
+                <div className="py-16 text-center space-y-3">
+                  <div className="w-10 h-10 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  <p className="text-xs text-slate-500">Loading verified WhatsApp recipients with phone numbers...</p>
+                </div>
+              ) : waRecipients.length === 0 ? (
+                <div className="py-16 text-center space-y-2">
+                  <p className="text-sm font-bold text-slate-700">No WhatsApp recipients loaded for this scope</p>
+                  <p className="text-xs text-slate-500">Select a different regional scope above or click to refresh</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {waRecipients
+                    .filter(r => {
+                      if (!waSearchTerm) return true;
+                      const q = waSearchTerm.toLowerCase();
+                      return (
+                        r.school_name?.toLowerCase().includes(q) ||
+                        r.district?.toLowerCase().includes(q) ||
+                        r.principal_name?.toLowerCase().includes(q) ||
+                        r.phone_e164?.includes(q) ||
+                        r.udise_code?.includes(q)
+                      );
+                    })
+                    .map((school, idx) => {
+                      const isCurrent = waAutoRunning && idx === waCurrentIndex;
+                      const isProcessed = school.status === 'SENT' || school.status === 'OPENED';
+                      const previewText = generateAntiBanWhatsAppText(school);
+
+                      return (
+                        <div
+                          key={school.school_id || idx}
+                          className={`p-3.5 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                            isCurrent
+                              ? 'border-emerald-500 bg-emerald-50/70 ring-2 ring-emerald-400/40 shadow-sm'
+                              : isProcessed
+                              ? 'border-slate-200 bg-slate-50/60 opacity-80'
+                              : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs'
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-xs sm:text-sm text-slate-900 truncate">
+                                {school.school_name}
+                              </span>
+                              <span className="px-2 py-0.2 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                {school.district} • {school.state}
+                              </span>
+                              <span className="text-[10px] font-mono text-slate-500">
+                                UDISE: {school.udise_code}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-3 text-xs text-slate-600">
+                              <span>👤 {school.principal_name}</span>
+                              <span>•</span>
+                              <span className="font-mono text-emerald-800 font-bold">
+                                📱 {school.phone_e164}
+                              </span>
+                            </div>
+
+                            {/* Snippet of Dynamic Polymorphic Anti-Ban Text */}
+                            <p className="text-[11px] text-slate-500 line-clamp-1 italic font-sans bg-slate-100/70 p-1 rounded">
+                              "{previewText.slice(0, 110)}..."
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                              school.status === 'SENT'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                : school.status === 'OPENED'
+                                ? 'bg-sky-100 text-sky-800 border border-sky-300'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200'
+                            }`}>
+                              {school.status === 'SENT' ? '✓ Sent' : school.status === 'OPENED' ? 'Opened' : 'Ready'}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => handleOpenWaChat(school)}
+                              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer hover:scale-102"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 text-white" />
+                              <span>Send via WhatsApp Web</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-100 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
+              <div className="flex items-center gap-2 text-slate-500 text-[11px]">
+                <ShieldAlert className="w-4 h-4 text-emerald-600" />
+                <span>Protects account reputation: zero bulk spam triggers, natural pacing, and valid wa.me URLs.</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsWhatsAppQueueModalOpen(false);
+                  setWaAutoRunning(false);
+                }}
+                className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Close Queue Console
+              </button>
             </div>
 
           </div>

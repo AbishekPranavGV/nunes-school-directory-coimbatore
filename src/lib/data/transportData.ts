@@ -169,6 +169,50 @@ export const BOUNCED_EMAILS_DATA: BouncedEmailRecord[] = [
 
 export const TRANSPORT_CIRCULARS_DATA: TransportCircular[] = [
   {
+    id: 'CIR-2026-SAF-089',
+    title: 'Mandatory Commercial & School Fleet Driver Breath Alcohol Screening Compliance',
+    ref_no: 'NUNES/TR/2026/089',
+    category: 'Fleet Safety & RTO Mandate' as any,
+    target_audience: '🌐 All Registered Transport Fleets (South India - TN & KL)' as any,
+    target_districts: ['all'],
+    target_state: 'all',
+    subject: 'Deployment of Certified Breath Alcohol Analysers with Evidential Camera, GPS & Thermal Printing for Fleet Safety (AY 2026-27)',
+    body: `To All Managing Directors, Fleet Operators, School Bus Correspondents, and Depot Managers,
+Commercial Passenger, School Transport, and Logistics Fleets across Tamil Nadu & Kerala.
+
+Subject: Mandatory Pre-Trip Driver Alcohol Screening & Evidential Breath Analyser Deployment (Academic & Transport Fiscal Year 2026-27).
+
+Pursuant to Supreme Court Guidelines on Passenger & School Bus Safety, Tamil Nadu Motor Vehicles Rules, and Kerala MVD Safe Transit Directives, 100% pre-trip breath alcohol screening is mandatory for commercial and institutional vehicle operators before daily dispatch.
+
+Nunes Instruments presents our accredited 14-Model Breath Alcohol Analyser series:
+1. Model AT-9000: Built-in Camera for facial photo proof + Built-in Thermal Slip Printer.
+2. Model A50: Rugged fuel-cell electrochemical sensor with integrated thermal receipt printer.
+3. Model AT-8900: Detachable thermal printer + GPS coordinate tagging on every test log.
+4. Rapid Screening Batons: Non-contact screening in under 5 seconds (screen 40 drivers in 5 mins!).
+
+Complimentary On-Campus / Depot Fleet Safety Demonstration & Calibration Audits are available at our Coimbatore zonal hubs:
+1. RATHINAPURI: 11-A, 2nd Cross, Sundarar St, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, TN 641027 | Phone: +91 89409 44000
+2. GOPALAPURAM: 6, GJ Chandran Complex, Head Quarters Rd, Opp. to CSI Church, Gopalapuram, Coimbatore, TN 641018 | Phone: +91 89409 33000
+3. GANDHIPURAM: 218-628, 1st St, Cross Cut, Gandhipuram, Coimbatore, TN 641012 | Phone: +91 0422 2499444 / +91 89409 44000
+
+Catalogue: https://darling-torrone-c0aaf9.netlify.app/ | WhatsApp Hotline: +91 89409 44000`,
+    signatory_name: 'Er. K. R. Senthil Kumar, B.E., M.I.E.',
+    signatory_title: 'Director of Technical Services & Metrology Standards',
+    issuing_authority: 'Nunes Instruments — Fleet Safety & Precision Metrology Directorate',
+    attachment_name: 'Nunes_Breath_Analyser_Catalogue_14_Models_2026.pdf',
+    attachments: [
+      {
+        id: 'att-catalogue-1',
+        name: 'Nunes_Breath_Analyser_Catalogue_14_Models_2026.pdf',
+        type: 'pdf',
+        size: '1.8 MB'
+      }
+    ],
+    created_at: '2026-04-18T07:30:00Z',
+    status: 'Sent',
+    recipient_count: 3200
+  },
+  {
     id: 'CIR-2026-KL-01',
     title: 'Walayar-Palakkad Inter-State Corridor Toll RFID & Retarder Protocol',
     ref_no: 'NUNES/TR/KL/2026/104',

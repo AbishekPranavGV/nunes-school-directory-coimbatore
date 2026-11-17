@@ -218,6 +218,9 @@ export interface CircularItem {
   attachment_size_kb?: number;
   generated_email_subject: string;
   generated_email_body: string;
+  generated_whatsapp_body?: string;
+  catalogue_url?: string;
+  lead_generation_campaign?: boolean;
   status: 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'ARCHIVED';
   created_at: string;
   approved_by?: string;

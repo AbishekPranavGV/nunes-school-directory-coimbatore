@@ -195,4 +195,34 @@ export type TransportWorkspaceView =
   | 'map'
   | 'dispatch'
   | 'missing'
-  | 'reports';
+  | 'reports'
+  | 'dtp';
+
+export interface DTPUserSession {
+  isLoggedIn: boolean;
+  userId: string;
+  userName: string;
+  email: string;
+  role: 'DTP Pre-Press Lead' | 'Catalog & Graphic Designer' | 'Publications Specialist' | 'Administrator';
+  department: string;
+  employeeId: string;
+  avatarInitials: string;
+  loginTime: string;
+}
+
+export interface DTPCatalogItem {
+  id: string;
+  title: string;
+  code: string;
+  category: 'master' | 'mini' | 'leaflet';
+  filename: string;
+  size: string;
+  pageCount: number;
+  format: 'PDF' | 'Word' | 'Image';
+  resolution: string;
+  version: string;
+  lastUpdated: string;
+  isDefaultAttached: boolean;
+  thumbnailUrl?: string;
+  description: string;
+}
