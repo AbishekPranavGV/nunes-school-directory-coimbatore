@@ -498,6 +498,11 @@ export default function DashboardPage() {
               onSelectSchool={setSelectedSchool}
               selectedDistrict={selectedDistrict}
               selectedState={selectedState}
+              quickFilter={quickFilter}
+              onQuickFilterChange={(qf) => {
+                setQuickFilter(qf);
+                setCurrentPage(1);
+              }}
             />
           </div>
         ) : currentView === 'circulars' ? (
@@ -620,6 +625,11 @@ export default function DashboardPage() {
               onSelectSchool={setSelectedSchool}
               selectedDistrict={selectedDistrict}
               selectedState={selectedState}
+              quickFilter={quickFilter}
+              onQuickFilterChange={(qf) => {
+                setQuickFilter(qf);
+                setCurrentPage(1);
+              }}
             />
           </div>
         )}

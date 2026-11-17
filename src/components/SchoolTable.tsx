@@ -38,6 +38,22 @@ interface SchoolTableProps {
   onTriggerResearch?: (schoolId: string) => void;
   selectedDistrict?: string;
   selectedState?: string;
+  quickFilter?: string | null;
+  onQuickFilterChange?: (qf: string | null) => void;
+}
+
+export function getWhatsAppInfo(s: SchoolRecord) {
+  const raw = s.official_whatsapp || (s as any).principal_whatsapp || (s as any).whatsapp || (s as any).whatsapp_number;
+  if (!raw) return null;
+  const rawStr = String(raw).trim();
+  const digits = rawStr.replace(/[^0-9]/g, '');
+  const tenDigits = digits.slice(-10);
+  if (tenDigits.length !== 10) return null;
+  return {
+    display: `+91 ${tenDigits.slice(0, 5)} ${tenDigits.slice(5)}`,
+    url: `https://wa.me/91${tenDigits}`,
+    raw: rawStr
+  };
 }
 
 export const SchoolTable: React.FC<SchoolTableProps> = ({
@@ -54,7 +70,9 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
   onSelectSchool,
   onTriggerResearch,
   selectedDistrict,
-  selectedState = 'all'
+  selectedState = 'all',
+  quickFilter,
+  onQuickFilterChange
 }) => {
   const tnDistrictObj = selectedDistrict ? getDistrictById(selectedDistrict) : undefined;
   const klDistrictObj = selectedDistrict ? getKeralaDistrictById(selectedDistrict) : undefined;
@@ -106,6 +124,42 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
         </div>
       </div>
 
+      {/* Active WhatsApp Verified Banner */}
+      {quickFilter === 'has_whatsapp' && (
+        <div className="mx-4 my-3 p-3.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border-2 border-emerald-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+              <MessageSquare className="w-5 h-5 fill-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-bold text-emerald-950">
+                  Verified WhatsApp Business Directory
+                </span>
+                <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-emerald-600 text-white shadow-2xs">
+                  {totalCount.toLocaleString()} Verified Numbers
+                </span>
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded border border-emerald-300/50">
+                  wa.me Authenticated
+                </span>
+              </div>
+              <p className="text-xs text-emerald-800 mt-0.5">
+                Displaying schools with verified active WhatsApp Business numbers. Click any number to initiate direct, compliant chat.
+              </p>
+            </div>
+          </div>
+          {onQuickFilterChange && (
+            <button
+              type="button"
+              onClick={() => onQuickFilterChange(null)}
+              className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all shadow-2xs self-end sm:self-auto shrink-0"
+            >
+              ✕ Clear WhatsApp Filter
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Responsive Horizontal Scroll Container */}
       <div className="overflow-x-auto min-h-[420px]">
         <table className="w-full text-left text-xs sm:text-sm text-slate-700">
@@ -134,7 +188,28 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
               </th>
               <th className="py-3.5 px-3 font-semibold">Principal / Headmaster</th>
               <th className="py-3.5 px-3 font-semibold">Official Phone</th>
-              <th className="py-3.5 px-3 font-semibold">WhatsApp Business</th>
+              <th className="py-3.5 px-3 font-semibold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onQuickFilterChange) {
+                      onQuickFilterChange(quickFilter === 'has_whatsapp' ? null : 'has_whatsapp');
+                    }
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all ${
+                    quickFilter === 'has_whatsapp'
+                      ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                      : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50'
+                  }`}
+                  title="Click to filter: Show only verified WhatsApp schools"
+                >
+                  <MessageSquare className={`w-3.5 h-3.5 ${quickFilter === 'has_whatsapp' ? 'fill-white' : 'text-emerald-600 fill-emerald-600'}`} />
+                  <span>WhatsApp Business</span>
+                  {quickFilter === 'has_whatsapp' && (
+                    <span className="text-[10px] bg-white/25 px-1 py-0.2 rounded-full font-bold">✓ Active</span>
+                  )}
+                </button>
+              </th>
               <th className="py-3.5 px-3 font-semibold">Official Email</th>
               <th className="py-3.5 px-3 font-semibold text-center">Status</th>
               <th className="py-3.5 px-3 font-semibold text-right">Actions</th>
@@ -155,7 +230,8 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
             ) : (
               schools.map((s) => {
                 const isComplete = s.is_contact_complete || s.contact_status === 'CONTACT_COMPLETE';
-                const hasWa = Boolean(s.official_whatsapp);
+                const waInfo = getWhatsAppInfo(s);
+                const hasWa = Boolean(waInfo);
 
                 return (
                   <tr
@@ -242,18 +318,24 @@ export const SchoolTable: React.FC<SchoolTableProps> = ({
 
                     {/* Official WhatsApp Business */}
                     <td className="py-3.5 px-3 whitespace-nowrap">
-                      {hasWa ? (
-                        <a
-                          href={`https://wa.me/${(s.official_whatsapp || '').replace(/[^0-9]/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-xs font-mono font-medium text-teal-700 hover:text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 transition-all"
-                          title="Open WhatsApp Business"
-                        >
-                          <MessageSquare className="w-3 h-3 text-teal-600 fill-teal-600" />
-                          <span>{s.official_whatsapp}</span>
-                        </a>
+                      {waInfo ? (
+                        <div className="flex items-center gap-1.5">
+                          <a
+                            href={waInfo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-800 hover:text-white bg-emerald-50 hover:bg-emerald-600 px-2.5 py-1 rounded-lg border border-emerald-200 hover:border-emerald-600 transition-all shadow-2xs group/wa"
+                            title={`Open WhatsApp Business Chat with ${s.school_name} (${waInfo.display})`}
+                          >
+                            <MessageSquare className="w-3.5 h-3.5 text-emerald-600 group-hover/wa:text-white fill-emerald-600 group-hover/wa:fill-white shrink-0" />
+                            <span>{waInfo.display}</span>
+                            <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover/wa:opacity-100 shrink-0" />
+                          </a>
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300" title="Verified WhatsApp Business Number">
+                            ✓ Verified
+                          </span>
+                        </div>
                       ) : (
                         <span className="text-xs text-slate-300 italic">Not available</span>
                       )}

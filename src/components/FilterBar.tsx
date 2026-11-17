@@ -137,17 +137,31 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </span>
         {quickFilters.map((qf) => {
           const active = quickFilter === qf.id;
+          const isWhatsApp = qf.id === 'has_whatsapp';
+          const isEmail = qf.id === 'has_email';
+          const isPhone = qf.id === 'has_phone';
+
           return (
             <button
               key={String(qf.id)}
-              onClick={() => setQuickFilter(qf.id)}
-              className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+              onClick={() => setQuickFilter(active ? null : qf.id)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                 active
-                  ? 'bg-sky-600 text-white shadow-sm shadow-sky-600/30'
+                  ? isWhatsApp
+                    ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30 ring-2 ring-emerald-400'
+                    : isEmail
+                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30 ring-2 ring-blue-400'
+                    : 'bg-sky-600 text-white shadow-sm shadow-sky-600/30'
+                  : isWhatsApp
+                  ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80 border border-emerald-200'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'
               }`}
             >
-              {qf.label}
+              {isWhatsApp && <MessageSquare className={`w-3.5 h-3.5 ${active ? 'fill-white' : 'text-emerald-600 fill-emerald-600'}`} />}
+              {isEmail && <Mail className="w-3.5 h-3.5" />}
+              {isPhone && <Phone className="w-3.5 h-3.5" />}
+              <span>{qf.label}</span>
+              {active && <span className="ml-0.5 text-[10px] bg-white/25 px-1 rounded-full font-bold">Active</span>}
             </button>
           );
         })}

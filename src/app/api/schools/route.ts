@@ -94,18 +94,24 @@ export async function GET(req: NextRequest) {
       if (contact_status && s.contact_status !== contact_status) return false;
       if (missing_queue_category && s.missing_queue_category !== missing_queue_category) return false;
 
-      // Boolean filters
-      if (has_phone === 'true' && !s.official_landline && !s.official_mobile) return false;
-      if (has_principal_office === 'true' && !s.principal_office_phone) return false;
-      if (has_whatsapp === 'true' && !s.official_whatsapp) return false;
-      if (has_email === 'true' && !s.official_email) return false;
+      // Contact existence helpers
+      const schoolHasWa = Boolean(s.official_whatsapp || s.principal_whatsapp || s.whatsapp || s.whatsapp_number);
+      const schoolHasEmail = Boolean(s.official_email);
+      const schoolHasPhone = Boolean(s.official_landline || s.official_mobile);
+      const schoolHasPrincipalOffice = Boolean(s.principal_office_phone);
+
+      // Boolean & Quick filter presets for availability
+      if ((has_phone === 'true' || quick_filter === 'has_phone') && !schoolHasPhone) return false;
+      if ((has_principal_office === 'true' || quick_filter === 'has_principal_office') && !schoolHasPrincipalOffice) return false;
+      if ((has_whatsapp === 'true' || quick_filter === 'has_whatsapp') && !schoolHasWa) return false;
+      if ((has_email === 'true' || quick_filter === 'has_email') && !schoolHasEmail) return false;
       if (has_missing_contact === 'true' && s.is_contact_complete) return false;
 
-      // Quick filter presets
+      // Quick filter presets for missing / workflow
       if (quick_filter === 'no_contact' && s.is_contact_complete) return false;
-      if (quick_filter === 'no_principal_office' && s.principal_office_phone) return false;
-      if (quick_filter === 'no_whatsapp' && s.official_whatsapp) return false;
-      if (quick_filter === 'no_email' && s.official_email) return false;
+      if (quick_filter === 'no_principal_office' && schoolHasPrincipalOffice) return false;
+      if (quick_filter === 'no_whatsapp' && schoolHasWa) return false;
+      if (quick_filter === 'no_email' && schoolHasEmail) return false;
       if (quick_filter === 'complete' && !s.is_contact_complete) return false;
       if (quick_filter === 'needs_verification' && (s.workflow_state !== 'IN_RESEARCH' && s.workflow_state !== 'FOUND_UNVERIFIED' && s.workflow_state !== 'RECHECK_REQUIRED')) return false;
 

@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     for (const s of schools) {
       if (s.is_contact_complete) verified_any++;
       if (s.official_landline || s.official_mobile) verified_phone++;
-      if (s.official_whatsapp) verified_whatsapp++;
+      if (s.official_whatsapp || s.principal_whatsapp || s.whatsapp || s.whatsapp_number) verified_whatsapp++;
       if (s.official_email) verified_email++;
       if (s.principal_name) verified_principal_name++;
       if (s.principal_office_phone) verified_principal_office++;

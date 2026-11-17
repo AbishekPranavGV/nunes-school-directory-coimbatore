@@ -95,7 +95,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
       icon: Briefcase,
       iconColor: 'text-amber-600',
       iconBg: 'bg-amber-50',
-      borderColor: activeQuickFilter === 'no_principal_office' ? 'ring-2 ring-amber-500 border-amber-400' : 'border-slate-200',
+      borderColor: activeQuickFilter === 'has_principal_office' ? 'ring-2 ring-amber-500 border-amber-400 bg-amber-50/20' : 'border-slate-200',
       filterValue: 'has_principal_office'
     },
     {
@@ -106,7 +106,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
       icon: MessageSquare,
       iconColor: 'text-teal-600',
       iconBg: 'bg-teal-50',
-      borderColor: activeQuickFilter === 'no_whatsapp' ? 'ring-2 ring-teal-500 border-teal-400' : 'border-slate-200',
+      borderColor: activeQuickFilter === 'has_whatsapp' ? 'ring-2 ring-teal-500 border-teal-400 bg-teal-50/20' : 'border-slate-200',
       filterValue: 'has_whatsapp'
     },
     {
@@ -117,7 +117,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
       icon: Mail,
       iconColor: 'text-blue-600',
       iconBg: 'bg-blue-50',
-      borderColor: activeQuickFilter === 'no_email' ? 'ring-2 ring-blue-500 border-blue-400' : 'border-slate-200',
+      borderColor: activeQuickFilter === 'has_email' ? 'ring-2 ring-blue-500 border-blue-400 bg-blue-50/20' : 'border-slate-200',
       filterValue: 'has_email'
     },
     {
@@ -128,7 +128,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
       icon: Clock,
       iconColor: 'text-purple-600',
       iconBg: 'bg-purple-50',
-      borderColor: activeQuickFilter === 'needs_verification' ? 'ring-2 ring-purple-500 border-purple-400' : 'border-slate-200',
+      borderColor: activeQuickFilter === 'needs_verification' ? 'ring-2 ring-purple-500 border-purple-400 bg-purple-50/20' : 'border-slate-200',
       filterValue: 'needs_verification'
     }
   ];
@@ -143,7 +143,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
           return (
             <button
               key={c.id}
-              onClick={() => onSelectQuickFilter(c.filterValue)}
+              onClick={() => onSelectQuickFilter(activeQuickFilter === c.filterValue ? '' : c.filterValue)}
               className={`text-left p-3.5 bg-white rounded-xl border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between h-full min-h-[124px] ${c.borderColor} ${
                 isSelected ? 'bg-sky-50/50 shadow-sm ring-2 ring-sky-500' : 'hover:border-slate-300'
               }`}
