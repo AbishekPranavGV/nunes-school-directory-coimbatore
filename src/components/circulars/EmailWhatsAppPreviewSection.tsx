@@ -22,6 +22,7 @@ import {
   NUNES_OFFICIAL_CONTACTS, 
   INTERACTIVE_TOUCH_REPLY_BUTTONS 
 } from '@/lib/data/circularV2Constants';
+import { CircularV2Attachment } from '@/types/circular';
 
 interface EmailWhatsAppPreviewSectionProps {
   subject: string;
@@ -30,6 +31,7 @@ interface EmailWhatsAppPreviewSectionProps {
   targetPrincipal?: string;
   onOpenPdfModal: () => void;
   onLaunchGmailWeb: () => void;
+  activeAttachment?: CircularV2Attachment;
 }
 
 export const EmailWhatsAppPreviewSection: React.FC<EmailWhatsAppPreviewSectionProps> = ({
@@ -38,7 +40,8 @@ export const EmailWhatsAppPreviewSection: React.FC<EmailWhatsAppPreviewSectionPr
   targetSchoolName = 'Stanes Anglo Indian Higher Secondary School',
   targetPrincipal = 'The Principal / Administrative Officer',
   onOpenPdfModal,
-  onLaunchGmailWeb
+  onLaunchGmailWeb,
+  activeAttachment = EXACT_CATALOGUE_PDF
 }) => {
   const [channel, setChannel] = useState<'email' | 'whatsapp'>('email');
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
@@ -222,7 +225,7 @@ export const EmailWhatsAppPreviewSection: React.FC<EmailWhatsAppPreviewSectionPr
                     className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    <span>Open 16-Page Catalogue PDF</span>
+                    <span>Open Attached PDF ({activeAttachment.filename})</span>
                   </button>
 
                   <a

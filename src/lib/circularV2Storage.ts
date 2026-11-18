@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { 
   CircularV2Campaign, 
+  CircularV2Attachment,
   CircularV2DashboardMetrics, 
   DeliveryEventRecord, 
   InboundReplyV2, 
@@ -19,6 +20,7 @@ interface StorageState {
   followUpTasks: FollowUpTaskV2[];
   optedOutEmails: string[];
   optedOutPhones: string[];
+  customAttachments?: CircularV2Attachment[];
 }
 
 let memoryState: StorageState | null = null;
@@ -188,18 +190,27 @@ function initializeDefaultState(): StorageState {
     inboundReplies: initialReplies,
     followUpTasks: initialTasks,
     optedOutEmails: ['unsubscribe-test@sample.org'],
-    optedOutPhones: []
+    optedOutPhones: [],
+    customAttachments: [EXACT_CATALOGUE_PDF]
   };
 }
 
 export function getStorageState(): StorageState {
-  if (memoryState) return memoryState;
+  if (memoryState) {
+    if (!memoryState.customAttachments || memoryState.customAttachments.length === 0) {
+      memoryState.customAttachments = [EXACT_CATALOGUE_PDF];
+    }
+    return memoryState;
+  }
 
   const filePath = getStoreFilePath();
   if (fs.existsSync(filePath)) {
     try {
       const raw = fs.readFileSync(filePath, 'utf8');
       memoryState = JSON.parse(raw);
+      if (!memoryState!.customAttachments || memoryState!.customAttachments.length === 0) {
+        memoryState!.customAttachments = [EXACT_CATALOGUE_PDF];
+      }
       return memoryState!;
     } catch (e) {
       console.warn('[CircularV2Storage] Failed to read store file, reinitializing default:', e);

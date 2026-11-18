@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   FileText, 
   Send, 
@@ -17,23 +17,36 @@ import {
   Plus,
   RefreshCw,
   Mail,
-  HelpCircle
+  HelpCircle,
+  Upload,
+  Download,
+  Trash2,
+  Check,
+  ExternalLink
 } from 'lucide-react';
-import { CircularV2Template, CircularSectionTab } from '@/types/circular';
+import { CircularV2Template, CircularV2Attachment, CircularSectionTab } from '@/types/circular';
 import { EXACT_CATALOGUE_PDF, PREBUILT_CIRCULAR_TEMPLATES } from '@/lib/data/circularV2Constants';
 
 interface CreateCircularSectionProps {
   initialTemplate?: CircularV2Template;
   onNavigateTab: (tab: CircularSectionTab) => void;
-  onOpenPdfModal: () => void;
-  onLaunchGmailWeb: (subject: string, body: string) => void;
+  onOpenPdfModal: (pdfUrl?: string, title?: string) => void;
+  onLaunchGmailWeb: (subject: string, body: string, attachment?: CircularV2Attachment) => void;
+  activeAttachment?: CircularV2Attachment;
+  onSelectAttachment?: (att: CircularV2Attachment) => void;
+  availableAttachments?: CircularV2Attachment[];
+  onRefreshAttachments?: () => void;
 }
 
 export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
   initialTemplate = PREBUILT_CIRCULAR_TEMPLATES[0],
   onNavigateTab,
   onOpenPdfModal,
-  onLaunchGmailWeb
+  onLaunchGmailWeb,
+  activeAttachment = EXACT_CATALOGUE_PDF,
+  onSelectAttachment,
+  availableAttachments = [EXACT_CATALOGUE_PDF],
+  onRefreshAttachments
 }) => {
   const [title, setTitle] = useState<string>(initialTemplate.title);
   const [referenceNo, setReferenceNo] = useState<string>(initialTemplate.referenceNumber);
@@ -43,6 +56,12 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
   const [subject, setSubject] = useState<string>(initialTemplate.subject);
   const [bodyText, setBodyText] = useState<string>(initialTemplate.body);
 
+  // Active attached PDF state
+  const [currentAttachment, setCurrentAttachment] = useState<CircularV2Attachment>(activeAttachment);
+  const [isUploadingPdf, setIsUploadingPdf] = useState<boolean>(false);
+  const [uploadToast, setUploadToast] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
@@ -50,10 +69,106 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
   const isSubjectValid = subject.trim().length > 10;
   const isBodyValid = bodyText.trim().length > 50;
   const isRefValid = referenceNo.trim().length > 3;
-  const isAttachmentReady = true;
+  const isAttachmentReady = Boolean(currentAttachment && currentAttachment.filename);
 
   const handleInsertTag = (tag: string) => {
     setBodyText(prev => `${prev}\n${tag}`);
+  };
+
+  // Switch attachment
+  const handleSwitchAttachment = (att: CircularV2Attachment) => {
+    setCurrentAttachment(att);
+    onSelectAttachment?.(att);
+    
+    // Update attachment mention in body if present
+    setBodyText(prev => {
+      if (prev.includes('Attachment:')) {
+        return prev.replace(/Attachment:\s*[^\n\r]+/g, `Attachment: ${att.filename}`);
+      }
+      return `${prev}\n\nAttachment: ${att.filename}`;
+    });
+
+    setUploadToast(`Active attachment switched to: ${att.filename}`);
+    setTimeout(() => setUploadToast(null), 3000);
+  };
+
+  // Handle Manual PDF File Upload
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+      alert('Please upload a valid PDF document (.pdf format only).');
+      return;
+    }
+
+    try {
+      setIsUploadingPdf(true);
+      setUploadToast(`Reading and uploading ${file.name}...`);
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64Data = reader.result as string;
+
+          const res = await fetch('/api/circulars/v2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'upload_pdf',
+              fileName: file.name,
+              fileBase64: base64Data,
+              description: `Uploaded from Circular Composer on ${new Date().toLocaleDateString()}`
+            })
+          });
+
+          const data = await res.json();
+          if (data.success && data.attachment) {
+            const newAtt: CircularV2Attachment = data.attachment;
+            setCurrentAttachment(newAtt);
+            onSelectAttachment?.(newAtt);
+            onRefreshAttachments?.();
+
+            // Synchronize body text attachment line
+            setBodyText(prev => {
+              if (prev.includes('Attachment:')) {
+                return prev.replace(/Attachment:\s*[^\n\r]+/g, `Attachment: ${newAtt.filename}`);
+              }
+              return `${prev}\n\nAttachment: ${newAtt.filename}`;
+            });
+
+            setUploadToast(`✓ Custom PDF "${file.name}" uploaded, verified, and attached!`);
+            setTimeout(() => setUploadToast(null), 4000);
+          } else {
+            alert(data.error || 'Failed to upload PDF file');
+          }
+        } catch (err: any) {
+          alert(`Upload error: ${err.message}`);
+        } finally {
+          setIsUploadingPdf(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+      };
+
+      reader.onerror = () => {
+        alert('Failed to read file from disk.');
+        setIsUploadingPdf(false);
+      };
+
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      alert(`File reading error: ${err.message}`);
+      setIsUploadingPdf(false);
+    }
+  };
+
+  const handleDownloadActivePdf = () => {
+    const link = document.createElement('a');
+    link.href = currentAttachment.urlPath;
+    link.download = currentAttachment.filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleSaveDraft = async () => {
@@ -71,13 +186,14 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
           target_district: targetDistrict,
           target_audience_label: targetAudience,
           subject,
-          body_text: bodyText
+          body_text: bodyText,
+          attachment: currentAttachment
         })
       });
       const data = await res.json();
       if (data.success) {
-        setSaveSuccessMsg('Circular campaign draft saved to persistent storage!');
-        setTimeout(() => setSaveSuccessMsg(null), 3000);
+        setSaveSuccessMsg(`Circular draft saved with attached PDF: "${currentAttachment.filename}"!`);
+        setTimeout(() => setSaveSuccessMsg(null), 3500);
       }
     } catch (err: any) {
       alert(`Error saving draft: ${err.message}`);
@@ -89,7 +205,6 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
   const handleSubmitForApproval = async () => {
     try {
       setIsSaving(true);
-      // Create first, then submit
       const resCreate = await fetch('/api/circulars/v2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,24 +216,19 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
           target_district: targetDistrict,
           target_audience_label: targetAudience,
           subject,
-          body_text: bodyText
+          body_text: bodyText,
+          attachment: currentAttachment
         })
       });
-      const dataCreate = await resCreate.json();
-      if (dataCreate.success && dataCreate.campaign?.id) {
-        await fetch('/api/circulars/v2', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'submit_approval',
-            campaign_id: dataCreate.campaign.id
-          })
-        });
-        setSaveSuccessMsg('Submitted to Manager Approval queue!');
-        setTimeout(() => onNavigateTab('approval'), 1200);
+      const created = await resCreate.json();
+
+      if (created.success && created.campaign) {
+        onNavigateTab('approval');
+      } else {
+        alert(created.error || 'Failed to submit campaign for approval');
       }
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      alert(`Submission error: ${err.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -127,200 +237,308 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-200">
       
-      {/* Notifications */}
-      {saveSuccessMsg && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl text-xs font-bold flex items-center justify-between animate-in zoom-in-95">
-          <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            {saveSuccessMsg}
-          </span>
+      {/* Hidden File Input for Manual PDF Upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,application/pdf"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
+      {/* Toast alert banner */}
+      {uploadToast && (
+        <div className="p-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl shadow-lg border border-emerald-400 flex items-center justify-between text-xs animate-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center gap-2 font-bold">
+            <CheckCircle2 className="w-4 h-4 text-emerald-200" />
+            <span>{uploadToast}</span>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setUploadToast(null)} 
+            className="text-white/80 hover:text-white font-bold"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* Two-Column Creator Layout */}
+      {/* Success Save Banner */}
+      {saveSuccessMsg && (
+        <div className="p-3.5 bg-sky-600 text-white rounded-2xl shadow-md text-xs font-bold flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-sky-200" />
+          <span>{saveSuccessMsg}</span>
+        </div>
+      )}
+
+      {/* Main 2-Column Split Composer */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* ========================================================================= */}
-        {/* LEFT PANEL: Circular Settings, Audience, Message Editor, Attachments (7c)  */}
+        {/* LEFT PANEL: Form Fields, Target Audience, Message, Attachment (7 cols)    */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-5">
-          
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-sky-100 text-sky-800">
-                <FileText className="w-4 h-4" />
-              </span>
-              <div>
-                <h3 className="font-extrabold text-sm sm:text-base text-slate-900">
-                  Circular Composer & Editor
-                </h3>
-                <p className="text-[11px] text-slate-500">
-                  Compose official NUNES institutional outreach directives
-                </p>
+        <div className="lg:col-span-7 space-y-5">
+          <div className="p-5 sm:p-6 bg-white rounded-3xl border border-slate-200 shadow-xs space-y-4">
+            
+            {/* Header with Template Loader Link */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-xl bg-sky-50 text-sky-600">
+                  <FileText className="w-4 h-4" />
+                </span>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
+                    Circular Composer &amp; Editor
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Compose official NUNES institutional outreach directives
+                  </p>
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() => onNavigateTab('templates')}
+                className="inline-flex items-center gap-1 text-xs font-bold text-sky-700 hover:text-sky-900 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+              >
+                <span>Load Template</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
 
-            <button
-              onClick={() => onNavigateTab('templates')}
-              className="text-xs font-bold text-sky-700 hover:text-sky-900 flex items-center gap-1 hover:underline cursor-pointer"
-            >
-              <span>Load Template</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Form Fields */}
-          <div className="space-y-4 text-xs">
-            
-            {/* Title & Reference No */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2">
-                <label className="block font-bold text-slate-700 mb-1">
+            {/* Campaign Title & Reference */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <div className="sm:col-span-8">
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Circular Campaign Title:
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white"
                   placeholder="e.g. Introduction of Breath Analyser Solutions"
-                  className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
+              <div className="sm:col-span-4">
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Reference No:
                 </label>
                 <input
                   type="text"
                   value={referenceNo}
                   onChange={(e) => setReferenceNo(e.target.value)}
-                  placeholder="e.g. NUNES/INST/2026/014"
-                  className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white"
+                  placeholder="NUNES/INST/2026/014"
                 />
               </div>
             </div>
 
-            {/* Geographical Target & Audience */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Scope Selection: State, District, Audience */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Target State:</label>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Target State:
+                </label>
                 <select
                   value={targetState}
                   onChange={(e) => setTargetState(e.target.value as any)}
-                  className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
                 >
                   <option value="tamil-nadu">Tamil Nadu (38 Dists)</option>
                   <option value="kerala">Kerala (14 Dists)</option>
-                  <option value="all">Both States (TN + KL)</option>
+                  <option value="all">South India (TN &amp; KL)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Target District:</label>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Target District:
+                </label>
                 <select
                   value={targetDistrict}
                   onChange={(e) => setTargetDistrict(e.target.value)}
-                  className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
                 >
                   <option value="coimbatore">Coimbatore (Primary)</option>
-                  <option value="chennai">Chennai</option>
-                  <option value="madurai">Madurai</option>
-                  <option value="salem">Salem</option>
+                  <option value="chennai">Chennai Region</option>
+                  <option value="madurai">Madurai Zone</option>
+                  <option value="salem">Salem Zone</option>
                   <option value="ernakulam">Ernakulam (Kochi)</option>
-                  <option value="all">All Districts</option>
+                  <option value="thiruvananthapuram">Thiruvananthapuram</option>
+                  <option value="all">All Educational Districts</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Recipient Designation:</label>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Recipient Designation:
+                </label>
                 <input
                   type="text"
                   value={targetAudience}
                   onChange={(e) => setTargetAudience(e.target.value)}
-                  placeholder="The Principal / Transport In-Charge"
-                  className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  placeholder="To The Principal / Administration"
                 />
               </div>
             </div>
 
-            {/* Subject Line */}
+            {/* Outbound Email Subject Line */}
             <div>
-              <label className="block font-bold text-slate-700 mb-1">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Outbound Email Subject Line:
               </label>
               <input
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder="Subject of the institutional circular"
-                className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white"
+                placeholder="Subject of outbound email broadcast..."
               />
             </div>
 
-            {/* Personalization Merge Tags Bar */}
+            {/* Quick Personalization Merge-Tags */}
             <div className="flex items-center gap-1.5 flex-wrap pt-1">
-              <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+              <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-sky-500" />
-                <span>Personalization Tags:</span>
+                Personalization Tags:
               </span>
               {[
-                { label: '+ {{School_Name}}', tag: '{{School_Name}}' },
-                { label: '+ {{Principal_Name}}', tag: '{{Principal_Name}}' },
-                { label: '+ {{UDISE_Code}}', tag: '{{UDISE_Code}}' },
-                { label: '+ {{Block}}', tag: '{{Block}}' }
-              ].map(t => (
+                '{{School_Name}}',
+                '{{Principal_Name}}',
+                '{{UDISE_Code}}',
+                '{{Block}}',
+                '{{District}}'
+              ].map((tag) => (
                 <button
-                  key={t.tag}
+                  key={tag}
                   type="button"
-                  onClick={() => handleInsertTag(t.tag)}
-                  className="px-2 py-0.5 bg-sky-50 hover:bg-sky-100 text-sky-800 rounded-md text-[10px] font-mono font-bold transition-all cursor-pointer border border-sky-200"
+                  onClick={() => handleInsertTag(tag)}
+                  className="px-2 py-0.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-[10px] font-mono font-bold transition-all cursor-pointer"
+                  title={`Insert ${tag} at cursor`}
                 >
-                  {t.label}
+                  + {tag}
                 </button>
               ))}
             </div>
 
             {/* Message Body Editor */}
             <div>
-              <label className="block font-bold text-slate-700 mb-1">
-                Circular Message Body (Rich Email Text):
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  Circular Message Body (Rich Email Text):
+                </label>
+                <span className="text-[10px] font-mono text-slate-400">
+                  {bodyText.length} characters
+                </span>
+              </div>
               <textarea
                 value={bodyText}
                 onChange={(e) => setBodyText(e.target.value)}
-                rows={14}
+                rows={13}
                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-sans text-xs leading-relaxed text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white"
                 placeholder="Type circular text here..."
               />
             </div>
 
-            {/* Attachment Box */}
-            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-red-100 text-red-700 rounded-xl shrink-0">
-                  <FileText className="w-4 h-4" />
+            {/* ========================================================================= */}
+            {/* ENHANCED PDF ATTACHMENT BOX: MANUAL UPLOAD & MULTI-PDF SELECTOR           */}
+            {/* ========================================================================= */}
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200/80">
+                <div className="flex items-center gap-1.5">
+                  <Paperclip className="w-4 h-4 text-sky-600" />
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+                    Enclosed Official PDF Document
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
+                    Attached
+                  </span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <p className="font-bold text-slate-900 text-xs truncate max-w-xs sm:max-w-md">
-                      {EXACT_CATALOGUE_PDF.filename}
-                    </p>
-                    <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 font-mono">
-                      16p Verified
-                    </span>
+
+                {/* Upload Any PDF Button */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingPdf}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer hover:scale-102 disabled:opacity-50"
+                  title="Upload any PDF circular, brochure, directive, or price list"
+                >
+                  <Upload className={`w-3.5 h-3.5 ${isUploadingPdf ? 'animate-bounce' : ''}`} />
+                  <span>{isUploadingPdf ? 'Uploading...' : '+ Upload Any PDF Manually'}</span>
+                </button>
+              </div>
+
+              {/* Active PDF Spec Row */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-12 rounded-xl bg-red-100 border border-red-200 flex flex-col items-center justify-center text-red-700 font-mono text-[9px] font-black shrink-0">
+                    <FileText className="w-4 h-4 text-red-600" />
+                    <span>PDF</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 font-mono">5.16 MB • SHA256 Verified Genuine</p>
+
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-extrabold text-slate-900 text-xs truncate max-w-xs sm:max-w-md">
+                        {currentAttachment.filename}
+                      </p>
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 font-mono">
+                        {currentAttachment.pageCount} Pages Verified
+                      </span>
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-sky-100 text-sky-800 font-mono">
+                        {currentAttachment.sizeFormatted}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-mono mt-0.5 truncate max-w-md">
+                      SHA256: {currentAttachment.sha256Checksum ? currentAttachment.sha256Checksum.slice(0, 16) : 'Verified'}... • {currentAttachment.version || 'Genuine'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => onOpenPdfModal(currentAttachment.urlPath, currentAttachment.filename)}
+                    className="px-3 py-1 bg-white hover:bg-slate-100 text-sky-800 border border-slate-300 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                  >
+                    Inspect PDF
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDownloadActivePdf}
+                    className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs transition-all cursor-pointer"
+                    title="Download physical PDF file to your computer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={onOpenPdfModal}
-                className="px-3 py-1 bg-white hover:bg-slate-100 text-sky-800 border border-slate-300 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs"
-              >
-                Inspect PDF
-              </button>
+              {/* Quick Switch Dropdown if multiple attachments exist */}
+              {availableAttachments.length > 1 && (
+                <div className="flex items-center gap-2 text-xs pt-1">
+                  <span className="text-[11px] font-bold text-slate-500">Switch Enclosure:</span>
+                  <select
+                    value={currentAttachment.id}
+                    onChange={(e) => {
+                      const found = availableAttachments.find(a => a.id === e.target.value);
+                      if (found) handleSwitchAttachment(found);
+                    }}
+                    className="py-1 px-2.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  >
+                    {availableAttachments.map((att) => (
+                      <option key={att.id} value={att.id}>
+                        {att.filename} ({att.sizeFormatted})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
             </div>
 
             {/* Action Buttons */}
@@ -338,8 +556,9 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => onLaunchGmailWeb(subject, bodyText)}
-                  className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                  onClick={() => onLaunchGmailWeb(subject, bodyText, currentAttachment)}
+                  className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs hover:scale-102"
+                  title="Opens Gmail Web with 9 BCC coordinators, downloads the active PDF, and assists in attaching"
                 >
                   <Mail className="w-4 h-4 text-rose-600" />
                   <span>Test in Gmail Web</span>
@@ -400,9 +619,11 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
               </div>
 
               <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50">
-                <span className="text-slate-600">16-Page Catalogue Attached:</span>
-                <span className="text-emerald-700 font-bold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Verified (5.16 MB)
+                <span className="text-slate-600 truncate max-w-[170px]" title={currentAttachment.filename}>
+                  PDF Attached: {currentAttachment.filename}
+                </span>
+                <span className="text-emerald-700 font-bold flex items-center gap-1 shrink-0">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {currentAttachment.sizeFormatted} ({currentAttachment.pageCount}p)
                 </span>
               </div>
 
@@ -446,7 +667,20 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
 
               {/* Message text snippet */}
               <div className="p-3 bg-white rounded-xl border border-slate-200 text-slate-800 text-[11px] leading-relaxed whitespace-pre-line font-sans">
-                {bodyText.slice(0, 450)}...
+                {bodyText.slice(0, 420)}...
+              </div>
+
+              {/* Attached PDF pill in preview */}
+              <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-red-600" />
+                  <span className="font-bold text-red-950 truncate max-w-[200px]">
+                    {currentAttachment.filename}
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono font-bold text-red-800">
+                  {currentAttachment.sizeFormatted}
+                </span>
               </div>
 
               {/* Touch reply buttons in preview */}

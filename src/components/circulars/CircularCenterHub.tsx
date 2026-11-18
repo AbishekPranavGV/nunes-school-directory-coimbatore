@@ -30,7 +30,8 @@ import {
   BarChart3,
   Flame,
   Radio,
-  FileCheck
+  FileCheck,
+  Paperclip
 } from 'lucide-react';
 
 import { 
@@ -38,6 +39,7 @@ import {
   UserRole, 
   CircularV2Template, 
   CircularV2Campaign, 
+  CircularV2Attachment,
   DeliveryEventRecord, 
   InboundReplyV2, 
   FollowUpTaskV2, 
@@ -65,6 +67,7 @@ import { DeliveryTrackingSection } from './DeliveryTrackingSection';
 import { RepliesAndEnquiriesSection } from './RepliesAndEnquiriesSection';
 import { ReportsAndExportsSection } from './ReportsAndExportsSection';
 import { PdfViewerModal } from './PdfViewerModal';
+import { GmailAttachmentModal } from './GmailAttachmentModal';
 
 interface CircularCenterHubProps {
   selectedState?: string;
@@ -90,12 +93,24 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
   const [activeSubject, setActiveSubject] = useState<string>(PREBUILT_CIRCULAR_TEMPLATES[0].subject);
   const [activeBody, setActiveBody] = useState<string>(PREBUILT_CIRCULAR_TEMPLATES[0].body);
 
+  // Dynamic Attachments Management (Supports any PDF added manually)
+  const [activeAttachment, setActiveAttachment] = useState<CircularV2Attachment>(EXACT_CATALOGUE_PDF);
+  const [attachmentsList, setAttachmentsList] = useState<CircularV2Attachment[]>([EXACT_CATALOGUE_PDF]);
+
   // Geographic scope
   const [scopeState, setScopeState] = useState<string>(selectedState);
   const [scopeDistrict, setScopeDistrict] = useState<string>(selectedDistrict);
 
   // PDF Viewer Modal
   const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
+  const [pdfModalData, setPdfModalData] = useState<{ url: string; title: string }>({
+    url: EXACT_CATALOGUE_PDF.urlPath,
+    title: EXACT_CATALOGUE_PDF.filename
+  });
+
+  // Gmail Attachment Assistant Modal
+  const [isGmailModalOpen, setIsGmailModalOpen] = useState<boolean>(false);
+  const [lastGmailUrl, setLastGmailUrl] = useState<string>('');
 
   // Data Stores
   const [metrics, setMetrics] = useState<CircularV2DashboardMetrics | null>(null);
@@ -115,9 +130,18 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
         const data = await res.json();
         if (data.metrics) setMetrics(data.metrics);
         if (data.campaigns) setCampaigns(data.campaigns);
-        if (data.delivery_events) setDeliveryEvents(data.delivery_events);
-        if (data.replies) setReplies(data.replies);
-        if (data.follow_up_tasks) setFollowUpTasks(data.follow_up_tasks);
+        if (data.delivery_events || data.deliveryEvents) {
+          setDeliveryEvents(data.delivery_events || data.deliveryEvents);
+        }
+        if (data.replies || data.inboundReplies) {
+          setReplies(data.replies || data.inboundReplies);
+        }
+        if (data.follow_up_tasks || data.followUpTasks) {
+          setFollowUpTasks(data.follow_up_tasks || data.followUpTasks);
+        }
+        if (data.attachments && Array.isArray(data.attachments)) {
+          setAttachmentsList(data.attachments);
+        }
         setLastRefreshedAt(new Date().toLocaleTimeString());
       }
     } catch (err) {
@@ -138,19 +162,59 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
     setActiveBody(tpl.body);
   };
 
-  // Launch Gmail Web Composer with BCC coordinators
-  const handleLaunchGmailWeb = (subjectParam?: string, bodyParam?: string) => {
+  // Open PDF viewer with any file
+  const handleOpenPdfModal = (url?: string, title?: string) => {
+    setPdfModalData({
+      url: url || activeAttachment.urlPath,
+      title: title || activeAttachment.filename
+    });
+    setIsPdfModalOpen(true);
+  };
+
+  // Launch Gmail Web Composer with physical file download & Attachment Assistant
+  const handleLaunchGmailWeb = (subjectParam?: string, bodyParam?: string, attachmentParam?: CircularV2Attachment) => {
     const subj = subjectParam || activeSubject;
-    const body = bodyParam || activeBody;
+    const att = attachmentParam || activeAttachment;
+    let body = bodyParam || activeBody;
+
+    // 1. Immediately trigger physical download of the active PDF so user can attach it via 📎 in Gmail
+    if (typeof window !== 'undefined') {
+      try {
+        const link = document.createElement('a');
+        link.href = att.urlPath;
+        link.download = att.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.warn('Auto-download trigger notice:', err);
+      }
+    }
+
+    // 2. Embed direct verified cloud download link and Google Drive mirror inside template body
+    const cloudUrl = `https://nunes-transport.vercel.app${att.urlPath}`;
+    const attachmentNotice = `\n\n================================================================\n📎 ATTACHED OFFICIAL ENCLOSURE:\nDocument: ${att.filename} (${att.pageCount} Pages, ${att.sizeFormatted})\nDirect Verified Download: ${cloudUrl}\nOfficial Google Drive Directive: https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing\n(Physical PDF copy also attached to this email)\n================================================================`;
+
+    if (!body.includes(att.filename) && !body.includes('ATTACHED OFFICIAL ENCLOSURE')) {
+      body = `${body}${attachmentNotice}`;
+    }
+
+    // 3. Compose standard Gmail Web URL with 9 BCC coordinators
     const bccList = NUNES_INTERNAL_BCC_LIST.join(',');
     const encodedSubject = encodeURIComponent(subj);
     const encodedBody = encodeURIComponent(body);
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&bcc=${encodeURIComponent(bccList)}&su=${encodedSubject}&body=${encodedBody}`;
+    setLastGmailUrl(gmailUrl);
+
+    // Open Gmail
     window.open(gmailUrl, '_blank');
+
+    // 4. Open Gmail Attachment Assistant to guide user in clicking 📎 or dragging the downloaded file
+    setIsGmailModalOpen(true);
   };
 
   const handleLaunchCampaignGmailWeb = (campaign: CircularV2Campaign) => {
-    handleLaunchGmailWeb(campaign.subject, campaign.body_text || campaign.body || '');
+    handleLaunchGmailWeb(campaign.subject, campaign.body_text || campaign.body || '', campaign.attachment || activeAttachment);
   };
 
   // Tab definitions with badges
@@ -197,7 +261,7 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
       label: '5. PDF Catalogue Manager',
       shortLabel: 'PDF Attachments',
       icon: FileCheck,
-      badge: '16 Pgs',
+      badge: `${attachmentsList.length} File${attachmentsList.length === 1 ? '' : 's'}`,
       badgeColor: 'bg-purple-100 text-purple-800'
     },
     {
@@ -269,7 +333,7 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                 <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                16-Page Catalogue Validated
+                Active PDF: {activeAttachment.filename.slice(0, 28)}...
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
                 TN (38) + Kerala (14) Active
@@ -280,7 +344,7 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
               <span>Institutional Outreach &amp; Circular Management Suite</span>
             </h1>
             <p className="text-xs sm:text-sm text-sky-200/90 max-w-3xl leading-relaxed">
-              Enterprise communications hub for South Indian educational institutions. Standardized Alcohol Breath Analyser catalogues, multi-tier approval gates, verified recipient directories, and automated lead tracking.
+              Enterprise outreach system with manual PDF attachment support, verified 16-page catalogues, multi-tier approval pipeline, and Gmail Web synchronization.
             </p>
           </div>
 
@@ -305,14 +369,15 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
               </div>
             </div>
 
-            {/* Quick 16-Page PDF View Button */}
+            {/* Quick PDF Viewer Button */}
             <button
               type="button"
-              onClick={() => setIsPdfModalOpen(true)}
+              onClick={() => handleOpenPdfModal()}
               className="inline-flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl text-xs font-bold transition-all shadow-md hover:shadow-lg cursor-pointer hover:scale-102"
+              title="Inspect active attached PDF"
             >
               <FileCheck className="w-4 h-4" />
-              <span>16-Page Catalogue PDF</span>
+              <span>Inspect Attached PDF</span>
             </button>
 
             {/* Direct Gmail Web Compose Button */}
@@ -320,7 +385,7 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
               type="button"
               onClick={() => handleLaunchGmailWeb()}
               className="inline-flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-2xl text-xs font-bold transition-all shadow-md hover:shadow-lg cursor-pointer hover:scale-102"
-              title="Compose in Gmail Web with 9 Nunes BCC coordinators attached"
+              title="Compose in Gmail Web with 9 Nunes BCC coordinators attached and auto-downloaded PDF"
             >
               <Mail className="w-4 h-4" />
               <span>Gmail Web (9 BCC)</span>
@@ -364,9 +429,9 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
           </div>
 
           <div className="bg-white/5 rounded-xl p-2.5 border border-white/10">
-            <span className="text-[10px] text-indigo-300 block font-medium">Dispatched Campaigns</span>
+            <span className="text-[10px] text-indigo-300 block font-medium">PDF Repository</span>
             <span className="text-sm font-extrabold text-indigo-300">
-              {metrics ? (metrics.total_campaigns_dispatched ?? metrics.approved_campaigns ?? 12) : '12'}
+              {attachmentsList.length} Active Files
             </span>
           </div>
 
@@ -447,8 +512,12 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
           <CreateCircularSection
             initialTemplate={selectedTemplate}
             onNavigateTab={(tab) => setActiveTab(tab)}
-            onOpenPdfModal={() => setIsPdfModalOpen(true)}
-            onLaunchGmailWeb={(subj, body) => handleLaunchGmailWeb(subj, body)}
+            onOpenPdfModal={(url, title) => handleOpenPdfModal(url, title)}
+            onLaunchGmailWeb={(subj, body, att) => handleLaunchGmailWeb(subj, body, att)}
+            activeAttachment={activeAttachment}
+            onSelectAttachment={(att) => setActiveAttachment(att)}
+            availableAttachments={attachmentsList}
+            onRefreshAttachments={fetchHubData}
           />
         )}
 
@@ -456,7 +525,7 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
           <CircularTemplatesSection
             onSelectTemplate={handleSelectTemplate}
             onNavigateTab={(tab) => setActiveTab(tab)}
-            onOpenPdfModal={() => setIsPdfModalOpen(true)}
+            onOpenPdfModal={() => handleOpenPdfModal()}
           />
         )}
 
@@ -477,7 +546,11 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
 
         {activeTab === 'attachments' && (
           <PdfAttachmentManagerSection
-            onOpenPdfModal={() => setIsPdfModalOpen(true)}
+            onOpenPdfModal={(url, title) => handleOpenPdfModal(url, title)}
+            activeAttachment={activeAttachment}
+            onSelectAttachment={(att) => setActiveAttachment(att)}
+            attachmentsList={attachmentsList}
+            onRefreshAttachments={fetchHubData}
           />
         )}
 
@@ -485,7 +558,8 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
           <EmailWhatsAppPreviewSection
             subject={activeSubject}
             bodyText={activeBody}
-            onOpenPdfModal={() => setIsPdfModalOpen(true)}
+            activeAttachment={activeAttachment}
+            onOpenPdfModal={() => handleOpenPdfModal()}
             onLaunchGmailWeb={() => handleLaunchGmailWeb()}
           />
         )}
@@ -504,6 +578,7 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
             campaigns={campaigns}
             onNavigateTab={(tab) => setActiveTab(tab)}
             onLaunchGmailWeb={handleLaunchCampaignGmailWeb}
+            onOpenPdfModal={(url, title) => handleOpenPdfModal(url, title)}
             onRefresh={fetchHubData}
           />
         )}
@@ -512,6 +587,7 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
           <DeliveryTrackingSection
             events={deliveryEvents}
             onRefresh={fetchHubData}
+            onOpenPdfModal={(url, title) => handleOpenPdfModal(url, title)}
           />
         )}
 
@@ -532,13 +608,27 @@ export const CircularCenterHub: React.FC<CircularCenterHubProps> = ({
       </div>
 
       {/* =========================================================================
-          EMBEDDED 16-PAGE PDF VIEWER MODAL
+          EMBEDDED PDF VIEWER MODAL (WORKS WITH ANY PDF)
       ========================================================================== */}
       <PdfViewerModal
         isOpen={isPdfModalOpen}
         onClose={() => setIsPdfModalOpen(false)}
-        pdfUrl={EXACT_CATALOGUE_PDF.urlPath}
-        title={EXACT_CATALOGUE_PDF.filename}
+        pdfUrl={pdfModalData.url}
+        title={pdfModalData.title}
+      />
+
+      {/* =========================================================================
+          GMAIL ATTACHMENT ASSISTANT MODAL (ASSISTS IN ATTACHING PDF IN GMAIL)
+      ========================================================================== */}
+      <GmailAttachmentModal
+        isOpen={isGmailModalOpen}
+        onClose={() => setIsGmailModalOpen(false)}
+        attachment={activeAttachment}
+        subject={activeSubject}
+        bodyText={activeBody}
+        onReopenGmail={() => {
+          if (lastGmailUrl) window.open(lastGmailUrl, '_blank');
+        }}
       />
 
     </div>

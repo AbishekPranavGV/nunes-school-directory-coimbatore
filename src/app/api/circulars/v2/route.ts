@@ -6,7 +6,7 @@ import {
   getFilteredRecipients 
 } from '@/lib/circularV2Storage';
 import { EXACT_CATALOGUE_PDF, PREBUILT_CIRCULAR_TEMPLATES, NUNES_OFFICIAL_CONTACTS } from '@/lib/data/circularV2Constants';
-import { CircularV2Campaign, DeliveryEventRecord, InboundReplyV2, FollowUpTaskV2, ReplyClassification } from '@/types/circular';
+import { CircularV2Campaign, CircularV2Attachment, DeliveryEventRecord, InboundReplyV2, FollowUpTaskV2, ReplyClassification } from '@/types/circular';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -65,6 +65,7 @@ export async function GET(req: NextRequest) {
       campaigns: store.campaigns,
       templates: PREBUILT_CIRCULAR_TEMPLATES,
       attachment: EXACT_CATALOGUE_PDF,
+      attachments: store.customAttachments || [EXACT_CATALOGUE_PDF],
       contacts: NUNES_OFFICIAL_CONTACTS,
       deliveryEvents: store.deliveryEvents.slice(-50),
       delivery_events: store.deliveryEvents.slice(-50),
@@ -115,7 +116,7 @@ export async function POST(req: NextRequest) {
         verified_recipient_count: body.verified_recipient_count || 1420,
         subject: body.subject || 'Introduction of Breath Analyser Solutions for Institutional & Transport Safety',
         body_text: body.body_text || PREBUILT_CIRCULAR_TEMPLATES[0].body,
-        attachment: EXACT_CATALOGUE_PDF,
+        attachment: body.attachment || EXACT_CATALOGUE_PDF,
         approval: {
           campaign_id: newId,
           status: 'DRAFT',
@@ -305,6 +306,83 @@ export async function POST(req: NextRequest) {
         expected_sha256: EXACT_CATALOGUE_PDF.sha256Checksum,
         actual_sha256: calculatedHash,
         checksum_verified: calculatedHash === EXACT_CATALOGUE_PDF.sha256Checksum
+      });
+    }
+
+    // 6.5. Upload Custom PDF Attachment Manually
+    if (action === 'upload_pdf') {
+      const { fileName, fileBase64, description } = body;
+      if (!fileName || !fileBase64) {
+        return NextResponse.json({ error: 'Missing fileName or fileBase64' }, { status: 400 });
+      }
+
+      const sanitizedName = (fileName as string).replace(/[^a-zA-Z0-9._-]/g, '_');
+      const base64Data = (fileBase64 as string).replace(/^data:application\/pdf;base64,/, '').replace(/^data:.*;base64,/, '');
+      const fileBuffer = Buffer.from(base64Data, 'base64');
+
+      const publicUploadsDir = path.join(process.cwd(), 'public', 'attachments', 'uploads');
+      const dataUploadsDir = path.join(process.cwd(), 'data', 'attachments', 'uploads');
+
+      if (!fs.existsSync(publicUploadsDir)) fs.mkdirSync(publicUploadsDir, { recursive: true });
+      if (!fs.existsSync(dataUploadsDir)) fs.mkdirSync(dataUploadsDir, { recursive: true });
+
+      const publicFilePath = path.join(publicUploadsDir, sanitizedName);
+      const dataFilePath = path.join(dataUploadsDir, sanitizedName);
+
+      fs.writeFileSync(publicFilePath, fileBuffer);
+      fs.writeFileSync(dataFilePath, fileBuffer);
+
+      const calculatedHash = crypto.createHash('sha256').update(fileBuffer).digest('hex').toUpperCase();
+      const contentStr = fileBuffer.toString('latin1');
+      const match = contentStr.match(/\/Type\s*\/Page\b/g);
+      const estimatedPages = match ? match.length : 1;
+
+      const sizeMB = fileBuffer.length / (1024 * 1024);
+      const sizeFormatted = sizeMB >= 1 ? `${sizeMB.toFixed(2)} MB` : `${Math.round(fileBuffer.length / 1024)} KB`;
+
+      const newAttachment: CircularV2Attachment = {
+        id: `att_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        filename: sanitizedName,
+        originalName: fileName,
+        urlPath: `/attachments/uploads/${sanitizedName}`,
+        localPath: `public/attachments/uploads/${sanitizedName}`,
+        sizeBytes: fileBuffer.length,
+        sizeFormatted,
+        pageCount: estimatedPages,
+        sha256Checksum: calculatedHash,
+        version: 'Manual Upload',
+        description: description || `Custom institutional circular PDF: ${fileName}`,
+        isVerified: true,
+        uploadedAt: new Date().toISOString()
+      };
+
+      if (!store.customAttachments) store.customAttachments = [EXACT_CATALOGUE_PDF];
+      // Filter out duplicate filename if re-uploaded
+      store.customAttachments = store.customAttachments.filter(a => a.filename !== sanitizedName);
+      store.customAttachments.unshift(newAttachment);
+      saveStorageState();
+
+      return NextResponse.json({
+        success: true,
+        message: `PDF "${sanitizedName}" successfully uploaded and verified.`,
+        attachment: newAttachment,
+        attachments: store.customAttachments
+      });
+    }
+
+    // 6.6. Delete Custom PDF
+    if (action === 'delete_pdf') {
+      const { id } = body;
+      if (!id || id === EXACT_CATALOGUE_PDF.id) {
+        return NextResponse.json({ error: 'Cannot delete default catalog PDF' }, { status: 400 });
+      }
+      if (store.customAttachments) {
+        store.customAttachments = store.customAttachments.filter(a => a.id !== id);
+        saveStorageState();
+      }
+      return NextResponse.json({
+        success: true,
+        attachments: store.customAttachments || [EXACT_CATALOGUE_PDF]
       });
     }
 
