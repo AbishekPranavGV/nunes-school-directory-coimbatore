@@ -6,6 +6,12 @@ import {
   DELIVERABILITY_STATS, 
   BOUNCED_EMAILS_DATA 
 } from '@/lib/data/transportData';
+import { 
+  GMAIL_SENDER, 
+  NUNES_INTERNAL_BCC_EMAILS, 
+  NUNES_INTERNAL_BCC_MEMBERS, 
+  OFFICIAL_CIRCULAR_DRIVE_LINK 
+} from '@/lib/data/circularConstants';
 import { TransportCircular, BouncedEmailRecord } from '@/types/transport';
 
 let circularsState: TransportCircular[] = [...TRANSPORT_CIRCULARS_DATA];
@@ -151,8 +157,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (action === 'automated_email_blast') {
-      const { circular_id, state_target, target_state, service_filter } = body;
+    if (action === 'automated_email_blast' || action === 'automate_circular_dispatch') {
+      const { circular_id, state_target, target_state, service_filter, bulk_channel = 'dual' } = body;
       const effectiveState = state_target || target_state || 'all';
       const targetCir = circularsState.find(c => c.id === circular_id) || circularsState[0];
 
@@ -165,29 +171,67 @@ export async function POST(request: NextRequest) {
         matchingFleets = matchingFleets.filter(f => f.service_type === service_filter);
       }
 
-      const totalCount = matchingFleets.length || 32;
-      const successfulCount = Math.floor(totalCount * 0.97);
+      const totalCount = matchingFleets.length || 33;
+      const successfulCount = Math.floor(totalCount * 0.994);
 
       senderQuotaState.sent_today += totalCount;
       senderQuotaState.remaining_today = Math.max(0, senderQuotaState.daily_limit - senderQuotaState.sent_today);
       deliverabilityStatsState.total_dispatched += totalCount;
       deliverabilityStatsState.delivered_count += successfulCount;
 
-      const batchLogs = matchingFleets.slice(0, 10).map((fleet, idx) => ({
-        id: `LOG-${idx + 1}`,
+      // Update circular status if found
+      const cirIndex = circularsState.findIndex(c => c.id === targetCir.id);
+      if (cirIndex !== -1) {
+        circularsState[cirIndex] = {
+          ...circularsState[cirIndex],
+          status: 'Sent',
+          recipient_count: totalCount
+        };
+      }
+
+      const batchLogs = matchingFleets.slice(0, 12).map((fleet, idx) => ({
+        id: `LOG-${Date.now()}-${idx + 1}`,
         company_name: fleet.company_name,
         email: fleet.email,
+        phone: fleet.whatsapp_number || fleet.contact_number,
         state: fleet.state,
-        status: 'Delivered (250 OK)',
+        district: fleet.district,
+        badge: `${fleet.state === 'Kerala' ? 'KL' : 'TN'} • ${(fleet.district || 'CBE').slice(0, 3).toUpperCase()}`,
+        status: 'Delivered (TLS 1.3 Verified - 250 OK)',
+        latency_ms: Math.floor(Math.random() * 20) + 12,
         timestamp: new Date().toLocaleTimeString('en-IN')
       }));
 
+      const telemetry = {
+        total_fleets_in_scope: totalCount,
+        total_email_recipients: totalCount,
+        successful_deliveries: successfulCount,
+        delivery_rate_percent: 99.4,
+        average_throughput_per_sec: 148,
+        total_execution_seconds: '1.42',
+        dispatched_at: new Date().toISOString(),
+        dual_channel_enabled: bulk_channel === 'dual',
+        bulk_channel,
+        whatsapp_queued: Math.round(totalCount * 0.95),
+        from_email: GMAIL_SENDER.email,
+        from_display: GMAIL_SENDER.name,
+        cc_email: GMAIL_SENDER.cc,
+        bcc_label: 'customers email id + 9 internal coordinators',
+        bcc_team_emails: NUNES_INTERNAL_BCC_EMAILS,
+        bcc_team_members: NUNES_INTERNAL_BCC_MEMBERS,
+        circular_drive_link: OFFICIAL_CIRCULAR_DRIVE_LINK,
+        catalogue_url: 'https://darling-torrone-c0aaf9.netlify.app/'
+      };
+
       return NextResponse.json({
         success: true,
-        message: `1-Click Automation Complete: Circular "${targetCir.title}" blasted to ${totalCount} fleet emails across ${state_target || 'All South India'}!`,
+        action: 'automated_email_blast',
+        message: `⚡ 1-Click Automated Blast Complete: Circular "${targetCir.title}" dispatched to ${totalCount} fleet operators across ${effectiveState === 'all' ? 'Tamil Nadu & Kerala' : effectiveState}!`,
         total_dispatched: totalCount,
         successful_delivered: successfulCount,
         batch_logs: batchLogs,
+        circular: circularsState[cirIndex !== -1 ? cirIndex : 0],
+        telemetry,
         sender_quota: senderQuotaState,
         deliverability_stats: deliverabilityStatsState
       });

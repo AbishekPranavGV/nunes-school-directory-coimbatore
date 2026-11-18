@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { CircularItem } from '@/types';
 import { getSessionUser } from '@/lib/auth';
 import { getMasterSchoolsFromMemoryOrDb } from '@/lib/db';
+import { GMAIL_SENDER, generateGmailWebComposeUrl, NUNES_INTERNAL_BCC_EMAILS, NUNES_INTERNAL_BCC_MEMBERS, OFFICIAL_CIRCULAR_DRIVE_LINK } from '@/lib/mailer';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,45 +10,209 @@ export const dynamic = 'force-dynamic';
 let circularsStore: CircularItem[] = [
   {
     id: 'circ_2026_001',
-    title: 'TNEA 2026 District Science Lab & Instrumentation Equipment Audit',
-    reference_number: 'NUNES/CBE/EDU/2026/048',
-    circular_date: '2026-03-15',
-    subject: 'Official Verification of Physics, Chemistry & Biology Laboratory Instrumentation for Higher Secondary Schools in Coimbatore District',
-    body_text: `To All The Heads of Schools / Principals,
-Coimbatore District, Tamil Nadu.
+    title: 'Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models)',
+    reference_number: 'NUNES/EDU/SAFETY/2026/CIRC-014',
+    circular_date: '2026-04-20',
+    subject: 'Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation',
+    body_text: `NUNES INSTRUMENTATION
+PRECISION INSTRUMENTS • SAFETY & SCREENING SOLUTIONS
 
-Subject: Annual Verification & Modernization of Higher Secondary Laboratory Equipment (Academic Year 2026-27).
+INSTITUTIONAL CAMPUS SAFETY
+Alcohol Breath Analyser Solutions for Educational Institutions
+A focused 14-model range for gate screening, hostel monitoring and campus security applications.
+14 AVAILABLE MODELS
 
-As per Tamil Nadu School Education Department directives and TNEA technical standards, an assessment of laboratory apparatus, measurement instruments, and STEM experimental kits is scheduled for Higher Secondary and Secondary schools across all 15 educational blocks of Coimbatore District.
+Dear Principal / Administration / Procurement Team,
+{{School_Name}} (UDISE: {{UDISE_Code}}),
+{{Block}}, {{Taluk}}.
 
-Kindly review your laboratory requirements, working status of precision instruments, and submit the certified inventory verification sheet by the end of the current month.
+Greetings from Nunes Instrumentation, Coimbatore. We are pleased to present our range of alcohol breath analysers for educational institutions. The range is intended for screening requirements at campus entrances, hostels and designated security checkpoints.
 
-For institutional inquiries, contact the Coimbatore District Technical Coordinator at Nunes Instruments.`,
-    extracted_text: 'TNEA 2026 Higher Secondary Laboratory Verification Circular. Ref: NUNES/CBE/EDU/2026/048. Coimbatore District. 15 Blocks covered.',
-    attachment_name: 'TNEA_2026_Lab_Inventory_Format.pdf',
+PRODUCT CATEGORIES:
+
+01 / RAPID SCREENING
+Non-contact Screening Batons
+Suitable for gate, hostel and checkpoint screening
+
+02 / HANDHELD TESTING
+Digital Breath Analysers
+Portable units with clear digital / LCD readouts
+
+03 / ADVANCED RECORDING
+Printer-enabled Models
+Selected units support printed test records
+
+ATTACHED PRODUCT CATALOGUE:
+14-model Breath Analyser Catalogue
+Please refer to the attached catalogue for model-wise specifications, product details and QR codes. Contact our team for model guidance and a commercial quotation.
+
+Official Catalogue & Directive Document (Google Drive):
+https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing
+
+Online Product Catalogue & Specifications:
+https://darling-torrone-c0aaf9.netlify.app/
+
+ENQUIRY & QUOTATION:
+For product selection, technical details or quotation, please contact us through your preferred channel:
+• WhatsApp Enquiry: +91 89409 44000 (https://wa.me/918940944000)
+• Email Enquiry: nunesalcotest@gmail.com | CC: nunescbe@gmail.com
+
+Direct Contact Numbers:
+93452 26022  |  89409 44000  |  89409 33000
+
+COIMBATORE OFFICE LOCATIONS (3 OFFICES):
+Select an office below to open directions in Google Maps:
+
+01 Rathinapuri:
+11-A, 2nd Cross, Sundarar Street, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, Tamil Nadu 641027.
+Directions: https://maps.google.com/?q=11.0366,76.9661
+
+02 Gopalapuram:
+6, GJ Chandran Complex, Head Quarters Road, Opp. CSI Church, Gopalapuram, Coimbatore, Tamil Nadu 641018.
+Directions: https://maps.google.com/?q=11.0028,76.9680
+
+03 Gandhipuram:
+218-628, 1st Street, Cross Cut, Gandhipuram, Coimbatore, Tamil Nadu 641012.
+Directions: https://maps.google.com/?q=11.0182,76.9658
+
+Regards,
+Nunes Instrumentation Team
+Coimbatore, Tamil Nadu
+
+Follow Us: YouTube | Instagram | Google
+NUNES INSTRUMENTATION • COIMBATORE, TAMIL NADU
+© 2026 Nunes Instrumentation. Reply "Unsubscribe" to opt out.`,
+    extracted_text: `NUNES INSTRUMENTATION • PRECISION INSTRUMENTS • SAFETY & SCREENING SOLUTIONS
+INSTITUTIONAL CAMPUS SAFETY
+Alcohol Breath Analyser Solutions for Educational Institutions
+A focused 14-model range for gate screening, hostel monitoring and campus security applications.
+14 AVAILABLE MODELS
+
+01 / RAPID SCREENING: Non-contact Screening Batons (gate, hostel, checkpoints)
+02 / HANDHELD TESTING: Digital Breath Analysers (portable, clear LCD readouts)
+03 / ADVANCED RECORDING: Printer-enabled Models (printed test records)
+
+Direct Contact Numbers: 93452 26022 | 89409 44000 | 89409 33000
+3 Offices in Coimbatore: Rathinapuri, Gopalapuram, Gandhipuram`,
+    attachment_name: 'https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing',
     attachment_type: 'application/pdf',
     attachment_size_kb: 482,
-    generated_email_subject: 'Official Circular: Laboratory Instrumentation Audit (Academic Year 2026-27) - Coimbatore District',
-    generated_email_body: `Respected Principal / Headmaster,
+    generated_email_subject: 'Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation',
+    generated_email_body: `Dear Principal / Administration / Procurement Team,
+{{School_Name}} (UDISE: {{UDISE_Code}}),
+{{Block}}, {{Taluk}}.
 
-Greetings from Nunes Instruments, Coimbatore.
+Greetings from Nunes Instrumentation, Coimbatore. We are pleased to present our range of alcohol breath analysers for educational institutions. The range is intended for screening requirements at campus entrances, hostels and designated security checkpoints.
 
-We are pleased to share the official circular regarding the Annual Laboratory Equipment & Measurement Instrumentation Verification for schools within Coimbatore District.
+PRODUCT CATEGORIES:
 
-Please find attached the official circular (Ref: NUNES/CBE/EDU/2026/048) and the prescribed equipment checklist for your science laboratories.
+01 / RAPID SCREENING
+Non-contact Screening Batons
+Suitable for gate, hostel and checkpoint screening
 
-Kindly acknowledge receipt of this communication. For any technical clarification, our switchboard is accessible during official working hours.
+02 / HANDHELD TESTING
+Digital Breath Analysers
+Portable units with clear digital / LCD readouts
 
-Warm regards,
-Educational Liaison Team
-Nunes Instruments, Coimbatore District, Tamil Nadu`,
+03 / ADVANCED RECORDING
+Printer-enabled Models
+Selected units support printed test records
+
+ATTACHED PRODUCT CATALOGUE:
+14-model Breath Analyser Catalogue
+Please refer to the attached catalogue for model-wise specifications, product details and QR codes. Contact our team for model guidance and a commercial quotation.
+
+📄 Official Directive & Catalogue Link (Google Drive):
+https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing
+
+Online Product Catalogue & Specifications:
+https://darling-torrone-c0aaf9.netlify.app/
+
+ENQUIRY & QUOTATION:
+For product selection, technical details or quotation, please contact us through your preferred channel:
+• WhatsApp Enquiry: +91 89409 44000 (https://wa.me/918940944000)
+• Email Enquiry: nunesalcotest@gmail.com | CC: nunescbe@gmail.com
+
+Direct Contact Numbers:
+📞 93452 26022  |  📞 89409 44000  |  📞 89409 33000
+
+COIMBATORE OFFICE LOCATIONS (3 OFFICES):
+Select an office below to open directions in Google Maps:
+
+01. Rathinapuri:
+11-A, 2nd Cross, Sundarar Street, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, Tamil Nadu 641027.
+Directions: https://maps.google.com/?q=11.0366,76.9661
+
+02. Gopalapuram:
+6, GJ Chandran Complex, Head Quarters Road, Opp. CSI Church, Gopalapuram, Coimbatore, Tamil Nadu 641018.
+Directions: https://maps.google.com/?q=11.0028,76.9680
+
+03. Gandhipuram:
+218-628, 1st Street, Cross Cut, Gandhipuram, Coimbatore, Tamil Nadu 641012.
+Directions: https://maps.google.com/?q=11.0182,76.9658
+
+Regards,
+Nunes Instrumentation Team
+Coimbatore, Tamil Nadu
+
+Follow Us: YouTube | Instagram | Google
+NUNES INSTRUMENTATION • COIMBATORE, TAMIL NADU
+© 2026 Nunes Instrumentation. Reply "Unsubscribe" to opt out.`,
+    generated_whatsapp_body: `🛡️ *NUNES INSTRUMENTATION — INSTITUTIONAL CAMPUS SAFETY*
+*Alcohol Breath Analyser Solutions for Educational Institutions*
+_(A focused 14-model range for gate screening, hostel monitoring and campus security applications - 14 Available Models)_
+
+Dear Principal / Administration / Procurement Team,
+*{{School_Name}}* (UDISE: {{UDISE_Code}}),
+
+Greetings from *Nunes Instrumentation, Coimbatore*. We are pleased to present our range of alcohol breath analysers for educational institutions. The range is intended for screening requirements at campus entrances, hostels and designated security checkpoints.
+
+📊 *PRODUCT CATEGORIES:*
+
+1️⃣ *01 / RAPID SCREENING*
+• *Non-contact Screening Batons*
+• Suitable for gate, hostel and checkpoint screening
+
+2️⃣ *02 / HANDHELD TESTING*
+• *Digital Breath Analysers*
+• Portable units with clear digital / LCD readouts
+
+3️⃣ *03 / ADVANCED RECORDING*
+• *Printer-enabled Models*
+• Selected units support printed test records
+
+📄 *ATTACHED PRODUCT CATALOGUE:*
+*14-model Breath Analyser Catalogue*
+Please refer to the official catalogue for model-wise specifications, product details and QR codes:
+🔗 *Official Catalogue Link (Google Drive):*
+https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing
+
+🌐 *Online Specifications:* https://darling-torrone-c0aaf9.netlify.app/
+
+💬 *ENQUIRY & QUOTATION:*
+For product selection, technical details, commercial quotation or on-campus demo:
+📲 *Direct Contact Numbers:*
+• *93452 26022*
+• *89409 44000*
+• *89409 33000*
+✉️ *Email:* nunesalcotest@gmail.com | CC: nunescbe@gmail.com
+
+📍 *COIMBATORE OFFICE LOCATIONS (3 OFFICES):*
+01. *Rathinapuri:* 11-A, 2nd Cross, Sundarar Street, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore 641027
+02. *Gopalapuram:* 6, GJ Chandran Complex, Head Quarters Road, Opp. CSI Church, Gopalapuram, Coimbatore 641018
+03. *Gandhipuram:* 218-628, 1st Street, Cross Cut, Gandhipuram, Coimbatore 641012
+
+Regards,
+*Nunes Instrumentation Team*
+Coimbatore, Tamil Nadu
+_YouTube • Instagram • Google_`,
     status: 'APPROVED',
-    created_at: '2026-03-15T09:30:00.000Z',
+    created_at: '2026-04-20T09:30:00.000Z',
     approved_by: 'Master Administrator',
-    approved_at: '2026-03-15T11:00:00.000Z',
-    target_group: 'Higher Secondary & Secondary Schools',
-    eligible_count: 512,
-    email_ready_count: 77
+    approved_at: '2026-04-20T11:00:00.000Z',
+    target_group: 'Educational Institutions & Campus Safety (21,120 Schools)',
+    eligible_count: 21120,
+    email_ready_count: 17364
   },
   {
     id: 'circ_2026_002',
@@ -436,20 +601,36 @@ export async function POST(req: NextRequest) {
           circular_id: circ.id,
           circular_title: circ.title,
           reference_number: circ.reference_number,
+          from_email: GMAIL_SENDER.email,
+          from_display: GMAIL_SENDER.name,
+          cc_email: GMAIL_SENDER.cc,
+          bcc_label: 'customers email id + 9 Nunes internal coordinators',
+          bcc_team_emails: NUNES_INTERNAL_BCC_EMAILS,
+          bcc_team_members: NUNES_INTERNAL_BCC_MEMBERS,
+          circular_drive_link: OFFICIAL_CIRCULAR_DRIVE_LINK,
+          auth_sender: GMAIL_SENDER.email,
           target_state: targetState,
           target_district: targetDistrict || 'All Districts in Scope',
           total_schools_in_scope: schools.length,
           total_email_recipients: recipientCount,
+          total_whatsapp_queued: schools.filter((s: any) => Boolean(s.official_whatsapp || s.principal_whatsapp || s.phone_number)).length,
+          dual_channel_active: Boolean(body.bulk_channel === 'dual' || body.send_bulk_dual),
           successful_deliveries: recipientCount,
           delivery_rate_percent: 99.4,
           bounce_count: 0,
           average_throughput_per_sec: 148,
           total_execution_seconds: (recipientCount / 148).toFixed(2),
           dispatched_at: new Date().toISOString(),
-          status: 'COMPLETED'
+          status: 'COMPLETED',
+          gmail_web_compose_url: generateGmailWebComposeUrl({
+            cc: GMAIL_SENDER.cc,
+            bcc: sampleRecipients.map((r: any) => r.recipient_email).slice(0, 5),
+            subject: circ.generated_email_subject,
+            body: circ.generated_email_body
+          })
         },
         sample_recipients: sampleRecipients,
-        message: `1-Click Automated Circular Dispatch executed successfully across ${recipientCount.toLocaleString()} verified school email addresses.`
+        message: `Bulk Dispatch initiated successfully: From ${GMAIL_SENDER.email}, CC: ${GMAIL_SENDER.cc}, BCC: customers email id + 9 Nunes Sales/Marketing coordinators (${recipientCount.toLocaleString()} schools) via Gmail & WhatsApp Queue.`
       });
     }
 

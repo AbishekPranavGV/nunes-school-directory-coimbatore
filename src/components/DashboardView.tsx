@@ -153,14 +153,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <Sparkles className="w-4 h-4" />
                 </span>
                 <h3 className="text-base font-bold text-slate-900">
-                  South India Active School Census: <span className="text-indigo-700">73,217+ Schools</span>
+                  School Census: <span className="text-indigo-700">73,217+ Schools</span>
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                  Interstate Multi-Registry Active
+                  52 Districts
                 </span>
               </div>
               <p className="text-xs text-slate-600 mt-1">
-                Authoritative census spread across <strong>52 districts</strong> (38 Tamil Nadu + 14 Kerala), <strong>548 educational blocks</strong>, and verified state portals.
+                38 Tamil Nadu + 14 Kerala districts across 548 blocks.
               </p>
             </div>
 
@@ -177,7 +177,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 ) : (
                   <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
                 )}
-                <span>{isHarvesting ? 'Scraping Sources Live...' : '⚡ Run High-Speed Multi-Source Harvester'}</span>
+                <span>{isHarvesting ? 'Scraping Sources Live...' : '⚡ Scan Live Sources'}</span>
               </button>
             </div>
           </div>
@@ -218,18 +218,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Kerala Intelligence Highlight Card */}
-          <div className="p-3.5 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent rounded-xl border border-emerald-300 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+          <div className="p-3 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent rounded-xl border border-emerald-300 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2.5">
               <span className="p-2 bg-emerald-600 text-white rounded-lg">
                 <Globe2 className="w-4 h-4" />
               </span>
               <div>
                 <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                  <span>🌴 Kerala Sametham KITE School Registry Added</span>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.2 rounded-full font-bold">14 Districts Verified</span>
+                  <span>🌴 Kerala School Registry</span>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.2 rounded-full font-bold">14 Districts</span>
                 </h4>
                 <p className="text-slate-600 text-[11px] mt-0.5">
-                  16,428 official institutions loaded with 100% verified <code>@schools.kerala.gov.in</code> domain emails, authentic Kerala STD codes (0471, 0484, 0495...), and WhatsApp connectivity.
+                  16,428 schools loaded with verified emails, phones & WhatsApp contacts.
                 </p>
               </div>
             </div>
@@ -243,7 +243,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 }}
                 className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
               >
-                Explore 14 Kerala Districts
+                View Kerala (14) →
               </button>
             </div>
           </div>
@@ -251,7 +251,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Management & Curriculum & Registries Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 text-xs">
             <div className="p-3 bg-white/80 rounded-xl border border-slate-200/80">
-              <span className="font-bold text-slate-800 block mb-1">Statewide Distribution:</span>
+              <span className="font-bold text-slate-800 block mb-1">Statewide Count:</span>
               <ul className="space-y-1 text-slate-600 text-[11px]">
                 <li className="flex justify-between">
                   <span>• 🌿 Tamil Nadu (38 Districts):</span>
@@ -267,14 +267,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="p-3 bg-white/80 rounded-xl border border-slate-200/80">
               <span className="font-bold text-slate-800 block mb-1">Curriculum Boards:</span>
               <ul className="space-y-1 text-slate-600 text-[11px]">
-                <li>• <strong>Kerala State Board (KBPE) & TN State Board (TNDGE)</strong></li>
-                <li>• <strong>CBSE / CISCE (ICSE):</strong> Central & Private</li>
-                <li>• <strong>VHSE Kerala:</strong> Vocational Higher Secondary</li>
+                <li>• <strong>State Boards:</strong> TNDGE & KBPE</li>
+                <li>• <strong>CBSE / ICSE:</strong> Central & Private</li>
+                <li>• <strong>VHSE:</strong> Vocational Higher Secondary</li>
               </ul>
             </div>
 
             <div className="p-3 bg-white/80 rounded-xl border border-slate-200/80">
-              <span className="font-bold text-slate-800 block mb-1">Active Sources Scraped:</span>
+              <span className="font-bold text-slate-800 block mb-1">Active Registries:</span>
               <div className="flex flex-wrap gap-1 text-[10px]">
                 <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">Sametham KITE</span>
                 <span className="px-1.5 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200">Schools.org.in</span>
@@ -297,14 +297,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base font-bold text-slate-900">
-                    South India School Intelligence Command Grid
+                    South India School Directory
                   </h3>
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">
                     52 Districts Active
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Interstate coverage across all 38 Tamil Nadu districts and 14 Kerala districts with Coimbatore 2,097 baseline 100% preserved.
+                  All 38 Tamil Nadu & 14 Kerala districts.
                 </p>
               </div>
             </div>
@@ -320,7 +320,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                All South India (52)
+                🌐 All South India (52)
               </button>
               <button
                 type="button"
@@ -331,7 +331,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                🌿 Tamil Nadu (38)
+                🌾 Tamil Nadu Only (38)
               </button>
               <button
                 type="button"
@@ -342,7 +342,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                🌴 Kerala (14)
+                🌴 Kerala Only (14)
               </button>
             </div>
           </div>

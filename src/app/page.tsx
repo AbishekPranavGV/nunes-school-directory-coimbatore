@@ -22,13 +22,14 @@ import { LoginModal } from '@/components/LoginModal';
 import { MapViewModal } from '@/components/MapViewModal';
 import { WorkerModal } from '@/components/WorkerModal';
 import { SchoolRecord, KPIMetrics, UserSession, WorkspaceView } from '@/types';
-import { LayoutGrid, AlertTriangle, Sparkles, X, PhoneCall } from 'lucide-react';
+import { LayoutGrid, AlertTriangle, Sparkles, X, PhoneCall, Send, Building2, Truck, Mail, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
 import { getDistrictById } from '@/lib/data/tamilNaduDistricts';
 import { getKeralaDistrictById } from '@/lib/data/keralaDistricts';
 
 export default function DashboardPage() {
-  // Navigation view state (9 Primary Workspaces)
-  const [currentView, setCurrentView] = useState<WorkspaceView>('dashboard');
+  // Navigation view state (Circular & Outreach Template as Default)
+  const [currentView, setCurrentView] = useState<WorkspaceView>('circulars');
 
   // Data states
   const [schools, setSchools] = useState<SchoolRecord[]>([]);
@@ -396,6 +397,74 @@ export default function DashboardPage() {
             </button>
           </div>
         )}
+
+        {/* Quick Shortcuts */}
+        <div className="mb-5 p-2 bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 rounded-2xl border border-sky-400/30 shadow-md flex flex-wrap items-center justify-between gap-2 text-white">
+          <div className="flex items-center gap-2 pl-2">
+            <span className="p-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-400/30">
+              <Sparkles className="w-4 h-4 animate-pulse text-amber-300" />
+            </span>
+            <div>
+              <span className="text-xs font-bold text-white block">
+                Quick Shortcuts
+              </span>
+              <span className="text-[10px] text-sky-200">
+                Direct access to main workspaces
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setCurrentView('circulars')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                currentView === 'circulars'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/30 scale-[1.02]'
+                  : 'bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white'
+              }`}
+            >
+              <Send className="w-3.5 h-3.5 text-emerald-300" />
+              <span>⚡ Circulars</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-emerald-400/30 text-white font-mono">14 Models</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setCurrentView('directory')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                currentView === 'directory'
+                  ? 'bg-sky-600 text-white shadow-md shadow-sky-600/30 scale-[1.02]'
+                  : 'bg-white/10 hover:bg-white/20 text-sky-200 hover:text-white'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5 text-sky-300" />
+              <span>🏫 Directory</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-sky-400/30 text-white font-mono">2,097</span>
+            </button>
+
+            <Link
+              href="/transport"
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 hover:text-white border border-amber-400/40 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Truck className="w-3.5 h-3.5 text-amber-400" />
+              <span>🚚 Fleets ↗</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setCurrentView('communications')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                currentView === 'communications'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 scale-[1.02]'
+                  : 'bg-white/10 hover:bg-white/20 text-indigo-200 hover:text-white'
+              }`}
+            >
+              <Mail className="w-3.5 h-3.5 text-indigo-300" />
+              <span>📬 Inbox</span>
+            </button>
+          </div>
+        </div>
 
         {/* Conditional Workspace View (Primary Workspaces) */}
         {currentView === 'dashboard' ? (

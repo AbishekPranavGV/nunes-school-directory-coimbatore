@@ -9,3 +9,4 @@ data/tnea_school_blocks.pdf
 .vercel
 .env*
 *.backup*
+.app_password_status.json

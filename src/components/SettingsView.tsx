@@ -12,7 +12,9 @@ import {
   UserCheck, 
   Cpu, 
   HardDrive,
-  RefreshCw
+  RefreshCw,
+  Mail,
+  ExternalLink
 } from 'lucide-react';
 import { UserSession } from '@/types';
 
@@ -121,6 +123,91 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
         <div className="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900">
           <strong>Security Policy:</strong> These switches are enforced directly in <code className="font-mono font-bold">src/app/api/communications/route.ts</code>. Any API attempt to dispatch live outbound messages returns HTTP 403 Forbidden. Only test transmissions to allowlisted internal email addresses (<code className="font-mono">compliance-audit@nunesinstruments.com</code>) are permitted during verification.
+        </div>
+      </div>
+
+      {/* Gmail Outreach Authorization Gateway (nunesalcotest@gmail.com) */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+        <div className="pb-4 mb-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 rounded-lg bg-rose-50 text-rose-700">
+              <Mail className="w-4 h-4" />
+            </span>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Authorized Gmail Sender Configuration</h3>
+              <p className="text-xs text-slate-500">Official circular outreach configuration with From, CC, and BCC recipient privacy routing</p>
+            </div>
+          </div>
+
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+            Routing Configured
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Authorized From Address</span>
+            <span className="font-mono text-xs font-bold text-emerald-800 block mt-1">nunesalcotest@gmail.com</span>
+            <span className="text-[11px] text-slate-600 block mt-0.5">Nunes Instruments Alcotest Division</span>
+          </div>
+
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Head Office CC</span>
+            <span className="font-mono text-xs font-bold text-indigo-800 block mt-1">nunescbe@gmail.com</span>
+            <span className="text-[11px] text-slate-600 block mt-0.5">Coimbatore Central Records</span>
+          </div>
+
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Recipient Privacy BCC (Shield + 9 Team)</span>
+            <span className="font-mono text-xs font-bold text-amber-800 block mt-1">customers email id</span>
+            <span className="text-[11px] text-slate-600 block mt-0.5">+ 9 Internal Coordinators (Gayathiri, Janani, Kaviya, Mercy, Radha, Sabitha, Shane, Sukanya, Yazhini)</span>
+          </div>
+        </div>
+
+        {/* 9 Coordinators Badges */}
+        <div className="mt-3 p-3 bg-slate-50/70 rounded-xl border border-slate-200 text-xs">
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1.5">
+            Internal Nunes Outreach &amp; Marketing BCC Team (9 Members):
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { name: 'Gayathiri', role: 'Sales Coordinator', email: 'global@nunesinstruments.com' },
+              { name: 'Janani', role: 'Marketing Person', email: 'nunesexpo@gmail.com' },
+              { name: 'Kaviya', role: 'Marketing User', email: 'overseas@nunesinstruments.com' },
+              { name: 'Mercy', role: 'Sales User', email: 'export@nunesinstruments.com' },
+              { name: 'Radha', role: 'Sales Coordinator', email: 'chennai@nunesinstruments.com' },
+              { name: 'Sabitha', role: 'Marketing User', email: 'instruchennai@gmail.com' },
+              { name: 'Shane', role: 'Sales Coordinator', email: 'admin@nunesinstruments.com' },
+              { name: 'Sukanya', role: 'Sales Coordinator', email: 'kochi@nunesinstruments.com' },
+              { name: 'Yazhini', role: 'Sales User', email: 'expo@nunesinstruments.com' }
+            ].map(m => (
+              <span key={m.email} className="px-2 py-0.5 rounded-md bg-white border border-slate-200 font-mono text-[10px] text-slate-700 shadow-2xs">
+                <strong>{m.name}</strong> ({m.role}): <span className="text-sky-700">{m.email}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 p-4 bg-gradient-to-r from-slate-50 to-rose-50/40 rounded-xl border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+          <div className="space-y-1">
+            <strong className="text-slate-900 font-bold flex items-center gap-1.5">
+              <Key className="w-3.5 h-3.5 text-amber-600" />
+              <span>How to Take Access for Sending from nunesalcotest@gmail.com</span>
+            </strong>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              Enable 2-Step Verification at <code>myaccount.google.com</code> &rarr; Generate 16-character App Password under <code>myaccount.google.com/apppasswords</code> &rarr; Enter in Circular Center [🔑 Gmail Access] modal or set <code>GMAIL_APP_PASSWORD</code> in environment.
+            </p>
+          </div>
+
+          <a
+            href="https://mail.google.com/mail/?view=cm&fs=1&authuser=nunesalcotest@gmail.com&cc=nunescbe@gmail.com&bcc=global@nunesinstruments.com,nunesexpo@gmail.com,overseas@nunesinstruments.com,export@nunesinstruments.com,chennai@nunesinstruments.com,instruchennai@gmail.com,admin@nunesinstruments.com,kochi@nunesinstruments.com,expo@nunesinstruments.com"
+            target="_blank"
+            rel="noreferrer"
+            className="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 shrink-0"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Open in Gmail Web (9 BCCs)</span>
+          </a>
         </div>
       </div>
 

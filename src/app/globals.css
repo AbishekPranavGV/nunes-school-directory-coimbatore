@@ -120,4 +120,82 @@ table {
   animation: shimmerWave 2.5s infinite;
 }
 
+@keyframes cardGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.25), 0 0 1px rgba(14, 165, 233, 0.4);
+    border-color: rgba(56, 189, 248, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(99, 102, 241, 0.45), 0 0 2px rgba(99, 102, 241, 0.6);
+    border-color: rgba(129, 140, 248, 0.8);
+  }
+}
+
+.animate-card-glow {
+  animation: cardGlow 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+}
+
+@keyframes floatSubtle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-float-subtle {
+  animation: floatSubtle 3.5s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.animate-badge-pulse {
+  animation: badgePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-radar,
+  .animate-float,
+  .animate-laser-scan,
+  .animate-pulse-glow,
+  .animate-shimmer,
+  .animate-card-glow,
+  .animate-gradient-shift,
+  .animate-float-subtle,
+  .animate-badge-pulse {
+    animation: none !important;
+  }
+  * {
+    transition-duration: 0.05s !important;
+  }
+}
+
 

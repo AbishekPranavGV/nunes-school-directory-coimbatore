@@ -185,9 +185,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               }}
               className="w-full text-xs py-2 px-2.5 bg-indigo-50/70 border border-indigo-200 rounded-lg text-indigo-950 font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white"
             >
-              <option value="all">All South India (52)</option>
-              <option value="tamil-nadu">🌿 Tamil Nadu (38)</option>
-              <option value="kerala">🌴 Kerala (14)</option>
+              <option value="tamil-nadu">🌿 Tamil Nadu Only (38)</option>
+              <option value="kerala">🌴 Kerala Only (14)</option>
+              <option value="all">🌐 All South India (52)</option>
             </select>
           </div>
         )}
@@ -206,10 +206,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             >
               <option value="all">
                 {selectedState === 'kerala'
-                  ? 'All Kerala (14 Districts)'
+                  ? '🌴 Kerala Only (All 14 Districts)'
                   : selectedState === 'tamil-nadu'
-                  ? 'All Tamil Nadu (38 Districts)'
-                  : 'All South India (52 Districts)'}
+                  ? '🌿 Tamil Nadu Only (All 38 Districts)'
+                  : '🌐 All South India (52 Districts)'}
               </option>
 
               {(selectedState === 'all' || selectedState === 'kerala') && (

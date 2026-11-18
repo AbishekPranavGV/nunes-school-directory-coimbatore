@@ -139,89 +139,192 @@ export async function POST(req: NextRequest) {
 
     if (textLower.includes('breath') || textLower.includes('alcohol') || textLower.includes('analyser') || textLower.includes('bus') || textLower.includes('driver') || textLower.includes('transport') || textLower.includes('fleet')) {
       isBreathAnalyser = true;
-      title = 'Mandatory School Bus Driver Alcohol Screening & Campus Fleet Safety Compliance (Supreme Court & Transport Directorate Mandates)';
-      refNumber = `NUNES/SAFE-CAMPUS/2026/CIRC-${randNum}`;
-      subject = 'Deployment of Certified Breath Alcohol Analysers with Evidential Camera, GPS & Thermal Printing for School Transportation Safety (Academic Year 2026-27)';
+      title = 'Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models)';
+      refNumber = `NUNES/EDU/SAFETY/2026/CIRC-${randNum}`;
+      subject = 'Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation';
       targetGroup = 'All South India Schools (21,120 Institutions)';
 
-      bodyText = `To The Correspondents, Principals, and Transport Management Officers,
-All Educational Institutions (State Board, Matriculation, CBSE & ICSE),
-Tamil Nadu & Kerala.
+      bodyText = `NUNES INSTRUMENTATION
+PRECISION INSTRUMENTS • SAFETY & SCREENING SOLUTIONS
 
-Subject: Mandatory Pre-Trip Breath Alcohol Screening Protocol for School Bus Drivers & Student Transport Fleet Safety (AY 2026-27).
+INSTITUTIONAL CAMPUS SAFETY
+Alcohol Breath Analyser Solutions for Educational Institutions
+A focused 14-model range for gate screening, hostel monitoring and campus security applications.
+14 AVAILABLE MODELS
 
-Pursuant to Supreme Court of India directives on School Bus Safety (W.P. Civil No. 13029/1985), Tamil Nadu Motor Vehicles (School Buses) Rules 2012, and Kerala MVD Safe Campus circulars, all educational institutions operating student buses and vans are mandated to execute 100% pre-trip breath alcohol testing for every driver prior to student transit.
-
-To fulfill statutory audit compliance, Nunes Instruments provides an accredited lineup of 14 professional breath alcohol analysers—ranging from rapid non-contact screening batons (<5s check) to advanced models with built-in thermal printers (Model A50), tamper-proof facial recognition cameras (Model AT-9000), and GPS coordinate logging (Model AT-8900).
-
-Institutions are entitled to special educational rate subsidies (up to 35% discount) and complimentary on-campus driver safety demonstrations.
-
-${getVerbatimLocationsEmail()}`;
-
-      emailSubject = `Official Circular & Lead Quotation: Mandatory School Bus Driver Breath Alcohol Screening Compliance (AY 2026-27) - Nunes Instruments`;
-      
-      emailBody = `Respected Principal / Correspondent / Transport Coordinator,
+Dear Principal / Administration / Procurement Team,
 {{School_Name}} (UDISE: {{UDISE_Code}}),
 {{Block}}, {{Taluk}}.
 
-Greetings from Nunes Instruments, Coimbatore.
+Greetings from Nunes Instrumentation, Coimbatore. We are pleased to present our range of alcohol breath analysers for educational institutions. The range is intended for screening requirements at campus entrances, hostels and designated security checkpoints.
 
-Under Supreme Court transport guidelines and State Motor Vehicles Rules, all schools across Tamil Nadu and Kerala are required to conduct compulsory pre-trip breath alcohol screening for school bus and van drivers to ensure 100% student safety.
+PRODUCT CATEGORIES:
 
-Nunes Instruments presents our certified 14-Model Breath Alcohol Analyser series engineered specifically for institutional campuses and transport fleet compliance:
+01 / RAPID SCREENING
+Non-contact Screening Batons
+Suitable for gate, hostel and checkpoint screening
 
-★ KEY INSTITUTIONAL HIGHLIGHTS:
-1. Model AT-9000 (Supreme Court Gold Standard): Built-in Camera for facial photo proof of the driver during testing + Built-in Thermal Slip Printer for date/time/BAC evidential receipts.
-2. Model A50 Rugged Handheld: Fuel-cell electrochemical sensor with integrated thermal printer and 20,000 audit records.
-3. Model AT-8900: Detachable thermal printer + GPS coordinate tagging on every test record.
-4. Rapid Screening Batons (Non-Contact): 3-5 cm distance screening in under 5 seconds—test 40 drivers in 5 minutes at the morning gate without mouthpieces!
+02 / HANDHELD TESTING
+Digital Breath Analysers
+Portable units with clear digital / LCD readouts
 
-★ INSTITUTIONAL LEAD CONVERSION & COMPLIANCE OFFER:
-• Complimentary On-Campus Demonstration & Safety Audit for your fleet.
-• Up to 35% Educational Subsidy on institutional bulk orders.
-• NABL-traceable annual calibration certificate included with every device.
-• 1-Year Comprehensive Replacement Warranty & On-Site Service.
+03 / ADVANCED RECORDING
+Printer-enabled Models
+Selected units support printed test records
 
-Online Catalogue & Technical Specifications:
-${NUNES_CATALOGUE_NETLIFY_URL}
+ATTACHED PRODUCT CATALOGUE:
+14-model Breath Analyser Catalogue
+Please refer to the attached catalogue for model-wise specifications, product details and QR codes. Contact our team for model guidance and a commercial quotation.
 
-To book a free on-campus demonstration or request an official rate quotation:
-WhatsApp Hotline: +91 89409 44000 (Click: https://wa.me/918940944000?text=Interested%20in%20School%20Bus%20Breath%20Analyser%20Quote)
-Direct Call: +91 89409 33000 | Landline: +91 0422 2499444
-Email: info@nunesinstruments.com
+Official Catalogue & Directive Document (Google Drive):
+https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing
 
-${getVerbatimLocationsEmail()}
+Online Product Catalogue & Specifications:
+https://darling-torrone-c0aaf9.netlify.app/
 
-Warm regards,
-Educational Transport Safety Division
-Nunes Instruments, Coimbatore
-Web: https://nunesinstruments.com | ${NUNES_CATALOGUE_NETLIFY_URL}`;
+ENQUIRY & QUOTATION:
+For product selection, technical details or quotation, please contact us through your preferred channel:
+• WhatsApp Enquiry: +91 89409 44000 (https://wa.me/918940944000)
+• Email Enquiry: nunesalcotest@gmail.com | CC: nunescbe@gmail.com
 
-      whatsappBody = `🚨 *URGENT MANDATE: SCHOOL BUS DRIVER ALCOHOL SCREENING (AY 2026-27)*
-*From: Nunes Instruments, Coimbatore*
+Direct Contact Numbers:
+📞 93452 26022  |  📞 89409 44000  |  📞 89409 33000
 
-Dear Correspondent / Principal, *{{School_Name}}*,
+COIMBATORE OFFICE LOCATIONS (3 OFFICES):
+Select an office below to open directions in Google Maps:
 
-As per Supreme Court & State Transport Department guidelines, daily pre-trip alcohol screening for all school bus drivers is strictly mandatory.
+01. Rathinapuri:
+11-A, 2nd Cross, Sundarar Street, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, Tamil Nadu 641027.
+Directions: https://maps.google.com/?q=11.0366,76.9661
 
-🛡️ *NUNES ACCREDITED BREATH ANALYSERS (14 MODELS):*
-📸 *Model AT-9000*: Built-in Camera for driver photo proof + Built-in Thermal Slip Printer.
-🖨️ *Model A50*: Fuel-cell sensor + Instant thermal printed receipts (20,000 test logs).
-📍 *Model AT-8900*: GPS coordinate tagging + Detachable thermal printer.
-⚡ *Rapid Screening Baton*: Non-contact test in <5 seconds. Screen 40 drivers in 5 mins!
+02. Gopalapuram:
+6, GJ Chandran Complex, Head Quarters Road, Opp. CSI Church, Gopalapuram, Coimbatore, Tamil Nadu 641018.
+Directions: https://maps.google.com/?q=11.0028,76.9680
 
-🎁 *INSTITUTIONAL SPECIAL OFFER:*
-✅ Up to 35% Educational Subsidy Discount.
-✅ Free On-Campus Driver Fleet Safety Audit & Live Demo.
-✅ 1-Year Comprehensive Replacement Warranty + Calibration Certificate.
+03. Gandhipuram:
+218-628, 1st Street, Cross Cut, Gandhipuram, Coimbatore, Tamil Nadu 641012.
+Directions: https://maps.google.com/?q=11.0182,76.9658
 
-📲 *View Full 14-Model Catalogue:*
-${NUNES_CATALOGUE_NETLIFY_URL}
+Regards,
+Nunes Instrumentation Team
+Coimbatore, Tamil Nadu
 
-${getVerbatimLocationsWhatsApp()}
+Follow Us: YouTube | Instagram | Google
+NUNES INSTRUMENTATION • COIMBATORE, TAMIL NADU
+© 2026 Nunes Instrumentation. Reply "Unsubscribe" to opt out.`;
 
-💬 *To Book Free On-Campus Demo or Request Official Quote:*
-Reply directly to this message or WhatsApp: https://wa.me/918940944000?text=Interested%20in%20School%20Bus%20Breath%20Analyser%20Quote`;
+      emailSubject = `Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation`;
+      
+      emailBody = `Dear Principal / Administration / Procurement Team,
+{{School_Name}} (UDISE: {{UDISE_Code}}),
+{{Block}}, {{Taluk}}.
+
+Greetings from Nunes Instrumentation, Coimbatore. We are pleased to present our range of alcohol breath analysers for educational institutions. The range is intended for screening requirements at campus entrances, hostels and designated security checkpoints.
+
+PRODUCT CATEGORIES:
+
+01 / RAPID SCREENING
+Non-contact Screening Batons
+Suitable for gate, hostel and checkpoint screening
+
+02 / HANDHELD TESTING
+Digital Breath Analysers
+Portable units with clear digital / LCD readouts
+
+03 / ADVANCED RECORDING
+Printer-enabled Models
+Selected units support printed test records
+
+ATTACHED PRODUCT CATALOGUE:
+14-model Breath Analyser Catalogue
+Please refer to the attached catalogue for model-wise specifications, product details and QR codes. Contact our team for model guidance and a commercial quotation.
+
+Official Catalogue & Directive Document (Google Drive):
+https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing
+
+Online Product Catalogue & Specifications:
+https://darling-torrone-c0aaf9.netlify.app/
+
+ENQUIRY & QUOTATION:
+For product selection, technical details or quotation, please contact us through your preferred channel:
+• WhatsApp Enquiry: +91 89409 44000 (https://wa.me/918940944000)
+• Email Enquiry: nunesalcotest@gmail.com | CC: nunescbe@gmail.com
+
+Direct Contact Numbers:
+📞 93452 26022  |  📞 89409 44000  |  📞 89409 33000
+
+COIMBATORE OFFICE LOCATIONS (3 OFFICES):
+Select an office below to open directions in Google Maps:
+
+01. Rathinapuri:
+11-A, 2nd Cross, Sundarar Street, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, Tamil Nadu 641027.
+Directions: https://maps.google.com/?q=11.0366,76.9661
+
+02. Gopalapuram:
+6, GJ Chandran Complex, Head Quarters Road, Opp. CSI Church, Gopalapuram, Coimbatore, Tamil Nadu 641018.
+Directions: https://maps.google.com/?q=11.0028,76.9680
+
+03. Gandhipuram:
+218-628, 1st Street, Cross Cut, Gandhipuram, Coimbatore, Tamil Nadu 641012.
+Directions: https://maps.google.com/?q=11.0182,76.9658
+
+Regards,
+Nunes Instrumentation Team
+Coimbatore, Tamil Nadu
+
+Follow Us: YouTube | Instagram | Google
+NUNES INSTRUMENTATION • COIMBATORE, TAMIL NADU
+© 2026 Nunes Instrumentation. Reply "Unsubscribe" to opt out.`;
+
+      whatsappBody = `🛡️ *NUNES INSTRUMENTATION — INSTITUTIONAL CAMPUS SAFETY*
+*Alcohol Breath Analyser Solutions for Educational Institutions*
+_(A focused 14-model range for gate screening, hostel monitoring and campus security applications - 14 Available Models)_
+
+*Dear Principal / Administration / Procurement Team*,
+*{{School_Name}}* (UDISE: {{UDISE_Code}}),
+{{Block}}, {{Taluk}}.
+
+Greetings from *Nunes Instrumentation, Coimbatore*. We are pleased to present our range of alcohol breath analysers for educational institutions. The range is intended for screening requirements at campus entrances, hostels and designated security checkpoints.
+
+📊 *PRODUCT CATEGORIES:*
+
+1️⃣ *01 / RAPID SCREENING*
+• *Non-contact Screening Batons*
+• Suitable for gate, hostel and checkpoint screening
+
+2️⃣ *02 / HANDHELD TESTING*
+• *Digital Breath Analysers*
+• Portable units with clear digital / LCD readouts
+
+3️⃣ *03 / ADVANCED RECORDING*
+• *Printer-enabled Models*
+• Selected units support printed test records
+
+📄 *ATTACHED PRODUCT CATALOGUE:*
+*14-model Breath Analyser Catalogue*
+Please refer to the official catalogue for model-wise specifications, product details and QR codes:
+🔗 *Official Catalogue Link (Google Drive):*
+https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing
+
+🌐 *Online Specifications:* https://darling-torrone-c0aaf9.netlify.app/
+
+💬 *ENQUIRY & QUOTATION:*
+For product selection, technical details, commercial quotation or on-campus demo:
+📲 *Direct Contact Numbers:*
+• *93452 26022*
+• *89409 44000*
+• *89409 33000*
+✉️ *Email:* nunesalcotest@gmail.com | CC: nunescbe@gmail.com
+
+📍 *COIMBATORE OFFICE LOCATIONS (3 OFFICES):*
+01. *Rathinapuri:* 11-A, 2nd Cross, Sundarar Street, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore 641027
+02. *Gopalapuram:* 6, GJ Chandran Complex, Head Quarters Road, Opp. CSI Church, Gopalapuram, Coimbatore 641018
+03. *Gandhipuram:* 218-628, 1st Street, Cross Cut, Gandhipuram, Coimbatore 641012
+
+Regards,
+*Nunes Instrumentation Team*
+Coimbatore, Tamil Nadu
+_YouTube • Instagram • Google_`;
 
     } else if (textLower.includes('lab') || textLower.includes('science') || textLower.includes('physics') || textLower.includes('chemistry') || textLower.includes('stem')) {
       title = 'Annual Science Laboratory Precision Apparatus & Sensor Audit (AY 2026-27)';
@@ -250,7 +353,10 @@ Greetings from Nunes Instruments Educational Liaison Division.
 
 We are pleased to provide the official circular regarding the Annual Science Laboratory Apparatus & Precision Metrology Audit for Higher Secondary schools across South India.
 
-Please find attached the official circular (Ref: ${refNumber}) and the laboratory verification checklist.
+📄 Official Directive Circular Link (Google Drive):
+https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing
+
+Kindly access the official directive document on Google Drive above and review the laboratory verification checklist.
 
 ★ INSTITUTIONAL SERVICES AVAILABLE:
 • Standard zero-error calibration for electronic balances and spectrometers.
@@ -276,6 +382,9 @@ As per Department of School Education directives, annual precision verification 
 • Board practical examination apparatus readiness.
 • NABL-traceable calibration certificates.
 • Complimentary on-campus equipment health check.
+
+📲 *Official Directive Circular Document (Google Drive):*
+https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing
 
 ${getVerbatimLocationsWhatsApp()}
 
@@ -339,7 +448,7 @@ ${getVerbatimLocationsWhatsApp()}
       subject,
       body_text: bodyText,
       extracted_text: extractedText.slice(0, 1000) || `${title}. Reference: ${refNumber}. Automatically scanned and extracted from ${fileName}.`,
-      attachment_name: fileName,
+      attachment_name: 'https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing',
       attachment_type: 'application/pdf',
       attachment_size_kb: fileSizeKb,
       generated_email_subject: emailSubject,

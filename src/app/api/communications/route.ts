@@ -9,14 +9,14 @@ let communicationsStore: OutboundCommunication[] = [
   {
     id: 'comm_001',
     circular_id: 'circ_2026_001',
-    circular_title: 'TNEA 2026 District Science Lab & Instrumentation Equipment Audit',
+    circular_title: 'Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models)',
     school_id: 'sch_stanes_01',
     school_name: 'Stanes Anglo-Indian Higher Secondary School',
     recipient_email: 'principal@stanescbe.org',
-    sender_email: 'educational.liaison@nunesinstruments.com',
+    sender_email: 'nunesalcotest@gmail.com',
     status: 'REPLIED',
-    subject: 'Official Circular: Laboratory Instrumentation Audit (Academic Year 2026-27)',
-    message_id: 'msg_tnea_2026_98124',
+    subject: 'Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation',
+    message_id: 'msg_alcotest_2026_98124',
     thread_id: 'th_stanes_01',
     sent_at: '2026-03-16T10:00:00.000Z',
     delivered_at: '2026-03-16T10:01:15.000Z',
@@ -27,14 +27,14 @@ let communicationsStore: OutboundCommunication[] = [
   {
     id: 'comm_002',
     circular_id: 'circ_2026_001',
-    circular_title: 'TNEA 2026 District Science Lab & Instrumentation Equipment Audit',
+    circular_title: 'Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models)',
     school_id: 'sch_psg_01',
     school_name: 'PSG Sarvajana Higher Secondary School',
     recipient_email: 'office@psgsarvajana.edu.in',
-    sender_email: 'educational.liaison@nunesinstruments.com',
+    sender_email: 'nunesalcotest@gmail.com',
     status: 'REPLIED',
-    subject: 'Official Circular: Laboratory Instrumentation Audit (Academic Year 2026-27)',
-    message_id: 'msg_tnea_2026_98125',
+    subject: 'Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation',
+    message_id: 'msg_alcotest_2026_98125',
     thread_id: 'th_psg_01',
     sent_at: '2026-03-16T10:05:00.000Z',
     delivered_at: '2026-03-16T10:06:20.000Z',
@@ -45,14 +45,14 @@ let communicationsStore: OutboundCommunication[] = [
   {
     id: 'comm_003',
     circular_id: 'circ_2026_001',
-    circular_title: 'TNEA 2026 District Science Lab & Instrumentation Equipment Audit',
+    circular_title: 'Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models)',
     school_id: 'sch_mani_01',
     school_name: 'Mani Higher Secondary School',
     recipient_email: 'mani.school.cbe@tn.gov.in',
-    sender_email: 'educational.liaison@nunesinstruments.com',
+    sender_email: 'nunesalcotest@gmail.com',
     status: 'DELIVERED',
-    subject: 'Official Circular: Laboratory Instrumentation Audit (Academic Year 2026-27)',
-    message_id: 'msg_tnea_2026_98126',
+    subject: 'Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation',
+    message_id: 'msg_alcotest_2026_98126',
     thread_id: 'th_mani_01',
     sent_at: '2026-03-16T10:10:00.000Z',
     delivered_at: '2026-03-16T10:11:45.000Z',
@@ -84,12 +84,12 @@ let repliesStore: InboundReply[] = [
     school_name: 'Stanes Anglo-Indian Higher Secondary School',
     sender_email: 'principal@stanescbe.org',
     sender_name: 'Dr. G. Selvaraj (Principal)',
-    subject: 'Re: Official Circular: Laboratory Instrumentation Audit (Academic Year 2026-27)',
+    subject: 'Re: Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation',
     body_text: `Dear Nunes Instruments Educational Team,
 
-We acknowledge receipt of Circular Ref: NUNES/CBE/EDU/2026/048 regarding the Higher Secondary Physics & Chemistry laboratory equipment audit.
+We acknowledge receipt of Circular Ref: NUNES/EDU/SAFETY/2026/CIRC-014 regarding the Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models).
 
-Our science department has received the inventory sheet and is currently verifying our digital Vernier calipers, spectrometers, and optical benches. We will submit the verified list before the deadline.
+Our campus safety and transport administration team has accessed the Google Drive product catalogue. We are currently evaluating Model AT-9000 and the non-contact rapid screening batons for morning student bus entry and hostel security checkpoints. We will coordinate with your Coimbatore team for a live demonstration.
 
 Thank you.
 Dr. G. Selvaraj
@@ -98,7 +98,7 @@ Principal, Stanes AI HSS, Coimbatore`,
     classification: 'Acknowledged',
     assigned_staff: 'admin',
     status: 'REVIEWED',
-    internal_notes: 'Acknowledged and preparing science department inventory by deadline.'
+    internal_notes: 'Acknowledged and evaluating Model AT-9000 & rapid screening batons for campus gate and hostel screening.'
   },
   {
     id: 'reply_002',
@@ -107,21 +107,21 @@ Principal, Stanes AI HSS, Coimbatore`,
     school_name: 'PSG Sarvajana Higher Secondary School',
     sender_email: 'office@psgsarvajana.edu.in',
     sender_name: 'V. Ramaswamy (Lab Coordinator)',
-    subject: 'Re: Official Circular: Laboratory Instrumentation Audit (Academic Year 2026-27)',
+    subject: 'Re: Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation',
     body_text: `Sir / Madam,
 
-With reference to the lab instrumentation circular, could you please clarify if the calibration certificates for the analytical balances and compound microscopes should be appended with the inventory submission?
+With reference to the Alcohol Breath Analyser circular for educational institutions, could you please provide a commercial rate contract quotation for 5 units of the Rapid Screening Baton and 2 units of the Printer-enabled Breath Analysers for our campus fleet and security gate?
 
-Also, please share the contact of your Peelamedu technical representative.
+Also, please share whether on-campus operator demonstration is available at our Peelamedu campus this week.
 
 Regards,
 V. Ramaswamy
-Lab In-Charge, PSG Sarvajana HSS, Coimbatore`,
+Campus Security & Transport In-Charge, PSG Sarvajana HSS, Coimbatore`,
     received_at: '2026-03-17T09:15:00.000Z',
     classification: 'Information Requested',
     assigned_staff: 'admin',
     status: 'UNREAD',
-    internal_notes: 'Wants calibration certificate instructions and local Peelamedu liaison contact.'
+    internal_notes: 'Requested commercial quotation for 5 rapid batons and 2 printer-enabled analysers + on-campus demo.'
   }
 ];
 
@@ -195,9 +195,9 @@ export async function POST(req: NextRequest) {
         school_id: 'sch_test_internal',
         school_name: 'Simulated Coimbatore Test Academy',
         recipient_email: test_email,
-        sender_email: 'educational.liaison@nunesinstruments.com',
+        sender_email: 'nunesalcotest@gmail.com',
         status: 'DELIVERED',
-        subject: `[SIMULATED TEST] ${body.subject || 'Official Circular Notification'}`,
+        subject: `[SIMULATED TEST from nunesalcotest@gmail.com | CC: nunescbe@gmail.com] ${body.subject || 'Official Circular Notification'}`,
         message_id: `msg_sim_${Date.now()}`,
         sent_at: new Date().toISOString(),
         delivered_at: new Date(Date.now() + 2000).toISOString(),

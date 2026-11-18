@@ -1312,7 +1312,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
                 regionTab === 'kerala' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              🌴 Kerala (14 Districts)
+              🌴 Kerala Only (14)
             </button>
             <button
               onClick={() => {
@@ -1326,7 +1326,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
                 regionTab === 'tamil_nadu' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              🌿 Tamil Nadu (38 Districts)
+              🌾 Tamil Nadu Only (38)
             </button>
             <button
               onClick={() => {
@@ -1340,7 +1340,7 @@ export const MapViewModal: React.FC<MapViewModalProps> = ({
                 regionTab === 'coimbatore_blocks' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Coimbatore Blocks (15)
+              Coimbatore (15)
             </button>
           </div>
 

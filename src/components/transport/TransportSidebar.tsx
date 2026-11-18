@@ -17,8 +17,7 @@ import {
   Sparkles,
   MapPin,
   Building2,
-  PhoneCall,
-  BookOpen
+  PhoneCall
 } from 'lucide-react';
 import { TransportWorkspaceView } from '@/types/transport';
 
@@ -79,14 +78,6 @@ export const TransportSidebar: React.FC<TransportSidebarProps> = ({
       badge: '1-Click',
       badgeColor: 'bg-emerald-100 text-emerald-800 font-bold',
       description: 'Automated Email Dispatch'
-    },
-    {
-      id: 'dtp' as TransportWorkspaceView,
-      label: 'DTP & Catalogs',
-      icon: BookOpen,
-      badge: 'Pre-Press',
-      badgeColor: 'bg-indigo-100 text-indigo-800 font-bold',
-      description: 'Email & Catalog Publishing'
     },
     {
       id: 'reports' as TransportWorkspaceView,
