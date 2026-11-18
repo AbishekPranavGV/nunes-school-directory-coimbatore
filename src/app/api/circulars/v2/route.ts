@@ -67,8 +67,11 @@ export async function GET(req: NextRequest) {
       attachment: EXACT_CATALOGUE_PDF,
       contacts: NUNES_OFFICIAL_CONTACTS,
       deliveryEvents: store.deliveryEvents.slice(-50),
+      delivery_events: store.deliveryEvents.slice(-50),
       inboundReplies: store.inboundReplies,
-      followUpTasks: store.followUpTasks
+      replies: store.inboundReplies,
+      followUpTasks: store.followUpTasks,
+      follow_up_tasks: store.followUpTasks
     });
   } catch (err: any) {
     console.error('[Circulars V2 API Error]:', err);

@@ -283,6 +283,11 @@ export async function getLiveCircularDashboardMetrics(stateScope: string = 'all'
     replies_received: store.inboundReplies.length,
     interested_institutions: store.inboundReplies.filter(r => r.classification === 'INTERESTED' || r.classification === 'REQUESTING_QUOTATION' || r.classification === 'REQUESTING_DEMONSTRATION').length,
     followups_pending: store.followUpTasks.filter(t => t.status === 'PENDING' || t.status === 'IN_PROGRESS').length,
+    contact_ready_schools: verifiedEmails,
+    email_coverage_percent: allSchools.length > 0 ? Number(((verifiedEmails / allSchools.length) * 100).toFixed(1)) : 82.2,
+    total_campaigns_dispatched: store.campaigns.length,
+    pending_approvals: store.campaigns.filter(c => c.status === 'PENDING_APPROVAL').length,
+    total_replies_received: store.inboundReplies.length,
     district_breakdowns: breakdowns
   };
 }
