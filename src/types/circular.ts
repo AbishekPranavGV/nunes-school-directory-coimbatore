@@ -45,6 +45,7 @@ export interface CircularV2Attachment {
   description: string;
   isVerified: boolean;
   uploadedAt: string;
+  fileBase64?: string;
 }
 
 export interface RecipientHierarchyFilters {

@@ -27,6 +27,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: true, metrics });
     }
 
+    if (action === 'download_pdf') {
+      const id = searchParams.get('id');
+      const custom = (store.customAttachments || []).find(a => a.id === id);
+      if (custom && custom.fileBase64) {
+        const buf = Buffer.from(custom.fileBase64, 'base64');
+        return new NextResponse(buf, {
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `inline; filename="${custom.filename}"`,
+            'Content-Length': String(buf.length)
+          }
+        });
+      }
+      return NextResponse.json({ error: 'PDF not found' }, { status: 404 });
+    }
+
     if (action === 'recipients') {
       const filters = {
         state: (stateScope as any) || 'all',
@@ -320,17 +336,14 @@ export async function POST(req: NextRequest) {
       const base64Data = (fileBase64 as string).replace(/^data:application\/pdf;base64,/, '').replace(/^data:.*;base64,/, '');
       const fileBuffer = Buffer.from(base64Data, 'base64');
 
-      const publicUploadsDir = path.join(process.cwd(), 'public', 'attachments', 'uploads');
-      const dataUploadsDir = path.join(process.cwd(), 'data', 'attachments', 'uploads');
-
-      if (!fs.existsSync(publicUploadsDir)) fs.mkdirSync(publicUploadsDir, { recursive: true });
-      if (!fs.existsSync(dataUploadsDir)) fs.mkdirSync(dataUploadsDir, { recursive: true });
-
-      const publicFilePath = path.join(publicUploadsDir, sanitizedName);
-      const dataFilePath = path.join(dataUploadsDir, sanitizedName);
-
-      fs.writeFileSync(publicFilePath, fileBuffer);
-      fs.writeFileSync(dataFilePath, fileBuffer);
+      // Safely try saving to disk (ignored on read-only cloud environments)
+      try {
+        const targetDir = process.env.VERCEL ? '/tmp' : path.join(process.cwd(), 'public', 'attachments', 'uploads');
+        if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+        fs.writeFileSync(path.join(targetDir, sanitizedName), fileBuffer);
+      } catch (e) {
+        // Ignored on read-only serverless lambdas
+      }
 
       const calculatedHash = crypto.createHash('sha256').update(fileBuffer).digest('hex').toUpperCase();
       const contentStr = fileBuffer.toString('latin1');
@@ -340,11 +353,12 @@ export async function POST(req: NextRequest) {
       const sizeMB = fileBuffer.length / (1024 * 1024);
       const sizeFormatted = sizeMB >= 1 ? `${sizeMB.toFixed(2)} MB` : `${Math.round(fileBuffer.length / 1024)} KB`;
 
+      const attId = `att_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
       const newAttachment: CircularV2Attachment = {
-        id: `att_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        id: attId,
         filename: sanitizedName,
         originalName: fileName,
-        urlPath: `/attachments/uploads/${sanitizedName}`,
+        urlPath: `/api/circulars/v2?action=download_pdf&id=${attId}`,
         localPath: `public/attachments/uploads/${sanitizedName}`,
         sizeBytes: fileBuffer.length,
         sizeFormatted,
@@ -353,7 +367,8 @@ export async function POST(req: NextRequest) {
         version: 'Manual Upload',
         description: description || `Custom institutional circular PDF: ${fileName}`,
         isVerified: true,
-        uploadedAt: new Date().toISOString()
+        uploadedAt: new Date().toISOString(),
+        fileBase64: base64Data
       };
 
       if (!store.customAttachments) store.customAttachments = [EXACT_CATALOGUE_PDF];
