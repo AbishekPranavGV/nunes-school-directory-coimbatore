@@ -333,10 +333,13 @@ ${institutionName}`
                         </td>
                         <!-- Right: Actions -->
                         <td valign="middle" align="right" class="attachment-btn-cell" style="padding-left:12px;white-space:nowrap;">
-                          <a href="${driveLink}" target="_blank" style="display:inline-block;padding:8px 16px;background-color:#087EC1;color:#FFFFFF;text-decoration:none;font-weight:bold;font-size:12px;border-radius:6px;margin:2px;">
+                          <a href="${driveLink}" target="_blank" style="display:inline-block;padding:8px 14px;background-color:#087EC1;color:#FFFFFF;text-decoration:none;font-weight:bold;font-size:12px;border-radius:6px;margin:2px;">
                             Preview PDF
                           </a>
-                          <a href="${catalogueUrl}" target="_blank" style="display:inline-block;padding:8px 14px;background-color:#FFFFFF;color:#092C55;border:1px solid #CBD5E1;text-decoration:none;font-weight:bold;font-size:12px;border-radius:6px;margin:2px;">
+                          <a href="https://nunes-transport.vercel.app/attachments/Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf" target="_blank" download style="display:inline-block;padding:8px 14px;background-color:#FFFFFF;color:#092C55;border:1px solid #CBD5E1;text-decoration:none;font-weight:bold;font-size:12px;border-radius:6px;margin:2px;">
+                            Download PDF
+                          </a>
+                          <a href="${catalogueUrl}" target="_blank" style="display:inline-block;padding:8px 12px;background-color:#F8FAFC;color:#087EC1;border:1px solid #BAE6FD;text-decoration:none;font-weight:bold;font-size:12px;border-radius:6px;margin:2px;">
                             Online View
                           </a>
                         </td>

@@ -37,16 +37,13 @@ interface TransportCircularEditModalProps {
 
 const CATEGORIES = [
   'Fleet Safety & RTO Mandate',
-  'Kerala MVD & AIS-140 GPS Telematics Mandate',
-  'Inter-State Walayar Border & Toll RFID FASTag Compliance',
-  'Monsoon Ghat Road & Retarder Safety Advisory (TN-KL)',
-  'Port Container & ICTT Vallarpadam Drayage Protocol',
-  'Speed Governor Compliance',
-  'Freight Corridor & Toll Revision',
-  'Pollution & Fitness Certification',
-  'Bulk Petroleum Safety Protocol',
-  'All India Tourist Permit (AITP) 2026 Inter-State Reciprocity',
-  'Driver Welfare & Highway Rest Stop Advisory',
+  'Driver Alcohol Screening & Pre-Trip Fitness Mandate',
+  'Depot Gate Safety & Evidential Alcohol Testing',
+  'Supreme Court Road Safety & Zero-Tolerance Protocol',
+  'School & Intercity Passenger Safety Compliance',
+  'Inter-State Walayar Border & Transit Corridor Safety',
+  'Annual Fleet Metrology & Calibration Certification',
+  'Bulk Petroleum & Hazardous Cargo Driver Screening',
   'General Technical Notice'
 ];
 
@@ -99,36 +96,40 @@ const formatFileSize = (bytes: number): string => {
 // Quick-Add Regulatory Templates Library
 const REGULATORY_ATTACHMENT_PRESETS: { name: string; type: 'pdf' | 'word' | 'image'; size: string; dataUrl?: string }[] = [
   {
-    name: 'AIS140_InterState_Calibration_Form_TN_KL.pdf',
+    name: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
     type: 'pdf',
-    size: '1.6 MB'
+    size: '5.16 MB'
   },
   {
-    name: 'Walayar_Border_FASTag_RFID_Clearance_Notice.docx',
+    name: 'Driver_PreTrip_Alcohol_Screening_Protocol_Logsheet.docx',
     type: 'word',
+    size: '480 KB'
+  },
+  {
+    name: 'Depot_Gate_Alcohol_Screening_SOP_Notice.pdf',
+    type: 'pdf',
+    size: '1.2 MB'
+  },
+  {
+    name: 'Evidential_Breath_Analyser_Calibration_Certificate_Sample.pdf',
+    type: 'pdf',
     size: '890 KB'
   },
   {
-    name: 'NH544_NH66_Freight_Corridor_Route_Map.png',
-    type: 'image',
-    size: '2.4 MB',
-    dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300"><rect width="100%" height="100%" fill="%230f172a"/><path d="M50 240 Q150 160 300 140 T550 60" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-dasharray="6 6"/><circle cx="50" cy="240" r="8" fill="%2310b981"/><circle cx="300" cy="140" r="8" fill="%23f59e0b"/><circle cx="550" cy="60" r="8" fill="%236366f1"/><text x="65" y="245" fill="%23fff" font-family="sans-serif" font-size="12" font-weight="bold">Kochi ICTT (KL)</text><text x="315" y="145" fill="%23fff" font-family="sans-serif" font-size="12" font-weight="bold">Walayar / Coimbatore</text><text x="450" y="55" fill="%23fff" font-family="sans-serif" font-size="12" font-weight="bold">Chennai Port (TN)</text><text x="50%" y="30" fill="%2338bdf8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Official Highway Corridor Route Map (NH 544 &amp; NH 66)</text></svg>'
-  },
-  {
-    name: 'MVD_Kerala_Vehicle_Fitness_Annexure.docx',
+    name: 'Kerala_MVD_Driver_PreTrip_Sobriety_Compliance_Guide.docx',
     type: 'word',
-    size: '720 KB'
+    size: '510 KB'
   },
   {
-    name: 'TOBOA_Omni_Bus_Speed_Governor_Declaration.pdf',
-    type: 'pdf',
-    size: '980 KB'
+    name: 'TOBOA_SLOF_Driver_Alcohol_Screening_SOP.docx',
+    type: 'word',
+    size: '520 KB'
   },
   {
     name: 'Official_Directorate_Inspection_Seal.png',
     type: 'image',
     size: '640 KB',
-    dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><circle cx="150" cy="150" r="130" fill="%23f8fafc" stroke="%231e3a8a" stroke-width="6"/><circle cx="150" cy="150" r="110" fill="none" stroke="%231e3a8a" stroke-width="2" stroke-dasharray="4 4"/><text x="150" y="100" fill="%231e3a8a" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">NUNES TRANSPORT</text><text x="150" y="130" fill="%23059669" font-family="sans-serif" font-size="18" font-weight="black" text-anchor="middle">★ VERIFIED ★</text><text x="150" y="160" fill="%231e3a8a" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">DIRECTORATE SEAL</text><text x="150" y="210" fill="%2364748b" font-family="sans-serif" font-size="9" text-anchor="middle">TN - KL INTER-STATE DESK</text></svg>'
+    dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><circle cx="150" cy="150" r="130" fill="%23f8fafc" stroke="%23092c55" stroke-width="6"/><circle cx="150" cy="150" r="110" fill="none" stroke="%23087ec1" stroke-width="2" stroke-dasharray="4 4"/><text x="150" y="100" fill="%23092c55" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">NUNES INSTRUMENTS</text><text x="150" y="130" fill="%23059669" font-family="sans-serif" font-size="18" font-weight="black" text-anchor="middle">★ VERIFIED ★</text><text x="150" y="160" fill="%23092c55" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">ALCOTEST CERTIFIED</text><text x="150" y="210" fill="%2364748b" font-family="sans-serif" font-size="9" text-anchor="middle">TN - KL FLEET SAFETY DESK</text></svg>'
   }
 ];
 
@@ -155,7 +156,7 @@ export const TransportCircularEditModal: React.FC<TransportCircularEditModalProp
 
   const [signatoryName, setSignatoryName] = useState('Er. K. R. Senthil Kumar, B.E., M.I.E.');
   const [signatoryTitle, setSignatoryTitle] = useState('Director of Technical Services & Logistics Standards');
-  const [issuingAuthority, setIssuingAuthority] = useState('Nunes Instruments — South India Inter-State Transport Directorate');
+  const [issuingAuthority, setIssuingAuthority] = useState('Nunes Instruments — South India Fleet Safety & Precision Metrology Directorate (Coimbatore HQ)');
   const [recipientCount, setRecipientCount] = useState(3200);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [butterflyNotice, setButterflyNotice] = useState<string>('');
@@ -165,6 +166,8 @@ export const TransportCircularEditModal: React.FC<TransportCircularEditModalProp
     setTargetState(state);
     
     if (state === 'Kerala') {
+      setTitle('Driver Sobriety & Evidential Breath Analyser Protocol — Kerala Commercial Fleets (14 Models)');
+      setSubject('Kerala Fleet Safety Advisory: Mandatory Driver Pre-Trip Alcohol Screening & Certified Breath Analysers — KSRTC & KSLOF Fleets');
       setRecipientCount(1120);
       setIssuingAuthority('Nunes Instruments — Kerala Regional Logistics & Metrology Cell (Ernakulam & Trivandrum)');
       setSelectedDistricts(['ernakulam', 'palakkad', 'kozhikode', 'thiruvananthapuram', 'thrissur']);
@@ -173,46 +176,69 @@ export const TransportCircularEditModal: React.FC<TransportCircularEditModalProp
       const klAttachments: TransportAttachment[] = [
         {
           id: `att-kl-pdf-${Date.now()}`,
-          name: 'MVD_Kerala_AIS140_Compliance_Form.pdf',
+          name: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
           type: 'pdf',
-          size: '1.4 MB'
+          size: '5.16 MB'
         },
         {
           id: `att-kl-doc-${Date.now()}`,
-          name: 'MVD_Kerala_Vehicle_Fitness_Annexure.docx',
+          name: 'Kerala_MVD_Driver_PreTrip_Sobriety_Compliance_Guide.docx',
           type: 'word',
-          size: '720 KB'
+          size: '510 KB'
         },
         {
           id: `att-kl-img-${Date.now()}`,
-          name: 'NH66_Cochin_Port_Freight_Corridor_Map.png',
+          name: 'Official_Directorate_Inspection_Seal.png',
           type: 'image',
-          size: '2.1 MB',
-          dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300"><rect width="100%" height="100%" fill="%23064e3b"/><text x="50%" y="40%" fill="%2334d399" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">NH 66 &amp; ICTT Vallarpadam Corridor</text><text x="50%" y="60%" fill="%23a7f3d0" font-family="sans-serif" font-size="14" text-anchor="middle">Kerala MVD Dedicated Freight Transit Map</text></svg>'
+          size: '640 KB',
+          dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><circle cx="150" cy="150" r="130" fill="%23f8fafc" stroke="%23092c55" stroke-width="6"/><circle cx="150" cy="150" r="110" fill="none" stroke="%23087ec1" stroke-width="2" stroke-dasharray="4 4"/><text x="150" y="100" fill="%23092c55" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">NUNES INSTRUMENTS</text><text x="150" y="130" fill="%23059669" font-family="sans-serif" font-size="18" font-weight="black" text-anchor="middle">★ VERIFIED ★</text><text x="150" y="160" fill="%23092c55" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">ALCOTEST CERTIFIED</text><text x="150" y="210" fill="%2364748b" font-family="sans-serif" font-size="9" text-anchor="middle">KERALA FLEET SAFETY DESK</text></svg>'
         }
       ];
       setAttachments(klAttachments);
       setAttachmentName(klAttachments.map(a => a.name).join(', '));
       
-      setBody(`To All Managing Directors, Fleet Proprietors, and Depot Controllers,
-Kerala State Transport Undertakings (KSRTC SWIFT), KSLOF Member Operators & Omni Bus Fleets.
+      setBody(`To All Managing Directors, Fleet Proprietors, Transport Officers & Depot Supervisors,
+Kerala Commercial Passenger & Freight Fleets (KSRTC SWIFT, KSLOF, Omni Bus Operators & Container Drayage Fleets).
 
-Subject: Kerala Motor Vehicles Department (MVD) & Transport Commissionerate Mandate — Bi-Annual Verification of AIS-140 GPS Telematics & Speed Limiter Calibration (2026-27).
+Subject: Kerala Motor Vehicles Department (MVD) Road Safety Advisory — Mandatory Driver Pre-Trip Alcohol Screening & Certified Evidential Breath Analysers.
 
-In accordance with Motor Vehicles Department Kerala (MVD) directives and MoRTH safety guidelines, all commercial passenger stage carriages and heavy multi-axle freight carriers registered or operating within Kerala must ensure valid bi-annual calibration of AIS-140 GPS tracking devices, emergency SOS panic buttons, and electronic speed limiters before regional RTO fitness inspections.
+Respected Fleet Leadership,
 
-Nunes Instruments provides NABL-accredited diagnostic calibration, digital tachograph servicing, and speed limiter testing at all key Kerala logistics hubs (Ernakulam / Kochi Vallarpadam ICTT, Palakkad Walayar Border, Kozhikode Mavoor Road, Thiruvananthapuram, and Thrissur).
+In compliance with Motor Vehicles Department Kerala (MVD) safety circulars, zero-tolerance highway enforcement directives, and monsoon/ghat corridor passenger safety regulations (NH 66, NH 544, MC Road, and high-range routes), commercial passenger carriages and freight carriers operating across Kerala are required to maintain strict driver sobriety verification prior to daily vehicle dispatch.
 
-Key Guidelines for Kerala Operations:
-1. Walayar & Inter-State Checkposts: Mandatory verification of FASTag 3.0 commercial RFID tags.
-2. Ghat Road Monsoon Safety: Mandatory auxiliary retarder and exhaust brake efficiency certification for Wayanad, Idukki, and Palakkad corridors.
-3. KSRTC SWIFT & Private Intercity Buses: Emergency exit window illumination and 112 Command Center integration.
+With Kerala MVD conducting rigorous roadside checks and inter-state checkpost verifications (Walayar, Manjeshwar, Amaravila), commercial operators found without verifiable driver sobriety logs face steep penalties, suspension of driving licenses, vehicle impoundment, and complete insurance claim denial in the event of an accident.
 
-Please ensure your depot managers schedule calibration for scheduled fleets prior to the regional RTO deadline.`);
+Nunes Instruments provides Kerala fleet operators with the complete 14-Model Fuel-Cell Breath Analyser Range, backed by dedicated regional sales and calibration support across Kochi / Ernakulam, Palakkad (Walayar), Kozhikode, Thiruvananthapuram, and Thrissur:
 
-      setButterflyNotice('🦋 Butterfly effect active: Recipient count, Kerala hubs, PDF/Word/Image attachments, and Ernakulam directorate auto-synchronized!');
+KEY FLEET SCREENING SOLUTIONS:
+1. Rapid Non-Contact Screening Batons (Models 01 & 02):
+   • Non-invasive funnel test — screens drivers in 5 seconds without disposable mouthpieces.
+   • High-visibility red/green illuminated baton with loud acoustic warning, torch, and magnetic mount.
+   • Perfect for rapid morning gate dispatch across bus stands and logistics yards (40+ drivers in 5 minutes).
+2. Evidential Thermal Printer Consoles (Models 10, 11, 12 & 14 — AT-9000 & 333-T Series):
+   • Generates instant printed receipts with Driver ID, Vehicle Reg Number, GPS/Depot Location, Date, Time, and precise BAC reading.
+   • Indisputable proof for Kerala MVD inspectors, depot records, and legal liability protection.
+   • AT-9000 includes automated digital photo capture to verify driver identity during the breath test.
+3. Portable Digital Meters (Models 03 to 09):
+   • High-precision electrochemical sensors for supervisor field checks and transit yard spot-audits.
+
+SPECIAL FLEET OFFER & COMPLIMENTARY TRIAL:
+• Request an On-Site Depot Demonstration: Our Kerala service engineers will visit your depot in Kochi, Palakkad, Kozhikode, or Trivandrum to conduct a live demonstration for your management and drivers.
+• Commercial Rate Contract & Quotation: Bulk institutional discount pricing, 1-year replacement warranty, ready stock for immediate dispatch, and NABL-traceable calibration support.
+
+ENCLOSURE:
+Enclosed is the official 16-page Nunes Breath Analyser Product Catalogue (14 Individual Product Models with complete technical specifications, QR codes, and compliance details).
+
+Regional Kerala Support & Helpline:
+• Direct Booking Hotline: +91 89409 44000 | +91 89409 33000
+• Email: nunesalcotest@gmail.com | info@nunesinstruments.com
+• Regional Metrology Hub: Serving Kochi Vallarpadam, Walayar, Kozhikode & Trivandrum`);
+
+      setButterflyNotice('🦋 Butterfly effect active: Recipient count, Kerala hubs, 16-page catalogue, and Ernakulam/Trivandrum cell auto-synchronized!');
     } 
     else if (state === 'Tamil Nadu') {
+      setTitle('Mandatory Driver Pre-Trip Alcohol Screening & Certified Breath Analysers — Tamil Nadu Fleets (14 Models)');
+      setSubject('Tamil Nadu Fleet Safety Directive: Mandatory Driver Alcohol Screening & Evidential Breath Analysers — TOBOA & SLOF Fleets');
       setRecipientCount(2080);
       setIssuingAuthority('Nunes Instruments — Tamil Nadu Transport & Metrology Directorate (Coimbatore HQ)');
       setSelectedDistricts(['coimbatore', 'namakkal', 'salem', 'chennai', 'madurai', 'tiruppur']);
@@ -221,86 +247,142 @@ Please ensure your depot managers schedule calibration for scheduled fleets prio
       const tnAttachments: TransportAttachment[] = [
         {
           id: `att-tn-pdf-${Date.now()}`,
-          name: 'AIS140_Calibration_Form_TN.pdf',
+          name: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
           type: 'pdf',
-          size: '1.2 MB'
+          size: '5.16 MB'
         },
         {
           id: `att-tn-doc-${Date.now()}`,
-          name: 'TOBOA_Omni_Bus_Standard_Operating_Procedure.docx',
+          name: 'TOBOA_SLOF_Driver_Alcohol_Screening_SOP.docx',
           type: 'word',
-          size: '940 KB'
+          size: '520 KB'
         },
         {
           id: `att-tn-img-${Date.now()}`,
-          name: 'Western_TamilNadu_Truck_Corridor_Map.png',
+          name: 'Official_Directorate_Inspection_Seal.png',
           type: 'image',
-          size: '1.8 MB',
-          dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300"><rect width="100%" height="100%" fill="%231e3a8a"/><text x="50%" y="40%" fill="%2360a5fa" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">NH 44 &amp; NH 544 Industrial Belt</text><text x="50%" y="60%" fill="%23bfdbfe" font-family="sans-serif" font-size="14" text-anchor="middle">Coimbatore - Namakkal - Salem - Chennai Map</text></svg>'
+          size: '640 KB',
+          dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><circle cx="150" cy="150" r="130" fill="%23f8fafc" stroke="%23092c55" stroke-width="6"/><circle cx="150" cy="150" r="110" fill="none" stroke="%23087ec1" stroke-width="2" stroke-dasharray="4 4"/><text x="150" y="100" fill="%23092c55" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">NUNES INSTRUMENTS</text><text x="150" y="130" fill="%23059669" font-family="sans-serif" font-size="18" font-weight="black" text-anchor="middle">★ VERIFIED ★</text><text x="150" y="160" fill="%23092c55" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">ALCOTEST CERTIFIED</text><text x="150" y="210" fill="%2364748b" font-family="sans-serif" font-size="9" text-anchor="middle">TN FLEET SAFETY DESK</text></svg>'
         }
       ];
       setAttachments(tnAttachments);
       setAttachmentName(tnAttachments.map(a => a.name).join(', '));
 
-      setBody(`To All Managing Directors, Fleet Proprietors, and Depot Managers,
-Tamil Nadu Commercial Bus & Freight Logistics Operators (TOBOA & SLOF).
+      setBody(`To All Managing Directors, Fleet Proprietors, Transport Managers & Depot Controllers,
+Tamil Nadu Commercial Passenger Carriage & Freight Transport Fleets (TOBOA & SLOF Federation Members).
 
-Subject: Compliance Directive — Mandatory Calibration of AIS-140 Certified GPS Telematics, FASTag Priority Lanes, and Emergency Response System.
+Subject: Mandatory Driver Pre-Trip Sobriety Protocol & Certified Fuel-Cell Breath Analyser Deployment (Tamil Nadu Fleets).
 
-In accordance with Tamil Nadu State Transport Authority (STA) enforcement regulations, all heavy commercial goods carriages and private Omni passenger buses registered in Tamil Nadu are required to submit their annual electronic telematics audit certificate.
+Respected Fleet Leadership,
 
-Nunes Instruments provides NABL-accredited diagnostic calibration at all major Tamil Nadu transport hubs (Coimbatore, Namakkal, Sankagiri, Salem, Chennai Koyambedu, and Madurai).
+Under Tamil Nadu State Transport Authority (STA) compliance mandates, Central Motor Vehicles Rules (CMVR), and recent High Court passenger safety advisories, all commercial Omni bus operators, school & college transport fleets, container freight carriers, and bulk petroleum tankers operating across Tamil Nadu must institute mandatory pre-trip driver breath alcohol screening at all dispatch depots and transit points.
 
-Please ensure your depot managers schedule calibration for scheduled fleets prior to the regional RTO deadline.`);
+Operating without verifiable driver screening logs exposes transport operators to severe enforcement actions, cancellation of stage carriage permits, immediate vehicle seizure at RTO checkposts, and insurance claim repudiation in the event of an accident. 
 
-      setButterflyNotice('🦋 Butterfly effect active: Recipient count, Tamil Nadu hubs, PDF/Word/Image attachments, and TOBOA/SLOF directorate auto-synchronized!');
+Nunes Instruments (headquartered in Coimbatore with 50+ years of metrology leadership) provides the complete 14-Model Alcohol Breath Analyser Portfolio engineered specifically for Tamil Nadu transport hubs (Coimbatore, Namakkal, Salem, Chennai, Madurai, Tiruppur, Erode, and Trichy):
+
+KEY EQUIPMENT HIGHLIGHTS FOR TAMIL NADU FLEETS:
+1. Rapid Depot Gate Screening Batons (Models 01 & 02):
+   • Fast non-contact funnel test — allows security guards to screen 40+ drivers in 5 minutes without blowpipes.
+   • High-intensity LED warning baton with whistle, torch, and magnetic base for round-the-clock depot dispatch.
+2. Evidential Thermal Printer Units (Models 10, 11 & 12 — AT-9000 & 333-T Series):
+   • Prints official tamper-proof receipts showing Driver Name, Driver License ID, Vehicle No, Date/Time, and BAC level.
+   • Provides legally recognized physical evidence for RTO inspections and court compliance.
+   • Built-in memory stores up to 20,000 screening records with PC synchronization.
+3. Handheld Field Units (Models 03 to 09):
+   • Compact digital LCD units for line supervisors and highway mobile inspection squads.
+
+DIRECT FLEET SUPPORT & IMMEDIATE ACTIONS:
+• Schedule a Complimentary On-Site Depot Demonstration: Our Coimbatore technical team will visit your facility in Coimbatore, Namakkal, Salem, Chennai, or Madurai to conduct a live demonstration with your operations team.
+• Request an Official Fleet Bulk Quotation: Special institutional rates for TOBOA/SLOF operators, 1-year replacement warranty, same-day shipment from Coimbatore central inventory, and annual NABL calibration certificates.
+
+ENCLOSURE:
+Attached is the official 16-page Nunes Breath Analyser Product Catalogue (14 Individual Product Models with complete technical specifications and direct QR verification).
+
+Direct Fleet Contacts (Coimbatore HQ):
+• Executive Lines: +91 89409 44000 | +91 89409 33000
+• Support Desk: info@nunesinstruments.com | nunescbe@gmail.com
+• Locations: RS Puram | Ganapathy | Peelamedu, Coimbatore - 641002`);
+
+      setButterflyNotice('🦋 Butterfly effect active: Recipient count, Tamil Nadu hubs, 16-page catalogue, and Coimbatore HQ auto-synchronized!');
     } 
     else {
       // All South India
+      setTitle('Driver Alcohol Screening Protocol & Certified Breath Analyser Equipment — South India Fleets (14 Models)');
+      setSubject('Official Notice: Mandatory Driver Pre-Trip Alcohol Screening & Certified Breath Analyser Solutions — South India Fleets (TN & KL)');
       setRecipientCount(3200);
-      setIssuingAuthority('Nunes Instruments — South India Inter-State Transport Directorate (Tamil Nadu & Kerala Divisions)');
+      setIssuingAuthority('Nunes Instruments — South India Fleet Safety & Precision Metrology Directorate (Coimbatore HQ)');
       setSelectedDistricts(['all']);
       if (!audience) setTargetAudience('🌐 All Registered Transport Fleets (South India - TN & KL)');
 
       const southAttachments: TransportAttachment[] = [
         {
           id: `att-all-pdf-${Date.now()}`,
-          name: 'AIS140_InterState_Calibration_Form_TN_KL.pdf',
+          name: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
           type: 'pdf',
-          size: '1.6 MB'
+          size: '5.16 MB'
         },
         {
           id: `att-all-doc-${Date.now()}`,
-          name: 'Walayar_Border_FASTag_RFID_Clearance_Notice.docx',
+          name: 'Driver_PreTrip_Alcohol_Screening_Protocol_Logsheet.docx',
           type: 'word',
-          size: '890 KB'
+          size: '480 KB'
         },
         {
           id: `att-all-img-${Date.now()}`,
-          name: 'NH544_NH66_Freight_Corridor_Route_Map.png',
+          name: 'Official_Directorate_Inspection_Seal.png',
           type: 'image',
-          size: '2.4 MB',
-          dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300"><rect width="100%" height="100%" fill="%230f172a"/><path d="M50 240 Q150 160 300 140 T550 60" fill="none" stroke="%2338bdf8" stroke-width="4" stroke-dasharray="6 6"/><circle cx="50" cy="240" r="8" fill="%2310b981"/><circle cx="300" cy="140" r="8" fill="%23f59e0b"/><circle cx="550" cy="60" r="8" fill="%236366f1"/><text x="65" y="245" fill="%23fff" font-family="sans-serif" font-size="12" font-weight="bold">Kochi ICTT (KL)</text><text x="315" y="145" fill="%23fff" font-family="sans-serif" font-size="12" font-weight="bold">Walayar / Coimbatore</text><text x="450" y="55" fill="%23fff" font-family="sans-serif" font-size="12" font-weight="bold">Chennai Port (TN)</text><text x="50%" y="30" fill="%2338bdf8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Official Highway Corridor Route Map (NH 544 &amp; NH 66)</text></svg>'
+          size: '640 KB',
+          dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><circle cx="150" cy="150" r="130" fill="%23f8fafc" stroke="%23092c55" stroke-width="6"/><circle cx="150" cy="150" r="110" fill="none" stroke="%23087ec1" stroke-width="2" stroke-dasharray="4 4"/><text x="150" y="100" fill="%23092c55" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">NUNES INSTRUMENTS</text><text x="150" y="130" fill="%23059669" font-family="sans-serif" font-size="18" font-weight="black" text-anchor="middle">★ VERIFIED ★</text><text x="150" y="160" fill="%23092c55" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">ALCOTEST CERTIFIED</text><text x="150" y="210" fill="%2364748b" font-family="sans-serif" font-size="9" text-anchor="middle">TN - KL FLEET SAFETY DESK</text></svg>'
         }
       ];
       setAttachments(southAttachments);
       setAttachmentName(southAttachments.map(a => a.name).join(', '));
 
-      setBody(`To All Managing Directors, Fleet Proprietors, and Depot Managers,
-South India Commercial Transport Fleets (Tamil Nadu TOBOA, SLOF, Kerala KSRTC SWIFT & KSLOF).
+      setBody(`To All Managing Directors, Fleet Proprietors, Transport Directors & Depot Operations Controllers,
+South India Commercial Passenger & Freight Fleets (Tamil Nadu TOBOA / SLOF & Kerala KSRTC SWIFT / KSLOF).
 
-Subject: Comprehensive Inter-State Fleet Safety & Telematics Standardization Directive — Tamil Nadu & Kerala Express Corridors (NH 544 & NH 66).
+Subject: Mandatory Driver Pre-Trip Alcohol Screening Protocol & Certified Breath Analyser Equipment Deployment (2026-27).
 
-In accordance with joint transport safety protocols established between Tamil Nadu and Kerala Transport Commissionerates, all inter-state passenger coaches and heavy goods bulkers operating across Southern corridors must verify AIS-140 GPS tracking devices, speed governors (80 km/h goods / 90 km/h buses), and FASTag RFID integration.
+Respected Fleet Leadership,
 
-Nunes Instruments operates accredited calibration stations across major inter-state nexus points:
-• Western Industrial Belt: Coimbatore, Namakkal, Salem & Sankagiri
-• Kerala Gateway & Ports: Ernakulam / Kochi Vallarpadam ICTT & Palakkad Walayar
-• Regional Terminals: Chennai Koyambedu, Kozhikode, and Thiruvananthapuram
+In strict accordance with Supreme Court Committee on Road Safety directives, Section 185 of the Motor Vehicles Act, and inter-state zero-tolerance road safety regulations across Tamil Nadu and Kerala, commercial passenger coaches, school bus contractors, hazardous goods tankers, and multi-axle freight carriers must implement rigorous mandatory pre-trip driver sobriety screening before departure from all depots and logistics terminals.
 
-Please ensure all inter-state vehicles carry certified calibration certificates.`);
+A single undetected driver intoxication incident carries catastrophic liabilities: immediate vehicle impoundment, suspension of state transport permits, non-payable commercial insurance repudiation, and personal vicarious liability for fleet directors. Implementing certified depot gate breath analyser screening guarantees complete legal immunity, eliminates accident risks, and protects your brand.
 
-      setButterflyNotice('🦋 Butterfly effect active: Full South India inter-state scope (3,200 recipients across TN & KL) with multi-format attachments auto-synchronized!');
+Nunes Instruments (established 50+ years in Coimbatore, South India) is the authorised manufacturer and distributor of South India's most comprehensive 14-Model Fuel-Cell & Electrochemical Breath Analyser Series:
+
+1. DEPOT GATE RAPID-SCREENING BATONS (Models 01 & 02):
+   • Non-contact rapid funnel screening — test 40+ drivers in under 5 minutes without mouthpieces.
+   • High-intensity flashing LED traffic baton with whistle, torch, and magnetic base.
+   • Instant pass/fail acoustic buzzer and red/green visual indicator for rapid depot gate dispatch.
+
+2. PORTABLE & DIGITAL PRECISION SENSORS (Models 03 to 09):
+   • Handheld multi-unit LCD displays with professional mouthpieces.
+   • Direct mg/100mL BAC Indian legal standard readout with auto-calibration check.
+   • Compact, ruggedised rubber housings engineered for supervisor route spot-checks and yard audits.
+
+3. EVIDENTIAL PRINTER & MEMORY SYSTEMS (Models 10, 11, 12, 13 & 14 — AT-9000 & 333-T Series):
+   • Integrated high-speed thermal printers generating tamper-proof physical test receipts on the spot.
+   • Captures Driver Name, Staff ID, Vehicle Registration, Date, Timestamp, and precise BAC reading.
+   • Up to 20,000 on-board test memory storage with PC download and RTO/police audit compliance.
+   • AT-9000 model includes built-in facial camera verification to prevent driver test impersonation.
+
+COMPLIMENTARY FLEET ASSISTANCE & ON-SITE DEMONSTRATION:
+To assist your transport operations in establishing a zero-accident sobriety protocol:
+1. Book a Free On-Site Depot Demonstration: Our certified instrumentation engineers will visit your depot or transit terminal anywhere in Tamil Nadu & Kerala to demonstrate equipment with your actual drivers.
+2. Fleet Rate Quotation & Concession Pricing: We offer special institutional pricing, 1-year comprehensive replacement warranty, ready stock for dispatch within 24 hours, and annual NABL-traceable calibration support from our Coimbatore headquarters.
+
+ENCLOSURE:
+Enclosed with this circular is the official 16-page Nunes Breath Analyser Product Catalogue (14 Individual Product Models with complete technical specifications, QR codes, and application matrix).
+
+For instant demonstration scheduling or formal quotation:
+• Direct Fleet Helpline: +91 89409 44000 | +91 89409 33000
+• Technical Service Desk: +91 0422 2499444 | Mobile: +91 93452 26022
+• Official Email: info@nunesinstruments.com | nunescbe@gmail.com
+• Corporate Head Office: RS Puram | Ganapathy | Peelamedu, Coimbatore, Tamil Nadu`);
+
+      setButterflyNotice('🦋 Butterfly effect active: Full South India scope (3,200 recipients across TN & KL), 16-page catalogue & enclosures auto-synchronized!');
     }
 
     setTimeout(() => setButterflyNotice(''), 4500);
@@ -308,18 +390,18 @@ Please ensure all inter-state vehicles carry certified calibration certificates.
 
   useEffect(() => {
     if (circular) {
-      setTitle(circular.title || '');
-      setRefNo(circular.ref_no || '');
+      setTitle(circular.title || 'Breath Analyser Solutions for Institutional & Transport Safety');
+      setRefNo(circular.ref_no || `NUNES/TR/${new Date().getFullYear()}/089`);
       setCategory(circular.category || CATEGORIES[0]);
       setTargetState(circular.target_state || 'all');
       setTargetAudience(circular.target_audience || TARGET_AUDIENCES[0]);
       setSelectedDistricts(circular.target_districts || ['all']);
-      setSubject(circular.subject || '');
+      setSubject(circular.subject || 'Breath Analyser Solutions for Institutional & Transport Safety');
       setBody(circular.body || '');
-      setAttachmentName(circular.attachment_name || '');
+      setAttachmentName(circular.attachment_name || 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf');
       setSignatoryName(circular.signatory_name || 'Er. K. R. Senthil Kumar, B.E., M.I.E.');
       setSignatoryTitle(circular.signatory_title || 'Director of Technical Services & Logistics Standards');
-      setIssuingAuthority(circular.issuing_authority || 'Nunes Instruments — South India Inter-State Transport Directorate');
+      setIssuingAuthority(circular.issuing_authority || 'Nunes Instruments — South India Fleet Safety & Precision Metrology Directorate (Coimbatore HQ)');
       setRecipientCount(circular.recipient_count || 3200);
 
       // Initialize attachments
@@ -330,15 +412,19 @@ Please ensure all inter-state vehicles carry certified calibration certificates.
           id: `att-init-${Date.now()}`,
           name: circular.attachment_name,
           type: getAttachmentType(circular.attachment_name),
-          size: '1.4 MB'
+          size: circular.attachment_name.includes('Breath_Analyser') ? '5.16 MB' : '1.4 MB'
         }]);
       } else {
-        setAttachments([]);
+        setAttachments([{
+          id: `att-init-${Date.now()}`,
+          name: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
+          type: 'pdf',
+          size: '5.16 MB'
+        }]);
       }
     } else {
       const year = new Date().getFullYear();
       const randomNum = Math.floor(100 + Math.random() * 900);
-      setTitle('RTO Vehicle Tracking & Speed Limiter Calibration Notice (South India Fleets)');
       setRefNo(`NUNES/TR/${year}/${randomNum}`);
       setCategory(CATEGORIES[0]);
       applyButterflyUpdate('all');
@@ -762,7 +848,7 @@ Please ensure all inter-state vehicles carry certified calibration certificates.
                   </span>
                 </label>
                 <p className="text-[11px] text-slate-500">
-                  Attach official compliance forms (PDF), editable guidelines (DOCX), and highway route maps or verification seals (PNG/JPG).
+                  Attach official 16-page catalogue (PDF), driver screening SOP guidelines (DOCX), and official verification seals (PNG/JPG).
                 </p>
               </div>
 
