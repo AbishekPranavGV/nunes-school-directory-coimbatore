@@ -6,12 +6,15 @@ import {
   DELIVERABILITY_STATS, 
   BOUNCED_EMAILS_DATA 
 } from '@/lib/data/transportData';
+import path from 'path';
+import fs from 'fs';
 import { 
   GMAIL_SENDER, 
   NUNES_INTERNAL_BCC_EMAILS, 
   NUNES_INTERNAL_BCC_MEMBERS, 
   OFFICIAL_CIRCULAR_DRIVE_LINK 
 } from '@/lib/data/circularConstants';
+import { sendEmailViaGmail } from '@/lib/mailer';
 import { TransportCircular, BouncedEmailRecord } from '@/types/transport';
 
 let circularsState: TransportCircular[] = [...TRANSPORT_CIRCULARS_DATA];
@@ -143,7 +146,7 @@ export async function POST(request: NextRequest) {
         recipient_email: operator_email,
         circular_id: circular_id || 'CIR-CURRENT',
         circular_title: circular_title || 'Official RTO & Logistics Circular',
-        status: 'Delivered (TLS 1.3 Verified)',
+        status: 'Delivered (SMTP 250 OK)',
         smtp_response: '250 2.0.0 OK: Message queued for outbound delivery',
         dispatched_at: new Date().toISOString()
       };
@@ -197,7 +200,7 @@ export async function POST(request: NextRequest) {
         state: fleet.state,
         district: fleet.district,
         badge: `${fleet.state === 'Kerala' ? 'KL' : 'TN'} • ${(fleet.district || 'CBE').slice(0, 3).toUpperCase()}`,
-        status: 'Delivered (TLS 1.3 Verified - 250 OK)',
+        status: 'Delivered (SMTP 250 OK)',
         latency_ms: Math.floor(Math.random() * 20) + 12,
         timestamp: new Date().toLocaleTimeString('en-IN')
       }));
@@ -234,6 +237,39 @@ export async function POST(request: NextRequest) {
         telemetry,
         sender_quota: senderQuotaState,
         deliverability_stats: deliverabilityStatsState
+      });
+    }
+
+    if (action === 'send_test_email') {
+      const { test_email, circular_id, circular_title, recipient_name, html_content } = body;
+      const targetEmail = test_email || 'nunesalcotest@gmail.com';
+      
+      const pdfPath = path.join(process.cwd(), 'public/attachments/Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf');
+      const hasAttachment = fs.existsSync(pdfPath);
+      
+      const attachments = hasAttachment ? [
+        {
+          filename: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
+          path: pdfPath,
+          contentType: 'application/pdf'
+        }
+      ] : [];
+
+      const sendResult = await sendEmailViaGmail({
+        to: targetEmail,
+        subject: `[TEST PREVIEW] ${circular_title || 'Breath Analyser Solutions for Institutional & Transport Safety'}`,
+        body: `Test email for ${recipient_name || 'Educational Institution'} with 16-page catalogue PDF attachment.`,
+        html: html_content,
+        attachments
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Test email successfully dispatched to ${targetEmail}`,
+        has_attachment: hasAttachment,
+        attachment_name: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
+        mode: sendResult.mode,
+        messageId: sendResult.messageId
       });
     }
 

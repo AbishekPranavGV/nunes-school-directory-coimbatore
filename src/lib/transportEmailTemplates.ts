@@ -5,8 +5,8 @@ import {
 } from '@/lib/data/circularConstants';
 
 export interface TransportEmailTemplateParams {
-  circularTitle: string;
-  refNo: string;
+  circularTitle?: string;
+  refNo?: string;
   category?: string;
   targetAudience?: string;
   companyName?: string;
@@ -22,306 +22,512 @@ export interface TransportEmailTemplateParams {
   signatoryName?: string;
   signatoryTitle?: string;
   issuingAuthority?: string;
+  customLogoUrl?: string;
 }
 
 export const DEFAULT_CATALOGUE_NETLIFY_URL = 'https://darling-torrone-c0aaf9.netlify.app/';
+export const OFFICIAL_CATALOGUE_FILENAME = 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf';
+export const OFFICIAL_CATALOGUE_FILE_PATH = '/attachments/Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf';
+export const OFFICIAL_LOGO_URL = 'https://nunes-transport.vercel.app/images/nunes_logo_transparent.png';
 
 /**
- * Generates the most advanced, enterprise-grade responsive HTML email template
- * compatible with Gmail, Outlook, Apple Mail, and modern mobile clients.
+ * NUNES INSTRUMENTATION PREMIUM CIRCULAR EMAIL V3.0
+ * 
+ * Strict 11-Section Layout:
+ * 1. Official NUNES Logo & Clean White Letterhead
+ * 2. Main Circular Heading
+ * 3. Personalised Institution Details
+ * 4. Professional Salutation
+ * 5. Short Company Introduction
+ * 6. Breath Analyser Product Overview (5 portfolio points)
+ * 7. Institutional Applications
+ * 8. Attached Product Catalogue Card (Compact horizontal card)
+ * 9. Primary Call to Action (Two clear buttons: Corporate Blue & White Outline)
+ * 10. Company Contact Information & Signature
+ * 11. Unsubscribe and Compliance Footer
+ * 
+ * Brand Colors:
+ * - Primary Navy: #092C55
+ * - Corporate Blue: #087EC1
+ * - Cyan Accent: #19B5E5
+ * - Background: #F4F7FB
+ * - Main Text: #243247
+ * - White: #FFFFFF
  */
 export function generateExecutiveTransportHtml(params: TransportEmailTemplateParams): string {
-  const title = params.circularTitle || 'Mandatory Commercial & School Fleet Driver Breath Alcohol Screening Compliance';
-  const refNo = params.refNo || 'NUNES/TR/2026/089';
+  const title = params.circularTitle || 'Breath Analyser Solutions for Institutional & Transport Safety';
+  const subtitle = 'Explore our range of 14 alcohol breath analyser models for institutional, workplace and transport applications.';
+  const refNo = params.refNo || 'NUNES/INST/SAFETY/2026/014';
   const driveLink = params.driveLink || OFFICIAL_CIRCULAR_DRIVE_LINK;
   const catalogueUrl = params.catalogueUrl || DEFAULT_CATALOGUE_NETLIFY_URL;
-  const attachmentName = params.attachmentName || 'Nunes_Breath_Analyser_Catalogue_14_Models_2026.pdf';
-  const signatoryName = params.signatoryName || 'Er. K. R. Senthil Kumar, B.E., M.I.E.';
-  const signatoryTitle = params.signatoryTitle || 'Director of Technical Services & Metrology Standards';
-  const issuingAuthority = params.issuingAuthority || 'Nunes Instruments — Fleet Safety & Precision Metrology Directorate';
+  const attachmentName = params.attachmentName || OFFICIAL_CATALOGUE_FILENAME;
+  const logoUrl = params.customLogoUrl || OFFICIAL_LOGO_URL;
 
-  const company = params.companyName || 'Registered Transport Fleet Operator';
-  const contact = params.recipientName 
-    ? `${params.recipientName} (${params.recipientDesignation || 'Managing Director / Fleet Safety Officer'})`
-    : 'Managing Director / Fleet Safety Officer / Depot Controller';
-  const location = params.cityHub || params.district 
-    ? `${params.cityHub || params.district}, ${params.state || 'Tamil Nadu & Kerala'}`
-    : 'South India Corridors (Tamil Nadu & Kerala)';
+  // Institution personalisation with safe fallback
+  const institutionName = params.companyName && params.companyName !== 'Registered Transport Fleet Operator'
+    ? params.companyName
+    : (params.recipientName || 'Educational Institution / Transport Fleet Operator');
+  const attention = params.recipientDesignation || 'The Principal / Administrative Officer / Transport Department';
+  const locationDistrict = params.cityHub || params.district || 'Coimbatore';
+  const locationState = params.state || 'Tamil Nadu';
 
-  return `<!DOCTYPE html>
-<html lang="en">
+  const quotationMailto = `mailto:info@nunesinstrumentation.com?cc=${GMAIL_SENDER.email}&subject=${encodeURIComponent(`Quotation / Demonstration Request: ${title} - ${institutionName}`)}&body=${encodeURIComponent(
+`Respected NUNES Instrumentation Team,
+
+We would like to request an official commercial quotation and schedule a product demonstration for your 14-Model Breath Analyser series.
+
+Institution Name: ${institutionName}
+Designation / Dept: ${attention}
+Location: ${locationDistrict}, ${locationState}
+Contact Phone: 
+Preferred Models / Requirements: (Portable / Rapid Screening Baton / Thermal Printer Model)
+
+Looking forward to your prompt response.
+
+Regards,
+${institutionName}`
+  )}`;
+
+  const contactMailto = `mailto:info@nunesinstrumentation.com?cc=${GMAIL_SENDER.email}&subject=${encodeURIComponent(`Institutional Enquiry: ${title}`)}`;
+
+  const whatsAppUrl = `https://wa.me/918940944000?text=${encodeURIComponent(`Hello NUNES Instrumentation, reaching out regarding ${title} for ${institutionName}. We request product information/quotation.`)}`;
+
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${title} - Nunes Instruments</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>${title} - NUNES Instrumentation</title>
+  <style type="text/css">
+    body, table, td, p, a, li, blockquote {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table, td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+    }
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      background-color: #F4F7FB;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #243247;
+      line-height: 1.6;
+    }
+    @media only screen and (max-width: 640px) {
+      .email-container {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .responsive-column {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .mobile-padding {
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+      }
+      .mobile-heading {
+        font-size: 20px !important;
+        line-height: 1.35 !important;
+      }
+      .mobile-stack-center {
+        text-align: left !important;
+        margin-top: 12px !important;
+      }
+      .attachment-btn-cell {
+        display: block !important;
+        width: 100% !important;
+        text-align: left !important;
+        padding-top: 10px !important;
+      }
+      .cta-btn-block {
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 10px !important;
+      }
+    }
+  </style>
 </head>
-<body style="margin:0;padding:24px 12px;background-color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1e293b;-webkit-font-smoothing:antialiased;">
-  
-  <div style="max-width:680px;margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);border:1px solid #334155;">
-    
-    <!-- 1. TOP EXECUTIVE BRAND BANNER -->
-    <div style="background:linear-gradient(135deg, #020617 0%, #0c1f38 45%, #0369a1 100%);padding:36px 28px;text-align:center;color:#ffffff;position:relative;">
-      
-      <div style="display:inline-block;padding:5px 14px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);border-radius:24px;font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#7dd3fc;margin-bottom:14px;">
-        ★ NUNES INSTRUMENTATION • PRECISION METROLOGY & FLEET SAFETY
-      </div>
-      
-      <div style="display:inline-block;background:#059669;color:#ffffff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:12px;margin-left:6px;text-transform:uppercase;letter-spacing:0.5px;">
-        TLS 1.3 VERIFIED • 0% BAN RISK
-      </div>
+<body style="margin:0;padding:24px 0;background-color:#F4F7FB;font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;">
 
-      <h1 style="margin:14px 0 8px 0;font-size:22px;line-height:1.35;font-weight:900;color:#ffffff;letter-spacing:-0.3px;">
-        ${title}
-      </h1>
+  <!-- OUTER WRAPPER TABLE -->
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#F4F7FB;table-layout:fixed;">
+    <tr>
+      <td align="center" style="padding:0 12px;">
 
-      <p style="margin:0 auto;font-size:13px;color:#bae6fd;line-height:1.55;max-width:560px;">
-        Accredited 14-Model Alcohol Breath Analyser Series with Built-in Facial Camera, Thermal Slip Printer & GPS Tagging (AY 2026-27)
-      </p>
-
-      <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15);font-size:11px;color:#cbd5e1;display:flex;justify-content:center;gap:16px;">
-        <span><strong>Ref:</strong> <code style="color:#fde047;background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;">${refNo}</code></span>
-        <span>&bull;</span>
-        <span><strong>Authority:</strong> Supreme Court & State RTO Fleet Safety Mandate</span>
-      </div>
-
-    </div>
-
-    <!-- 2. RECIPIENT FLEET PLAQUE -->
-    <div style="background:#f8fafc;padding:18px 28px;border-bottom:1px solid #e2e8f0;">
-      <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;color:#0284c7;margin-bottom:4px;">
-        TO ALL MANAGING DIRECTORS, FLEET OPERATORS & DEPOT MANAGERS
-      </div>
-      <div style="font-size:16px;font-weight:900;color:#0f172a;letter-spacing:-0.2px;">
-        ${company}
-      </div>
-      <div style="font-size:12px;color:#64748b;margin-top:2px;">
-        <strong>Attention:</strong> ${contact} &bull; <span>${location}</span>
-      </div>
-    </div>
-
-    <!-- 3. MANDATE DIRECTIVE CALLOUT -->
-    <div style="padding:28px 28px 16px 28px;font-size:13.5px;line-height:1.75;color:#334155;">
-      
-      <div style="background:#fffbeb;border:1px solid #fde68a;border-left:5px solid #d97706;border-radius:10px;padding:14px 18px;margin-bottom:22px;">
-        <strong style="color:#92400e;display:block;font-size:12.5px;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">
-          🚨 STATUTORY COMPLIANCE DIRECTIVE (AY 2026-27):
-        </strong>
-        <span style="color:#78350f;font-size:12.5px;line-height:1.6;">
-          Pursuant to Supreme Court Guidelines on Passenger & School Bus Safety, Tamil Nadu Motor Vehicles Rules, and Kerala MVD Safe Transit Directives, <strong>100% pre-trip breath alcohol screening is mandatory</strong> for commercial, school transport, and freight fleet drivers before daily vehicle dispatch.
-        </span>
-      </div>
-
-      <!-- 4. THREE PRODUCT CATEGORIES CARDS (14 ACCREDITED MODELS) -->
-      <div style="margin:24px 0;">
-        <div style="font-size:12px;font-weight:900;letter-spacing:1px;color:#0f172a;text-transform:uppercase;margin-bottom:12px;">
-          📊 14-MODEL ACCREDITED BREATH ANALYSER SUITE:
-        </div>
-
-        <!-- Tier 1: Rapid Screening -->
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:5px solid #10b981;padding:14px 16px;border-radius:10px;margin-bottom:10px;">
-          <div style="font-size:13.5px;font-weight:800;color:#065f46;">
-            01 / RAPID NON-CONTACT SCREENING BATONS
-          </div>
-          <div style="font-size:12px;color:#047857;margin-top:3px;line-height:1.5;">
-            <strong>Screen 40 drivers in under 5 minutes!</strong> Fast non-contact funnel testing. Ideal for depot gate entry, shift handovers, and bulk driver queues with flashing red/green traffic baton indicators.
-          </div>
-        </div>
-
-        <!-- Tier 2: Handheld Digital -->
-        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-left:5px solid #0284c7;padding:14px 16px;border-radius:10px;margin-bottom:10px;">
-          <div style="font-size:13.5px;font-weight:800;color:#075985;">
-            02 / HANDHELD DIGITAL FUEL-CELL ANALYSERS (AT-9000 & A50)
-          </div>
-          <div style="font-size:12px;color:#0369a1;margin-top:3px;line-height:1.5;">
-            High-precision electrochemical fuel cell sensor technology with clear digital LCD readouts. Zero cross-sensitivity to acetone or cigarette smoke.
-          </div>
-        </div>
-
-        <!-- Tier 3: Evidential Thermal Printer Units -->
-        <div style="background:#fefce8;border:1px solid #fef08a;border-left:5px solid #ca8a04;padding:14px 16px;border-radius:10px;margin-bottom:10px;">
-          <div style="font-size:13.5px;font-weight:800;color:#854d0e;">
-            03 / EVIDENTIAL RECORDING & THERMAL PRINTING (CAMERA + GPS)
-          </div>
-          <div style="font-size:12px;color:#713f12;margin-top:3px;line-height:1.5;">
-            <strong>Model AT-9000 & AT-8900:</strong> Built-in camera captures driver photo on test completion. Built-in thermal printer issues immediate timestamped test slips with driver ID, GPS location, and BAC reading.
-          </div>
-        </div>
-      </div>
-
-      <!-- 5. ATTACHED PRODUCT CATALOGUE & DIRECTIVE ACTION BOX -->
-      <div style="background:linear-gradient(to bottom, #f8fafc, #f1f5f9);border:2px dashed #0284c7;border-radius:14px;padding:22px;text-align:center;margin:26px 0;">
-        <div style="font-size:14.5px;font-weight:900;color:#0f172a;margin-bottom:4px;">
-          📄 OFFICIAL DIRECTIVE DOCUMENT & PRODUCT CATALOGUE
-        </div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:16px;">
-          ${attachmentName} &bull; Specifications, measurement ranges, and calibration certification.
-        </div>
-        <div>
-          <a href="${driveLink}" target="_blank" style="display:inline-block;padding:12px 22px;background:#0284c7;color:#ffffff;text-decoration:none;font-weight:800;font-size:13px;border-radius:8px;box-shadow:0 4px 14px rgba(2,132,199,0.35);margin:4px;">
-            📄 Open Official Directive PDF (Google Drive)
-          </a>
-          <a href="${catalogueUrl}" target="_blank" style="display:inline-block;padding:12px 20px;background:#0f172a;color:#ffffff;text-decoration:none;font-weight:800;font-size:13px;border-radius:8px;margin:4px;">
-            🌐 View Full Online Catalogue (Netlify)
-          </a>
-        </div>
-      </div>
-
-      <!-- 6. DEMO, QUOTATION & CONTACT DESK -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px;margin:24px 0;">
-        <div style="font-size:13px;font-weight:900;color:#0f172a;margin-bottom:8px;">
-          💬 COMPLIMENTARY ON-SITE DEMO & COMMERCIAL QUOTATION
-        </div>
-        <div style="font-size:12px;color:#475569;margin-bottom:14px;line-height:1.5;">
-          Our technical service engineers provide live on-depot fleet safety demonstrations and calibration audits across South India.
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <a href="https://wa.me/918940944000?text=${encodeURIComponent(`Hello Nunes Instruments, reaching out regarding ${title}. We request a demo/quotation for our fleet.`)}" target="_blank" style="display:inline-block;padding:10px 18px;background:#16a34a;color:#ffffff;text-decoration:none;font-weight:800;font-size:12px;border-radius:6px;">
-            💬 WhatsApp Enquiry: +91 89409 44000
-          </a>
-          <a href="mailto:${GMAIL_SENDER.email}?cc=${GMAIL_SENDER.cc}&subject=${encodeURIComponent(`Quotation Request: ${title}`)}" style="display:inline-block;padding:10px 18px;background:#4338ca;color:#ffffff;text-decoration:none;font-weight:800;font-size:12px;border-radius:6px;">
-            ✉️ Email Procurement: ${GMAIL_SENDER.email}
-          </a>
-        </div>
-        <div style="font-size:12px;color:#0f172a;margin-top:14px;font-weight:700;">
-          📞 Direct Hotline Numbers: 93452 26022 &bull; 89409 44000 &bull; 89409 33000
-        </div>
-      </div>
-
-      <!-- 7. THREE COIMBATORE OFFICE LOCATIONS (RESPONSIVE TABLE) -->
-      <div style="margin:26px 0;">
-        <div style="font-size:12px;font-weight:900;letter-spacing:1px;color:#0284c7;text-transform:uppercase;margin-bottom:12px;">
-          📍 COIMBATORE ZONAL HUBS (3 DIRECT LOCATIONS)
-        </div>
-
-        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <!-- MAIN CARD (640-680px) -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="email-container" style="max-width:660px;margin:0 auto;background-color:#FFFFFF;border:1px solid #D9E2EC;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(9,44,85,0.06);">
+          
+          <!-- ============================================================== -->
+          <!-- 1. OFFICIAL NUNES LOGO & LETTERHEAD                            -->
+          <!-- ============================================================== -->
           <tr>
-            <td style="padding:12px;border:1px solid #cbd5e1;background:#ffffff;vertical-align:top;width:33.3%;">
-              <strong style="color:#0f172a;font-size:12px;">01. Rathinapuri Hub</strong><br>
-              <span style="color:#64748b;line-height:1.5;display:block;margin-top:4px;">
-                11-A, 2nd Cross, Sundarar St, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore 641027
-              </span>
-              <div style="margin-top:6px;font-weight:700;color:#0f172a;">Phone: +91 89409 44000</div>
-              <a href="https://maps.google.com/?q=11-A+2nd+Cross+Sundarar+Street+Rathinapuri+Coimbatore" target="_blank" style="color:#0284c7;font-weight:800;text-decoration:none;display:inline-block;margin-top:6px;">
-                📍 Get Directions →
-              </a>
-            </td>
-            <td style="padding:12px;border:1px solid #cbd5e1;background:#ffffff;vertical-align:top;width:33.3%;">
-              <strong style="color:#0f172a;font-size:12px;">02. Gopalapuram Hub</strong><br>
-              <span style="color:#64748b;line-height:1.5;display:block;margin-top:4px;">
-                6, GJ Chandran Complex, Head Quarters Rd, Opp. CSI Church, Gopalapuram, Coimbatore 641018
-              </span>
-              <div style="margin-top:6px;font-weight:700;color:#0f172a;">Phone: +91 89409 33000</div>
-              <a href="https://maps.google.com/?q=6+GJ+Chandran+Complex+Head+Quarters+Road+Gopalapuram+Coimbatore" target="_blank" style="color:#0284c7;font-weight:800;text-decoration:none;display:inline-block;margin-top:6px;">
-                📍 Get Directions →
-              </a>
-            </td>
-            <td style="padding:12px;border:1px solid #cbd5e1;background:#ffffff;vertical-align:top;width:33.3%;">
-              <strong style="color:#0f172a;font-size:12px;">03. Gandhipuram Hub</strong><br>
-              <span style="color:#64748b;line-height:1.5;display:block;margin-top:4px;">
-                218-628, 1st St, Cross Cut, Gandhipuram, Coimbatore 641012
-              </span>
-              <div style="margin-top:6px;font-weight:700;color:#0f172a;">Phone: +91 0422 2499444</div>
-              <a href="https://maps.google.com/?q=218-628+1st+Street+Cross+Cut+Gandhipuram+Coimbatore" target="_blank" style="color:#0284c7;font-weight:800;text-decoration:none;display:inline-block;margin-top:6px;">
-                📍 Get Directions →
-              </a>
+            <td style="background-color:#FFFFFF;padding:24px 32px 18px 32px;" class="mobile-padding">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="left" valign="middle" style="width:55%;">
+                    <a href="https://www.nunesinstrumentation.com" target="_blank" style="text-decoration:none;display:inline-block;">
+                      <img src="${logoUrl}" alt="NUNES INSTRUMENTATION" width="168" style="display:block;border:0;outline:none;max-width:180px;height:auto;" />
+                    </a>
+                  </td>
+                  <td align="right" valign="middle" style="width:45%;font-size:11px;color:#475569;line-height:1.45;text-align:right;">
+                    <div style="font-weight:bold;color:#092C55;font-size:12px;letter-spacing:0.3px;">NUNES INSTRUMENTATION</div>
+                    <div>Coimbatore, Tamil Nadu, India</div>
+                    <div><a href="tel:+918940944000" style="color:#087EC1;text-decoration:none;font-weight:bold;">+91 8940944000</a></div>
+                    <div><a href="mailto:info@nunesinstrumentation.com" style="color:#087EC1;text-decoration:none;">info@nunesinstrumentation.com</a></div>
+                  </td>
+                </tr>
+              </table>
+              <!-- Subtle Navy-Blue Separator Line with Cyan Accent -->
+              <div style="border-top:2px solid #092C55;border-bottom:1px solid #19B5E5;margin-top:16px;width:100%;"></div>
             </td>
           </tr>
+
+          <!-- ============================================================== -->
+          <!-- 2. MAIN CIRCULAR HEADING                                       -->
+          <!-- ============================================================== -->
+          <tr>
+            <td style="background-color:#F4F7FB;padding:22px 32px;border-bottom:1px solid #E2E8F0;" class="mobile-padding">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="left">
+                    <div style="font-size:11px;font-weight:bold;color:#087EC1;border-left:3px solid #19B5E5;padding-left:8px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">
+                      Official Safety Circular • Ref: ${refNo}
+                    </div>
+                    <h1 class="mobile-heading" style="margin:0 0 8px 0;font-size:23px;font-weight:bold;color:#092C55;line-height:1.35;font-family:Arial,Helvetica,sans-serif;">
+                      ${title}
+                    </h1>
+                    <p style="margin:0;font-size:14.5px;color:#475569;line-height:1.5;">
+                      ${subtitle}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ============================================================== -->
+          <!-- 3. PERSONALISED INSTITUTION DETAILS                             -->
+          <!-- ============================================================== -->
+          <tr>
+            <td style="background-color:#FFFFFF;padding:18px 32px;border-bottom:1px solid #EEF2F6;" class="mobile-padding">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-left:4px solid #087EC1;border-radius:6px;">
+                <tr>
+                  <td style="padding:14px 18px;font-size:13px;line-height:1.6;color:#243247;">
+                    <div style="font-weight:bold;color:#092C55;font-size:14px;">
+                      To: ${institutionName}
+                    </div>
+                    <div style="color:#475569;">
+                      <strong>Attention:</strong> ${attention}
+                    </div>
+                    <div style="color:#475569;">
+                      <strong>Location:</strong> ${locationDistrict}, ${locationState}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ============================================================== -->
+          <!-- 4, 5, 6, 7. BODY CONTENT & PRODUCT OVERVIEW                   -->
+          <!-- ============================================================== -->
+          <tr>
+            <td style="background-color:#FFFFFF;padding:24px 32px 16px 32px;font-size:14.5px;line-height:1.65;color:#243247;" class="mobile-padding">
+              
+              <!-- 4. Salutation -->
+              <p style="margin:0 0 16px 0;font-size:15px;font-weight:bold;color:#092C55;">
+                Respected Sir/Madam,
+              </p>
+
+              <!-- 5. Short Company Introduction -->
+              <p style="margin:0 0 14px 0;">
+                Greetings from NUNES Instrumentation, Coimbatore.
+              </p>
+              <p style="margin:0 0 18px 0;">
+                We are pleased to introduce our range of Alcohol Breath Analysers for preliminary alcohol screening and safety-monitoring applications across educational institutions, workplaces and transport operations.
+              </p>
+
+              <!-- 6. Breath Analyser Product Overview -->
+              <p style="margin:0 0 10px 0;font-weight:bold;color:#092C55;">
+                Our product portfolio includes:
+              </p>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 18px 0;">
+                <tr>
+                  <td style="padding:4px 0 4px 12px;font-size:14px;color:#243247;">
+                    <span style="color:#087EC1;font-weight:bold;margin-right:8px;">•</span> Portable and handheld breath analysers
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0 4px 12px;font-size:14px;color:#243247;">
+                    <span style="color:#087EC1;font-weight:bold;margin-right:8px;">•</span> Rapid screening and non-contact screening devices
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0 4px 12px;font-size:14px;color:#243247;">
+                    <span style="color:#087EC1;font-weight:bold;margin-right:8px;">•</span> Digital testers with LCD displays
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0 4px 12px;font-size:14px;color:#243247;">
+                    <span style="color:#087EC1;font-weight:bold;margin-right:8px;">•</span> Professional models with integrated or external printing
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0 4px 12px;font-size:14px;color:#243247;">
+                    <span style="color:#087EC1;font-weight:bold;margin-right:8px;">•</span> Advanced devices with data storage and reporting features
+                  </td>
+                </tr>
+              </table>
+
+              <!-- 7. Institutional Applications -->
+              <p style="margin:0 0 16px 0;">
+                These solutions may assist with driver screening, institutional transport procedures and workplace safety initiatives, subject to applicable policies and requirements.
+              </p>
+              
+              <p style="margin:0 0 20px 0;">
+                Please find attached our 16-page Breath Analyser Product Catalogue, featuring 14 product models, specifications and QR codes.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- ============================================================== -->
+          <!-- 8. ATTACHED PRODUCT CATALOGUE CARD (Compact Horizontal Card)   -->
+          <!-- ============================================================== -->
+          <tr>
+            <td style="background-color:#FFFFFF;padding:0 32px 24px 32px;" class="mobile-padding">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#F4F7FB;border:1px solid #CFDFEE;border-radius:8px;">
+                <tr>
+                  <td style="padding:16px 18px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <!-- Left: Red PDF Icon -->
+                        <td valign="middle" style="width:48px;padding-right:14px;">
+                          <div style="width:42px;height:42px;background-color:#EF4444;border-radius:8px;text-align:center;line-height:42px;color:#FFFFFF;font-weight:bold;font-size:12px;letter-spacing:0.5px;">
+                            PDF
+                          </div>
+                        </td>
+                        <!-- Center: Catalogue Details -->
+                        <td valign="middle" align="left" style="font-size:13px;line-height:1.45;">
+                          <div style="font-weight:bold;color:#092C55;font-size:14px;">
+                            Breath Analyser Product Catalogue
+                          </div>
+                          <div style="color:#64748b;font-size:12px;margin-top:2px;">
+                            14 Product Models | 16 Pages | PDF (5.16 MB)
+                          </div>
+                        </td>
+                        <!-- Right: Actions -->
+                        <td valign="middle" align="right" class="attachment-btn-cell" style="padding-left:12px;white-space:nowrap;">
+                          <a href="${driveLink}" target="_blank" style="display:inline-block;padding:8px 16px;background-color:#087EC1;color:#FFFFFF;text-decoration:none;font-weight:bold;font-size:12px;border-radius:6px;margin:2px;">
+                            Preview PDF
+                          </a>
+                          <a href="${catalogueUrl}" target="_blank" style="display:inline-block;padding:8px 14px;background-color:#FFFFFF;color:#092C55;border:1px solid #CBD5E1;text-decoration:none;font-weight:bold;font-size:12px;border-radius:6px;margin:2px;">
+                            Online View
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ============================================================== -->
+          <!-- 9. PRIMARY CALL TO ACTION (Exactly Two Clear Actions)           -->
+          <!-- ============================================================== -->
+          <tr>
+            <td style="background-color:#FFFFFF;padding:0 32px 24px 32px;" class="mobile-padding">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#FFFFFF;border-top:1px solid #EEF2F6;padding-top:20px;">
+                <tr>
+                  <td align="left">
+                    <p style="margin:0 0 16px 0;font-size:14px;color:#243247;">
+                      For product information, demonstrations, quotations or institutional requirements, our team would be pleased to assist.
+                    </p>
+                    
+                    <!-- Two Buttons in Clean Responsive Alignment -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 12px 0;">
+                      <tr>
+                        <!-- Primary Button: Corporate Blue -->
+                        <td align="left" class="cta-btn-block" style="padding-right:12px;">
+                          <a href="${quotationMailto}" target="_blank" style="display:inline-block;padding:12px 22px;background-color:#087EC1;color:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;font-weight:bold;text-decoration:none;border-radius:6px;text-align:center;">
+                            Request a Quotation / Demonstration
+                          </a>
+                        </td>
+                        <!-- Secondary Button: White Outline -->
+                        <td align="left" class="cta-btn-block">
+                          <a href="${contactMailto}" target="_blank" style="display:inline-block;padding:11px 20px;background-color:#FFFFFF;color:#092C55;border:1.5px solid #092C55;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;font-weight:bold;text-decoration:none;border-radius:6px;text-align:center;">
+                            Contact NUNES Instrumentation
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Optional WhatsApp Contact as Small Text Link -->
+                    <div style="font-size:12px;color:#64748b;margin-top:8px;">
+                      Prefer WhatsApp? Chat directly with our institutional desk: 
+                      <a href="${whatsAppUrl}" target="_blank" style="color:#087EC1;font-weight:bold;text-decoration:none;margin-left:4px;">
+                        +91 8940944000
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ============================================================== -->
+          <!-- 10. COMPANY SIGNATURE & CONTACT INFORMATION                   -->
+          <!-- ============================================================== -->
+          <tr>
+            <td style="background-color:#FFFFFF;padding:0 32px 28px 32px;font-size:13.5px;line-height:1.6;color:#243247;" class="mobile-padding">
+              <div style="margin-bottom:16px;">
+                Warm regards,<br />
+                <strong style="color:#092C55;">Sales &amp; Institutional Support Team</strong><br />
+                <span>NUNES Instrumentation</span><br />
+                <span style="color:#64748b;">Coimbatore, Tamil Nadu</span>
+              </div>
+
+              <!-- Formal Company Signature Block -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid #E2E8F0;padding-top:16px;">
+                <tr>
+                  <td style="font-size:12px;line-height:1.6;color:#475569;">
+                    <div style="font-weight:bold;color:#092C55;font-size:13px;letter-spacing:0.5px;text-transform:uppercase;">
+                      NUNES INSTRUMENTATION
+                    </div>
+                    <div style="color:#64748b;font-size:11.5px;margin-bottom:6px;">
+                      Industrial | Laboratory | Testing | Measuring | Process Instruments<br />
+                      Sales • Service • Repairs • Calibration
+                    </div>
+                    <div>Coimbatore, Tamil Nadu, India</div>
+                    <div>
+                      Phone: <a href="tel:+918940944000" style="color:#087EC1;text-decoration:none;font-weight:bold;">+91 8940944000</a> / <a href="tel:+918940933000" style="color:#087EC1;text-decoration:none;font-weight:bold;">+91 8940933000</a>
+                    </div>
+                    <div>
+                      Email: <a href="mailto:info@nunesinstrumentation.com" style="color:#087EC1;text-decoration:none;">info@nunesinstrumentation.com</a>
+                    </div>
+                    <div>
+                      Website: <a href="https://www.nunesinstrumentation.com" target="_blank" style="color:#087EC1;text-decoration:none;font-weight:bold;">www.nunesinstrumentation.com</a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ============================================================== -->
+          <!-- 11. UNSUBSCRIBE AND COMPLIANCE FOOTER                          -->
+          <!-- ============================================================== -->
+          <tr>
+            <td style="background-color:#F4F7FB;padding:18px 32px;text-align:center;font-size:11px;color:#64748b;border-top:1px solid #E2E8F0;" class="mobile-padding">
+              <p style="margin:0 0 6px 0;line-height:1.5;">
+                This institutional safety circular was transmitted to institutional correspondents and transport safety administrators for informational and compliance purposes.
+              </p>
+              <p style="margin:0;line-height:1.5;">
+                To update your communication preferences or opt out, please 
+                <a href="mailto:info@nunesinstrumentation.com?subject=${encodeURIComponent(`Unsubscribe Safety Circular - ${institutionName}`)}" style="color:#087EC1;text-decoration:underline;">
+                  Unsubscribe
+                </a>.
+              </p>
+            </td>
+          </tr>
+
         </table>
-      </div>
 
-      <!-- 8. OFFICIAL SIGN-OFF -->
-      <div style="border-top:1px solid #e2e8f0;padding-top:18px;margin-top:24px;font-size:12px;color:#475569;">
-        <strong style="color:#0f172a;font-size:13px;">Regards,</strong><br>
-        <strong style="color:#0284c7;font-size:13px;">${signatoryName}</strong><br>
-        <span>${signatoryTitle}</span><br>
-        <span style="color:#64748b;">${issuingAuthority}</span>
-      </div>
-
-    </div>
-
-    <!-- 9. FOOTER -->
-    <div style="background:#0f172a;padding:18px 28px;text-align:center;font-size:11px;color:#94a3b8;border-top:1px solid #1e293b;">
-      NUNES INSTRUMENTATION &bull; COIMBATORE, TAMIL NADU &bull; SOUTH INDIA CORRIDORS<br>
-      TOBOA, SLOF & KSLOF Certified Fleet Safety Partner &bull; © 2026 Nunes Instruments
-    </div>
-
-  </div>
+      </td>
+    </tr>
+  </table>
 
 </body>
 </html>`;
 }
 
 /**
- * Generates structured, high-readability formatted plain text with clean borders
- * for default URL query string parameters.
+ * Generates clean plain text fallback for email clients that do not support HTML
  */
 export function generateStructuredTransportText(params: TransportEmailTemplateParams): string {
-  const title = params.circularTitle || 'Mandatory Commercial & School Fleet Driver Breath Alcohol Screening Compliance';
-  const refNo = params.refNo || 'NUNES/TR/2026/089';
+  const title = params.circularTitle || 'Breath Analyser Solutions for Institutional & Transport Safety';
+  const refNo = params.refNo || 'NUNES/INST/SAFETY/2026/014';
+  const institutionName = params.companyName || params.recipientName || 'Educational Institution / Transport Fleet Operator';
+  const attention = params.recipientDesignation || 'The Principal / Administrative Officer / Transport Department';
+  const locationDistrict = params.cityHub || params.district || 'Coimbatore';
+  const locationState = params.state || 'Tamil Nadu';
   const driveLink = params.driveLink || OFFICIAL_CIRCULAR_DRIVE_LINK;
   const catalogueUrl = params.catalogueUrl || DEFAULT_CATALOGUE_NETLIFY_URL;
 
-  return `═══════════════════════════════════════════════════════════════
-★ NUNES INSTRUMENTATION — FLEET SAFETY DIRECTIVE (AY 2026-27)
-Ref: ${refNo} • TLS 1.3 Verified • NABL Traceable
-═══════════════════════════════════════════════════════════════
+  return `NUNES INSTRUMENTATION
+Coimbatore, Tamil Nadu, India
+Phone: +91 8940944000 / +91 8940933000
+Email: info@nunesinstrumentation.com
+Website: www.nunesinstrumentation.com
+--------------------------------------------------------------------------------
 
+Ref: ${refNo}
 SUBJECT: ${title}
 
-To All Managing Directors, Fleet Operators, School Bus Correspondents & Depot Controllers,
-Commercial Passenger, School Transport, and Logistics Fleets across Tamil Nadu & Kerala.
+To: ${institutionName}
+Attention: ${attention}
+Location: ${locationDistrict}, ${locationState}
 
-🚨 MANDATORY STATUTORY DIRECTIVE:
-Pursuant to Supreme Court Guidelines on Passenger & School Bus Safety, Tamil Nadu Motor Vehicles Rules, and Kerala MVD Safe Transit Directives, 100% pre-trip breath alcohol screening is mandatory for commercial and institutional vehicle operators before daily dispatch.
+Respected Sir/Madam,
 
-📊 14-MODEL ACCREDITED BREATH ANALYSER SERIES:
-───────────────────────────────────────────────────────────────
-1️⃣ 01 / RAPID SCREENING BATONS:
-   • Screen 40 drivers in under 5 minutes!
-   • Non-contact testing suitable for depot gate shifts.
+Greetings from NUNES Instrumentation, Coimbatore.
 
-2️⃣ 02 / HANDHELD DIGITAL ANALYSERS (Model AT-9000 & A50):
-   • Fuel-cell electrochemical sensors with digital LCD readouts.
-   • High precision with zero cross-interference.
+We are pleased to introduce our range of Alcohol Breath Analysers for preliminary alcohol screening and safety-monitoring applications across educational institutions, workplaces and transport operations.
 
-3️⃣ 03 / EVIDENTIAL RECORDING WITH THERMAL PRINTER (Model AT-8900 / AT-9000):
-   • Built-in facial camera captures driver photo proof.
-   • Built-in thermal printer issues on-spot test slips with timestamp and GPS coordinate tagging.
+Our product portfolio includes:
+• Portable and handheld breath analysers
+• Rapid screening and non-contact screening devices
+• Digital testers with LCD displays
+• Professional models with integrated or external printing
+• Advanced devices with data storage and reporting features
 
-📄 OFFICIAL DIRECTIVE & CATALOGUE:
-• Online Product Specifications: ${catalogueUrl}
-• Cloud Directive Document (Google Drive): ${driveLink}
+These solutions may assist with driver screening, institutional transport procedures and workplace safety initiatives, subject to applicable policies and requirements.
 
-💬 ENQUIRY, LIVE DEMO & QUOTATION:
-• WhatsApp Hotline: +91 89409 44000 (https://wa.me/918940944000)
-• Email Procurement: ${GMAIL_SENDER.email} | CC: ${GMAIL_SENDER.cc}
-• Direct Contact Numbers: 93452 26022 | 89409 44000 | 89409 33000
+Please find attached our 16-page Breath Analyser Product Catalogue, featuring 14 product models, specifications and QR codes.
 
-📍 OUR 3 COIMBATORE OFFICE LOCATIONS:
-───────────────────────────────────────────────────────────────
-01. RATHINAPURI HUB:
-    11-A, 2nd Cross, Sundarar St, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore 641027
-    Phone: +91 89409 44000 | Maps: https://maps.google.com/?q=11-A+2nd+Cross+Sundarar+Street+Rathinapuri+Coimbatore
+Online Catalogue: ${catalogueUrl}
+Official Directive PDF: ${driveLink}
 
-02. GOPALAPURAM HUB:
-    6, GJ Chandran Complex, Head Quarters Rd, Opp. CSI Church, Gopalapuram, Coimbatore 641018
-    Phone: +91 89409 33000 | Maps: https://maps.google.com/?q=6+GJ+Chandran+Complex+Head+Quarters+Road+Gopalapuram+Coimbatore
+For product information, demonstrations, quotations or institutional requirements, our team would be pleased to assist.
 
-03. GANDHIPURAM HUB:
-    218-628, 1st St, Cross Cut, Gandhipuram, Coimbatore 641012
-    Phone: +91 0422 2499444 / +91 89409 44000 | Maps: https://maps.google.com/?q=218-628+1st+Street+Cross+Cut+Gandhipuram+Coimbatore
+Primary Actions:
+1. Request a Quotation / Demonstration: info@nunesinstrumentation.com
+2. WhatsApp Desk: +91 8940944000 (https://wa.me/918940944000)
 
-═══════════════════════════════════════════════════════════════
-Regards,
-Er. K. R. Senthil Kumar, B.E., M.I.E.
-Director of Technical Services & Metrology Standards
-Nunes Instruments — South India Inter-State Transport Directorate
-═══════════════════════════════════════════════════════════════`;
+Warm regards,
+Sales & Institutional Support Team
+NUNES Instrumentation
+Coimbatore, Tamil Nadu
+
+NUNES INSTRUMENTATION
+Industrial | Laboratory | Testing | Measuring | Process Instruments
+Sales • Service • Repairs • Calibration
+Coimbatore, Tamil Nadu, India
+Phone: +91 8940944000 / +91 8940933000
+Email: info@nunesinstrumentation.com
+Website: www.nunesinstrumentation.com
+
+To update communication preferences or unsubscribe, please email info@nunesinstrumentation.com with subject "Unsubscribe".`;
 }
 
 /**
  * Copies rich styled HTML directly to clipboard using ClipboardItem API
- * so when user presses Ctrl+V in Gmail, it pastes the complete formatted design!
  */
 export async function copyStyledHtmlToClipboard(htmlContent: string, plainTextFallback: string): Promise<boolean> {
   try {
@@ -339,7 +545,6 @@ export async function copyStyledHtmlToClipboard(htmlContent: string, plainTextFa
     console.warn('ClipboardItem HTML copy failed, falling back to writeText:', err);
   }
 
-  // Fallback
   if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
     await navigator.clipboard.writeText(htmlContent);
     return true;

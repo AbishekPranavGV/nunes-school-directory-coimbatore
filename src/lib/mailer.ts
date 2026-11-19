@@ -140,6 +140,7 @@ export async function sendEmailViaGmail(params: {
   body: string;
   html?: string;
   appPassword?: string;
+  attachments?: SendMailOptions['attachments'];
 }): Promise<{ success: boolean; messageId?: string; mode: 'LIVE_SMTP' | 'SIMULATED_TEST' | 'WEB_COMPOSE_READY'; error?: string }> {
   const password = params.appPassword || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
 
@@ -184,7 +185,8 @@ export async function sendEmailViaGmail(params: {
     bcc: Array.from(allBccSet),
     subject: params.subject,
     text: finalBody,
-    html: params.html
+    html: params.html,
+    attachments: params.attachments
   };
 
   const info = await transporter.sendMail(mailOptions);
@@ -195,3 +197,4 @@ export async function sendEmailViaGmail(params: {
     mode: 'LIVE_SMTP'
   };
 }
+

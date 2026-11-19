@@ -64,51 +64,33 @@ export const PREBUILT_CIRCULAR_TEMPLATES: CircularV2Template[] = [
     name: 'Breath Analyser Product Introduction (14 Models)',
     category: 'Breath Analyser Introduction',
     badge: 'Default Official Campaign',
-    title: 'Introduction of Breath Analyser Solutions for Institutional & Transport Safety',
+    title: 'Breath Analyser Solutions for Institutional & Transport Safety',
     referenceNumber: 'NUNES/INST/SAFETY/2026/014',
     targetAudience: 'To The Principal / Administrative Officer / Transport Department',
-    subject: 'Introduction of Breath Analyser Solutions for Institutional & Transport Safety',
-    body: `To
-The Principal / Administrative Officer / Transport Department
-
-Subject: Introduction of Breath Analyser Solutions for Institutional & Transport Safety
-
-Respected Sir/Madam,
+    subject: 'Breath Analyser Solutions for Institutional & Transport Safety',
+    body: `Respected Sir/Madam,
 
 Greetings from NUNES Instrumentation, Coimbatore.
 
-We are pleased to introduce our range of Alcohol Breath Analysers, designed for preliminary alcohol screening and safety-monitoring applications in institutions, workplaces, and transport operations.
+We are pleased to introduce our range of Alcohol Breath Analysers for preliminary alcohol screening and safety-monitoring applications across educational institutions, workplaces and transport operations.
 
-Our product range includes:
-• Portable and handheld alcohol breath testers
+Our product portfolio includes:
+• Portable and handheld breath analysers
 • Rapid screening and non-contact screening devices
-• Digital breath analysers with LCD displays
-• Professional breath analysers with printing options
-• Advanced models with data storage and reporting capabilities
+• Digital testers with LCD displays
+• Professional models with integrated or external printing
+• Advanced devices with data storage and reporting features
 
-These solutions may support transport safety procedures, driver screening, workplace safety programmes, and institutional safety initiatives, subject to your organisation's policies and applicable requirements.
+These solutions may assist with driver screening, institutional transport procedures and workplace safety initiatives, subject to applicable policies and requirements.
 
-Please find attached our Breath Analyser Product Catalogue featuring 14 models, including product specifications and QR codes for reference.
+Please find attached our 16-page Breath Analyser Product Catalogue, featuring 14 product models, specifications and QR codes.
 
-NUNES Instrumentation also provides product guidance, sales, service, repairs, and calibration support.
-
-For technical details, product demonstrations, quotations, or bulk institutional requirements, please contact us.
-
-NUNES INSTRUMENTATION
-Coimbatore, Tamil Nadu
-Phone: 8940944000 / 8940933000
-Email: info@nunesinstrumentation.com
-Website: www.nunesinstrumentation.com
-
-Thank you for your consideration.
+For product information, demonstrations, quotations or institutional requirements, our team would be pleased to assist.
 
 Warm regards,
 Sales & Institutional Support Team
 NUNES Instrumentation
-
-Attachment: Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf
-
-If you prefer not to receive further product communications, please reply with "Unsubscribe".`,
+Coimbatore, Tamil Nadu`,
     attachmentName: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
     attachmentSizeBytes: 5410301,
     attachmentPages: 16,

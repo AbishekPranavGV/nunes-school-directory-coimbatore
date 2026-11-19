@@ -82,6 +82,7 @@ import {
 } from '@/lib/data/circularConstants';
 import { NunesLogo } from './NunesLogo';
 import { CircularCenterHub } from './circulars/CircularCenterHub';
+import { generateExecutiveTransportHtml } from '@/lib/transportEmailTemplates';
 
 interface CircularCenterViewProps {
   schools: SchoolRecord[];
@@ -1350,7 +1351,21 @@ _YouTube • Instagram • Google_
         </div>
     `).join('');
 
-    const htmlContent = `<!DOCTYPE html>
+    const htmlContent = generateExecutiveTransportHtml({
+      circularTitle: details.title,
+      refNo: details.referenceNumber,
+      companyName: recipientName,
+      recipientName: recipientName,
+      recipientDesignation: details.salutation,
+      district: recipientBlock || recipientTaluk || 'Coimbatore',
+      state: 'Tamil Nadu',
+      bodyText: getInterpolatedBody(editBody),
+      attachmentName: details.displayAttachmentName,
+      driveLink: driveLink,
+      catalogueUrl: netlifyUrl
+    });
+
+    const _legacyHtmlContent = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -2140,14 +2155,14 @@ _YouTube • Instagram • Google_
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
                 <span>Circular Communication & Outreach Center</span>
               </h2>
-              <span className="px-3 py-1 rounded-full text-[11px] font-black bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 flex items-center gap-1.5 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>RADAR ACTIVE • 0% BAN RISK</span>
+              <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-400/20 text-sky-200 border border-sky-400/30 flex items-center gap-1.5 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-sky-400" />
+                <span>OFFICIAL OUTREACH • ACTIVE</span>
               </span>
             </div>
 
             <p className="text-xs sm:text-sm text-sky-100/90 leading-relaxed font-normal">
-              Autonomous Metrology Directive Ingestion, Official Formal Gmail Synthesizer & Safe Anti-Ban WhatsApp Queue. Pre-configured with Supreme Court fleet safety mandates, 14 certified breath analysers, and all 3 Coimbatore locations verbatim.
+              Autonomous Metrology Directive Ingestion, Official Formal Gmail Synthesizer &amp; Multi-Channel Institutional Queue. Pre-configured with Supreme Court fleet safety mandates, 14 certified breath analysers, and all 3 Coimbatore locations verbatim.
             </p>
 
             {/* Live Telemetry Metric Strip */}

@@ -10,78 +10,43 @@ export const dynamic = 'force-dynamic';
 let circularsStore: CircularItem[] = [
   {
     id: 'circ_2026_001',
-    title: 'Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models)',
+    title: 'Breath Analyser Solutions for Institutional & Transport Safety',
     reference_number: 'NUNES/EDU/SAFETY/2026/CIRC-014',
     circular_date: '2026-04-20',
-    subject: 'Institutional Campus Safety: Alcohol Breath Analyser Solutions for Educational Institutions (14 Available Models) - Nunes Instrumentation',
-    body_text: `NUNES INSTRUMENTATION
-PRECISION INSTRUMENTS • SAFETY & SCREENING SOLUTIONS
+    subject: 'Breath Analyser Solutions for Institutional & Transport Safety',
+    body_text: `Respected Sir/Madam,
 
-INSTITUTIONAL CAMPUS SAFETY
-Alcohol Breath Analyser Solutions for Educational Institutions
-A focused 14-model range for gate screening, hostel monitoring and campus security applications.
-14 AVAILABLE MODELS
+Greetings from NUNES Instrumentation, Coimbatore.
 
-Dear Principal / Administration / Procurement Team,
-{{School_Name}} (UDISE: {{UDISE_Code}}),
-{{Block}}, {{Taluk}}.
+We are pleased to introduce our range of Alcohol Breath Analysers for preliminary alcohol screening and safety-monitoring applications across educational institutions, workplaces and transport operations.
 
-Greetings from Nunes Instrumentation, Coimbatore. We are pleased to present our range of alcohol breath analysers for educational institutions. The range is intended for screening requirements at campus entrances, hostels and designated security checkpoints.
+Our product portfolio includes:
+• Portable and handheld breath analysers
+• Rapid screening and non-contact screening devices
+• Digital testers with LCD displays
+• Professional models with integrated or external printing
+• Advanced devices with data storage and reporting features
 
-PRODUCT CATEGORIES:
+These solutions may assist with driver screening, institutional transport procedures and workplace safety initiatives, subject to applicable policies and requirements.
 
-01 / RAPID SCREENING
-Non-contact Screening Batons
-Suitable for gate, hostel and checkpoint screening
+Please find attached our 16-page Breath Analyser Product Catalogue, featuring 14 product models, specifications and QR codes.
 
-02 / HANDHELD TESTING
-Digital Breath Analysers
-Portable units with clear digital / LCD readouts
+For product information, demonstrations, quotations or institutional requirements, our team would be pleased to assist.
 
-03 / ADVANCED RECORDING
-Printer-enabled Models
-Selected units support printed test records
-
-ATTACHED PRODUCT CATALOGUE:
-14-model Breath Analyser Catalogue
-Please refer to the attached catalogue for model-wise specifications, product details and QR codes. Contact our team for model guidance and a commercial quotation.
-
-Official Catalogue & Directive Document (Google Drive):
-https://drive.google.com/file/d/1PgEWdCogcIsrZ3Xv9q6NdDtRhgL8bSeF/view?usp=sharing
-
-Online Product Catalogue & Specifications:
-https://darling-torrone-c0aaf9.netlify.app/
-
-ENQUIRY & QUOTATION:
-For product selection, technical details or quotation, please contact us through your preferred channel:
-• WhatsApp Enquiry: +91 89409 44000 (https://wa.me/918940944000)
-• Email Enquiry: nunesalcotest@gmail.com | CC: nunescbe@gmail.com
-
-Direct Contact Numbers:
-93452 26022  |  89409 44000  |  89409 33000
-
-COIMBATORE OFFICE LOCATIONS (3 OFFICES):
-Select an office below to open directions in Google Maps:
-
-01 Rathinapuri:
-11-A, 2nd Cross, Sundarar Street, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, Tamil Nadu 641027.
-Directions: https://maps.google.com/?q=11.0366,76.9661
-
-02 Gopalapuram:
-6, GJ Chandran Complex, Head Quarters Road, Opp. CSI Church, Gopalapuram, Coimbatore, Tamil Nadu 641018.
-Directions: https://maps.google.com/?q=11.0028,76.9680
-
-03 Gandhipuram:
-218-628, 1st Street, Cross Cut, Gandhipuram, Coimbatore, Tamil Nadu 641012.
-Directions: https://maps.google.com/?q=11.0182,76.9658
-
-Regards,
-Nunes Instrumentation Team
+Warm regards,
+Sales & Institutional Support Team
+NUNES Instrumentation
 Coimbatore, Tamil Nadu
 
-Follow Us: YouTube | Instagram | Google
-NUNES INSTRUMENTATION • COIMBATORE, TAMIL NADU
-© 2026 Nunes Instrumentation. Reply "Unsubscribe" to opt out.`,
+NUNES INSTRUMENTATION
+Industrial | Laboratory | Testing | Measuring | Process Instruments
+Sales • Service • Repairs • Calibration
+Coimbatore, Tamil Nadu, India
+Phone: +91 8940944000 / +91 8940933000
+Email: info@nunesinstrumentation.com
+Website: www.nunesinstrumentation.com
+
+To update communication preferences or unsubscribe, please email info@nunesinstrumentation.com with subject "Unsubscribe".`,
     extracted_text: `NUNES INSTRUMENTATION • PRECISION INSTRUMENTS • SAFETY & SCREENING SOLUTIONS
 INSTITUTIONAL CAMPUS SAFETY
 Alcohol Breath Analyser Solutions for Educational Institutions

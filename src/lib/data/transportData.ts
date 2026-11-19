@@ -170,42 +170,46 @@ export const BOUNCED_EMAILS_DATA: BouncedEmailRecord[] = [
 export const TRANSPORT_CIRCULARS_DATA: TransportCircular[] = [
   {
     id: 'CIR-2026-SAF-089',
-    title: 'Mandatory Commercial & School Fleet Driver Breath Alcohol Screening Compliance',
+    title: 'Breath Analyser Solutions for Institutional & Transport Safety',
     ref_no: 'NUNES/TR/2026/089',
     category: 'Fleet Safety & RTO Mandate' as any,
     target_audience: '🌐 All Registered Transport Fleets (South India - TN & KL)' as any,
     target_districts: ['all'],
     target_state: 'all',
-    subject: 'Deployment of Certified Breath Alcohol Analysers with Evidential Camera, GPS & Thermal Printing for Fleet Safety (AY 2026-27)',
-    body: `To All Managing Directors, Fleet Operators, School Bus Correspondents, and Depot Managers,
-Commercial Passenger, School Transport, and Logistics Fleets across Tamil Nadu & Kerala.
+    subject: 'Breath Analyser Solutions for Institutional & Transport Safety',
+    body: `Respected Sir/Madam,
 
-Subject: Mandatory Pre-Trip Driver Alcohol Screening & Evidential Breath Analyser Deployment (Academic & Transport Fiscal Year 2026-27).
+Greetings from NUNES Instrumentation, Coimbatore.
 
-Pursuant to Supreme Court Guidelines on Passenger & School Bus Safety, Tamil Nadu Motor Vehicles Rules, and Kerala MVD Safe Transit Directives, 100% pre-trip breath alcohol screening is mandatory for commercial and institutional vehicle operators before daily dispatch.
+We are pleased to introduce our range of Alcohol Breath Analysers for preliminary alcohol screening and safety-monitoring applications across educational institutions, workplaces and transport operations.
 
-Nunes Instruments presents our accredited 14-Model Breath Alcohol Analyser series:
-1. Model AT-9000: Built-in Camera for facial photo proof + Built-in Thermal Slip Printer.
-2. Model A50: Rugged fuel-cell electrochemical sensor with integrated thermal receipt printer.
-3. Model AT-8900: Detachable thermal printer + GPS coordinate tagging on every test log.
-4. Rapid Screening Batons: Non-contact screening in under 5 seconds (screen 40 drivers in 5 mins!).
+Our product portfolio includes:
+• Portable and handheld breath analysers
+• Rapid screening and non-contact screening devices
+• Digital testers with LCD displays
+• Professional models with integrated or external printing
+• Advanced devices with data storage and reporting features
 
-Complimentary On-Campus / Depot Fleet Safety Demonstration & Calibration Audits are available at our Coimbatore zonal hubs:
-1. RATHINAPURI: 11-A, 2nd Cross, Sundarar St, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, TN 641027 | Phone: +91 89409 44000
-2. GOPALAPURAM: 6, GJ Chandran Complex, Head Quarters Rd, Opp. to CSI Church, Gopalapuram, Coimbatore, TN 641018 | Phone: +91 89409 33000
-3. GANDHIPURAM: 218-628, 1st St, Cross Cut, Gandhipuram, Coimbatore, TN 641012 | Phone: +91 0422 2499444 / +91 89409 44000
+These solutions may assist with driver screening, institutional transport procedures and workplace safety initiatives, subject to applicable policies and requirements.
 
-Catalogue: https://darling-torrone-c0aaf9.netlify.app/ | WhatsApp Hotline: +91 89409 44000`,
+Please find attached our 16-page Breath Analyser Product Catalogue, featuring 14 product models, specifications and QR codes.
+
+For product information, demonstrations, quotations or institutional requirements, our team would be pleased to assist.
+
+Warm regards,
+Sales & Institutional Support Team
+NUNES Instrumentation
+Coimbatore, Tamil Nadu`,
     signatory_name: 'Er. K. R. Senthil Kumar, B.E., M.I.E.',
     signatory_title: 'Director of Technical Services & Metrology Standards',
     issuing_authority: 'Nunes Instruments — Fleet Safety & Precision Metrology Directorate',
-    attachment_name: 'Nunes_Breath_Analyser_Catalogue_14_Models_2026.pdf',
+    attachment_name: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
     attachments: [
       {
         id: 'att-catalogue-1',
-        name: 'Nunes_Breath_Analyser_Catalogue_14_Models_2026.pdf',
+        name: 'Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf',
         type: 'pdf',
-        size: '1.8 MB'
+        size: '5.16 MB'
       }
     ],
     created_at: '2026-04-18T07:30:00Z',

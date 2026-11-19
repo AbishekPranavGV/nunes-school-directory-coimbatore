@@ -650,46 +650,65 @@ export const CreateCircularSection: React.FC<CreateCircularSectionProps> = ({
             </div>
 
             <div className="p-4 space-y-3 text-xs font-sans max-h-[500px] overflow-y-auto bg-slate-50/50">
-              {/* Mini Brand Banner */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-slate-950 to-indigo-950 text-white text-center space-y-1">
-                <span className="text-[9px] font-bold text-sky-300 uppercase tracking-widest">
-                  NUNES INSTRUMENTATION
-                </span>
-                <p className="font-extrabold text-xs text-white leading-tight">
-                  {subject || 'Subject Preview'}
-                </p>
+              {/* V3.0 Clean Letterhead with Logo & Contact */}
+              <div className="p-3 bg-white rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between pb-2 border-b-2 border-[#092C55]">
+                  <div>
+                    <span className="font-extrabold text-[#092C55] text-xs tracking-wider">
+                      NUNES INSTRUMENTATION
+                    </span>
+                    <p className="text-[10px] text-slate-500">Coimbatore, Tamil Nadu, India</p>
+                  </div>
+                  <div className="text-right text-[10px] text-[#087EC1] font-semibold">
+                    <div>+91 8940944000</div>
+                    <div>info@nunesinstrumentation.com</div>
+                  </div>
+                </div>
+
+                <div className="pt-2 text-center">
+                  <span className="text-[9px] font-bold text-[#087EC1] uppercase tracking-wider block">
+                    Official Safety Circular • Ref: {referenceNo}
+                  </span>
+                  <p className="font-extrabold text-xs text-[#092C55] leading-tight mt-0.5">
+                    {subject || 'Breath Analyser Solutions for Institutional & Transport Safety'}
+                  </p>
+                </div>
               </div>
 
-              {/* Recipient Greeting */}
-              <div className="p-2.5 bg-white rounded-xl border border-slate-200 text-slate-700 text-[11px]">
-                <strong>To:</strong> Stanes Anglo Indian Higher Secondary School
+              {/* Personalised Institution Details Card */}
+              <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 border-l-4 border-l-[#087EC1] text-slate-700 text-[11px] leading-relaxed">
+                <div className="font-bold text-[#092C55]">To: Stanes Anglo Indian Higher Secondary School</div>
+                <div className="text-slate-500 text-[10px]"><strong>Attention:</strong> The Principal / Transport &amp; Safety Committee</div>
+                <div className="text-slate-500 text-[10px]"><strong>Location:</strong> Coimbatore, Tamil Nadu</div>
               </div>
 
               {/* Message text snippet */}
               <div className="p-3 bg-white rounded-xl border border-slate-200 text-slate-800 text-[11px] leading-relaxed whitespace-pre-line font-sans">
-                {bodyText.slice(0, 420)}...
+                {bodyText.slice(0, 360)}...
               </div>
 
               {/* Attached PDF pill in preview */}
-              <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between text-[11px]">
+              <div className="p-2.5 bg-[#F4F7FB] border border-[#CFDFEE] rounded-xl flex items-center justify-between text-[11px]">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-red-600" />
-                  <span className="font-bold text-red-950 truncate max-w-[200px]">
+                  <div className="w-6 h-6 rounded bg-red-600 text-white font-bold text-[9px] flex items-center justify-center shrink-0">
+                    PDF
+                  </div>
+                  <span className="font-bold text-[#092C55] truncate max-w-[200px]">
                     {currentAttachment.filename}
                   </span>
                 </div>
-                <span className="text-[10px] font-mono font-bold text-red-800">
-                  {currentAttachment.sizeFormatted}
+                <span className="text-[10px] font-mono font-bold text-slate-600">
+                  {currentAttachment.sizeFormatted} ({currentAttachment.pageCount}p)
                 </span>
               </div>
 
-              {/* Touch reply buttons in preview */}
-              <div className="grid grid-cols-2 gap-1.5 text-[10px] font-bold">
-                <div className="p-2 rounded-lg bg-emerald-600 text-white text-center">
-                  Request Quotation
+              {/* Exactly 2 Clean V3.0 CTAs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[10px] font-bold pt-1">
+                <div className="p-2 rounded-lg bg-[#087EC1] text-white text-center shadow-xs">
+                  Request a Quotation / Demo
                 </div>
-                <div className="p-2 rounded-lg bg-sky-600 text-white text-center">
-                  Book Free Demo
+                <div className="p-2 rounded-lg bg-white text-[#092C55] border border-[#092C55] text-center">
+                  Contact NUNES
                 </div>
               </div>
             </div>
