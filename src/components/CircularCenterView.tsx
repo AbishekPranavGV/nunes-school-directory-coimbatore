@@ -3473,538 +3473,232 @@ _YouTube • Instagram • Google_
                         {emailViewMode === 'rich_executive' ? (() => {
                           const exec = getExecutiveDetails();
                           return (
-                            <div className="p-4 sm:p-7 bg-gradient-to-b from-slate-50 via-white to-sky-50/20 space-y-6 animate-in fade-in-50 duration-300">
-                              
-                              {/* 1. HERO EXECUTIVE BRAND BANNER */}
-                              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-sky-950 to-indigo-950 p-6 sm:p-8 text-white shadow-xl border border-sky-500/30">
-                                {/* Decorative ambient glowing orbs */}
-                                <div className="absolute -top-12 -right-12 w-64 h-64 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
-                                <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
-
-                                <div className="relative z-10 space-y-3">
-                                  {/* Top Brand Banner with Animated Company Logo & Badges */}
-                                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-white/10">
-                                    <NunesLogo size="lg" showText={true} variant="light" animated={true} />
-                                    
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-500 text-slate-950 flex items-center gap-1.5 shadow-sm">
-                                        <span className="relative flex h-2 w-2">
-                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
-                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                                        </span>
-                                        <span>{exec.badgeText}</span>
-                                      </span>
-                                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-amber-400/20 text-amber-200 border border-amber-400/40">
-                                        {exec.categoryBadge}
-                                      </span>
-                                      <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-white/10 text-sky-200 border border-white/15">
-                                        ESTD 1974 • COIMBATORE
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  {/* Title & Directive */}
-                                  <div className="pt-2">
-                                    <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
-                                      {exec.title}
-                                    </h2>
-                                    <p className="text-xs sm:text-sm text-sky-200 font-medium mt-1 leading-relaxed max-w-2xl">
-                                      {exec.subtitle}
-                                    </p>
-                                  </div>
-
-                                  {/* Dynamic Recipient Institutional Plaque */}
-                                  <div className="mt-4 p-3.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                    <div>
-                                      <p className="text-[11px] font-bold text-sky-300 uppercase tracking-wide">
-                                        Official Directive Addressed To:
-                                      </p>
-                                      <p className="text-sm font-extrabold text-white flex items-center gap-1.5 mt-0.5">
-                                        <span>{activeRecipient.name}</span>
-                                        <span className="text-[11px] font-mono font-medium text-sky-200">(UDISE: {activeRecipient.udise})</span>
-                                      </p>
-                                      <p className="text-[11px] text-slate-300">
-                                        {activeRecipient.block}, {activeRecipient.taluk}
-                                      </p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-[10px] font-mono font-bold flex items-center gap-1">
-                                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                                        <span>Verified Institution</span>
-                                      </span>
-                                      <span className="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-400/40 text-sky-200 text-[10px] font-mono font-bold">
-                                        Ref: {exec.referenceNumber}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* 2. SALUTATION & GREETING */}
-                              <div className="p-4 sm:p-5 bg-white rounded-xl border border-slate-200 shadow-xs space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
-                                <p className="font-semibold text-sky-900">
-                                  {exec.salutation}
-                                </p>
-                                <p className="whitespace-pre-line">
-                                  {exec.greeting}
-                                </p>
-                              </div>
-
-                              {/* ⚡ HIGH-CONVERTING 1-CLICK ACTION DESK (FOR FAST CLIENT REPLY & LEAD CAPTURE) */}
-                              <div className="p-5 sm:p-6 bg-gradient-to-br from-emerald-50 via-teal-50/30 to-sky-50 rounded-2xl border-2 border-emerald-400 shadow-sm space-y-4">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-emerald-200">
-                                  <div className="flex items-center gap-2">
-                                    <span className="p-1.5 rounded-lg bg-emerald-600 text-white shadow-xs">
-                                      <Zap className="w-4 h-4 text-amber-300 fill-amber-300 animate-pulse" />
-                                    </span>
-                                    <div>
-                                      <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
-                                        <span>⚡ 1-Click Fast Reply Desk (Instant Lead Conversion)</span>
-                                      </h3>
-                                      <p className="text-[11px] text-emerald-800 font-medium">
-                                        Direct actions for principals, management & procurement heads:
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500 text-slate-950 flex items-center gap-1 self-start sm:self-auto shadow-2xs">
-                                    <Sparkles className="w-3 h-3" />
-                                    <span>Zero Friction • Lead Magnet</span>
-                                  </span>
-                                </div>
-
-                                {/* 4 Primary Action Buttons with Live Clickability */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                                  
-                                  {/* Button 1: Request Quote & 35% Subsidy */}
-                                  <a
-                                    href={`mailto:nunesalcotest@gmail.com?cc=nunescbe@gmail.com&subject=${encodeURIComponent('Quotation & 35% Subsidy Request: ' + exec.title + ' - ' + activeRecipient.name)}&body=${encodeURIComponent('Dear Nunes Instrumentation,\n\nWe request an official rate contract quotation and 35% institutional educational subsidy for our campus:\n\nInstitution: ' + activeRecipient.name + '\nUDISE: ' + activeRecipient.udise + '\nLocation: ' + activeRecipient.block + ', ' + activeRecipient.taluk + '\nRequirement: 14-Model Alcohol Breath Analyser Solutions (Gate screening batons & Handheld testing units)\nContact Person: ' + (activeRecipient.principal || 'Administration') + '\nOfficial Email: ' + activeRecipient.email + '\n\nPlease send the detailed commercial quotation PDF.')}`}
-                                    className="p-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer hover:-translate-y-0.5"
-                                  >
-                                    <div className="flex items-center justify-between mb-1.5">
-                                      <span className="p-1 rounded-lg bg-white/20 text-white">
-                                        <FileSpreadsheet className="w-3.5 h-3.5" />
-                                      </span>
-                                      <span className="text-[9px] font-black bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded-full uppercase">
-                                        35% Subsidy
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <div className="text-xs font-black leading-tight flex items-center gap-1">
-                                        <span>Request Quote PDF</span>
-                                        <ArrowRight className="w-3 h-3 opacity-70 group-hover:translate-x-1 transition-transform" />
-                                      </div>
-                                      <p className="text-[10px] text-emerald-100 mt-0.5">Pre-filled institutional pricing</p>
-                                    </div>
-                                  </a>
-
-                                  {/* Button 2: Book Free Campus Demo */}
-                                  <button
-                                    type="button"
-                                    onClick={() => setIsLeadBookingModalOpen(true)}
-                                    className="p-3 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer hover:-translate-y-0.5 text-left"
-                                  >
-                                    <div className="flex items-center justify-between mb-1.5">
-                                      <span className="p-1 rounded-lg bg-white/20 text-white">
-                                        <Award className="w-3.5 h-3.5" />
-                                      </span>
-                                      <span className="text-[9px] font-black bg-white/20 text-sky-100 px-1.5 py-0.2 rounded-full uppercase">
-                                        Zero Cost
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <div className="text-xs font-black leading-tight flex items-center gap-1">
-                                        <span>Book Free Demo</span>
-                                        <ArrowRight className="w-3 h-3 opacity-70 group-hover:translate-x-1 transition-transform" />
-                                      </div>
-                                      <p className="text-[10px] text-sky-100 mt-0.5">On-campus trial & kit test</p>
-                                    </div>
-                                  </button>
-
-                                  {/* Button 3: Instant WhatsApp Consultation */}
-                                  <a
-                                    href={`https://wa.me/918940944000?text=${encodeURIComponent('Hello Nunes Instruments, I am reaching out from ' + activeRecipient.name + ' (UDISE: ' + activeRecipient.udise + '). We received the circular regarding \"' + exec.title + '\" and request an official quote, 35% subsidy details, and a free campus demo.')}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer hover:-translate-y-0.5"
-                                  >
-                                    <div className="flex items-center justify-between mb-1.5">
-                                      <span className="p-1 rounded-lg bg-white/20 text-white">
-                                        <MessageSquare className="w-3.5 h-3.5" />
-                                      </span>
-                                      <span className="text-[9px] font-bold bg-white/20 text-emerald-100 px-1.5 py-0.2 rounded-full font-mono">
-                                        89409 44000
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <div className="text-xs font-black leading-tight flex items-center gap-1">
-                                        <span>WhatsApp Chat</span>
-                                        <ExternalLink className="w-3 h-3 opacity-70 group-hover:translate-x-0.5 transition-transform" />
-                                      </div>
-                                      <p className="text-[10px] text-emerald-100 mt-0.5">Instant technical response</p>
-                                    </div>
-                                  </a>
-
-                                  {/* Button 4: Direct Hotline */}
-                                  <a
-                                    href="tel:+919345226022"
-                                    className="p-3 bg-gradient-to-r from-indigo-600 to-slate-800 hover:from-indigo-700 hover:to-slate-900 text-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer hover:-translate-y-0.5"
-                                  >
-                                    <div className="flex items-center justify-between mb-1.5">
-                                      <span className="p-1 rounded-lg bg-white/20 text-white">
-                                        <Phone className="w-3.5 h-3.5 text-sky-200" />
-                                      </span>
-                                      <span className="text-[9px] font-bold bg-white/20 text-indigo-100 px-1.5 py-0.2 rounded-full font-mono">
-                                        93452 26022
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <div className="text-xs font-black leading-tight flex items-center gap-1">
-                                        <span>Direct Hotline</span>
-                                        <ArrowRight className="w-3 h-3 opacity-70 group-hover:translate-x-1 transition-transform" />
-                                      </div>
-                                      <p className="text-[10px] text-indigo-200 mt-0.5">Call Safety Specialist</p>
-                                    </div>
-                                  </a>
-
-                                </div>
-
-                                {/* Fast-Track Option Pills */}
-                                <div className="p-3 bg-white/80 rounded-xl border border-emerald-200/80 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                                  <span className="font-extrabold text-slate-800 flex items-center gap-1">
-                                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                                    <span>Fast-Track Client Responses:</span>
-                                  </span>
-
-                                  <div className="flex flex-wrap items-center gap-1.5">
-                                    <a
-                                      href={`mailto:nunesalcotest@gmail.com?subject=${encodeURIComponent('Option A - Quotation Request: ' + activeRecipient.name)}&body=${encodeURIComponent('Yes, please send the official 14-model quote and subsidy pricing to ' + activeRecipient.email)}`}
-                                      className="px-2 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold transition-colors cursor-pointer"
-                                    >
-                                      ✓ Option A: Send Quote PDF
+                            <div className="p-4 sm:p-8 bg-[#F4F7FB] animate-in fade-in-50 duration-300">
+                              <div className="max-w-[660px] mx-auto bg-white rounded-xl border border-[#D9E2EC] shadow-sm overflow-hidden text-[#243247] font-sans">
+                                
+                                {/* 1. OFFICIAL NUNES LOGO & LETTERHEAD */}
+                                <div className="p-6 sm:p-8 pb-4 bg-white">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <a href="https://www.nunesinstrumentation.com" target="_blank" rel="noreferrer" className="inline-block">
+                                      <img 
+                                        src="/images/nunes_logo_clean.png" 
+                                        alt="NUNES INSTRUMENTATION" 
+                                        className="h-14 sm:h-16 w-auto object-contain block" 
+                                      />
                                     </a>
+                                    <div className="text-left sm:text-right text-[11px] text-slate-600 leading-snug">
+                                      <div className="font-bold text-[#092C55] text-xs tracking-wider">NUNES INSTRUMENTATION</div>
+                                      <div>Coimbatore, Tamil Nadu, India</div>
+                                      <div><a href="tel:+918940944000" className="text-[#087EC1] font-bold hover:underline">+91 8940944000</a></div>
+                                      <div><a href="mailto:info@nunesinstrumentation.com" className="text-[#087EC1] hover:underline">info@nunesinstrumentation.com</a></div>
+                                    </div>
+                                  </div>
+                                  {/* Subtle Navy-Blue Separator Line with Cyan Accent */}
+                                  <div className="border-t-2 border-[#092C55] border-b border-[#19B5E5] mt-4 w-full" />
+                                </div>
 
-                                    <a
-                                      href={`mailto:nunesalcotest@gmail.com?subject=${encodeURIComponent('Option B - Free Demo Request: ' + activeRecipient.name)}&body=${encodeURIComponent('Yes, we want a free demo kit at ' + activeRecipient.name + '. Please call us to confirm date.')}`}
-                                      className="px-2 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-900 font-bold transition-colors cursor-pointer"
-                                    >
-                                      ✓ Option B: Schedule Campus Demo
-                                    </a>
+                                {/* 2. MAIN CIRCULAR HEADING */}
+                                <div className="p-5 sm:p-6 bg-[#F4F7FB] border-b border-[#E2E8F0]">
+                                  <div className="text-[11px] font-bold text-[#087EC1] border-l-[3px] border-[#19B5E5] pl-2 uppercase tracking-wider mb-2">
+                                    Official Safety Circular • Ref: {exec.referenceNumber}
+                                  </div>
+                                  <h1 className="text-lg sm:text-2xl font-bold text-[#092C55] leading-snug">
+                                    {exec.title}
+                                  </h1>
+                                  <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+                                    {exec.subtitle}
+                                  </p>
+                                </div>
 
-                                    <a
-                                      href={`https://wa.me/918940944000?text=${encodeURIComponent('Option C: Quick callback requested for ' + activeRecipient.name)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="px-2 py-1 rounded-lg bg-teal-100 hover:bg-teal-200 text-teal-900 font-bold transition-colors cursor-pointer"
-                                    >
-                                      ✓ Option C: Instant Callback
-                                    </a>
+                                {/* 3. PERSONALISED INSTITUTION DETAILS */}
+                                <div className="p-4 sm:p-6 bg-white border-b border-[#EEF2F6]">
+                                  <div className="bg-[#F8FAFC] border border-[#E2E8F0] border-l-4 border-l-[#087EC1] rounded-md p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed">
+                                    <div className="font-bold text-[#092C55] text-sm">
+                                      To: {activeRecipient.name}
+                                    </div>
+                                    <div className="text-slate-600">
+                                      <strong className="text-slate-700">Attention:</strong> {activeRecipient.principal ? `${activeRecipient.principal} (Principal / Correspondent)` : 'The Principal / Administrative Officer / Transport Department'}
+                                    </div>
+                                    <div className="text-slate-600">
+                                      <strong className="text-slate-700">Location:</strong> {activeRecipient.block || activeRecipient.taluk || 'Coimbatore'}, Tamil Nadu
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
 
-                              {/* 3. THREE PRODUCT CATEGORIES / DIRECTIVE HIGHLIGHTS (DYNAMIC 100,000,000x INTERACTIVE CARDS) */}
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                    <Layers className="w-4 h-4 text-sky-600" />
-                                    <span>Product Categories & Specifications</span>
-                                  </h3>
-                                  <span className="text-[10px] font-mono font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full">
-                                    Metrology Calibrated
-                                  </span>
+                                {/* 4, 5, 6, 7. BODY CONTENT & PRODUCT OVERVIEW */}
+                                <div className="p-5 sm:p-7 bg-white text-xs sm:text-[14.5px] leading-relaxed text-[#243247] space-y-4">
+                                  {/* 4. Professional Salutation */}
+                                  <p className="font-bold text-[#092C55] text-sm sm:text-base">
+                                    {exec.salutation || 'Respected Sir/Madam,'}
+                                  </p>
+
+                                  {/* 5. Short Company Introduction */}
+                                  <p>
+                                    Greetings from NUNES Instrumentation, Coimbatore.
+                                  </p>
+                                  <p>
+                                    We are pleased to introduce our range of Alcohol Breath Analysers for preliminary alcohol screening and safety-monitoring applications across educational institutions, workplaces and transport operations.
+                                  </p>
+
+                                  {/* 6. Breath Analyser Product Overview */}
+                                  <p className="font-bold text-[#092C55]">
+                                    Our product portfolio includes:
+                                  </p>
+                                  <ul className="space-y-1.5 pl-1">
+                                    {[
+                                      'Portable and handheld breath analysers',
+                                      'Rapid screening and non-contact screening devices',
+                                      'Digital testers with LCD displays',
+                                      'Professional models with integrated or external printing',
+                                      'Advanced devices with data storage and reporting features'
+                                    ].map((item, idx) => (
+                                      <li key={idx} className="flex items-start gap-2">
+                                        <span className="text-[#087EC1] font-bold">•</span>
+                                        <span>{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+
+                                  {/* 7. Institutional Applications */}
+                                  <p>
+                                    These solutions may assist with driver screening, institutional transport procedures and campus safety initiatives, subject to applicable policies and requirements.
+                                  </p>
+                                  <p>
+                                    Please find attached our 16-page Breath Analyser Product Catalogue, featuring 14 product models, specifications and QR codes.
+                                  </p>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                                  {exec.cards.map((c, idx) => {
-                                    const colorStyles = c.color === 'emerald'
-                                      ? {
-                                          bg: 'bg-gradient-to-b from-emerald-50/70 to-white',
-                                          border: 'border-emerald-200 hover:border-emerald-400',
-                                          iconBg: 'bg-emerald-600',
-                                          pill: 'text-emerald-800 bg-emerald-100',
-                                          btn: 'bg-emerald-600 hover:bg-emerald-700 group-hover:bg-emerald-800'
-                                        }
-                                      : c.color === 'purple'
-                                      ? {
-                                          bg: 'bg-gradient-to-b from-purple-50/70 to-white',
-                                          border: 'border-purple-200 hover:border-purple-400',
-                                          iconBg: 'bg-purple-600',
-                                          pill: 'text-purple-800 bg-purple-100',
-                                          btn: 'bg-purple-600 hover:bg-purple-700 group-hover:bg-purple-800'
-                                        }
-                                      : {
-                                          bg: 'bg-gradient-to-b from-sky-50/70 to-white',
-                                          border: 'border-sky-200 hover:border-sky-400',
-                                          iconBg: 'bg-sky-600',
-                                          pill: 'text-sky-800 bg-sky-100',
-                                          btn: 'bg-sky-600 hover:bg-sky-700 group-hover:bg-sky-800'
-                                        };
-                                    
-                                    const iconKey = (c.icon || '').toLowerCase();
-                                    const CardIcon = iconKey === 'zap' ? Zap : iconKey === 'printer' ? Printer : (iconKey === 'shield' || iconKey === 'shieldcheck') ? ShieldCheck : Activity;
-
-                                    return (
-                                      <div key={idx} className={`group ${colorStyles.bg} p-4 sm:p-5 rounded-2xl border-2 ${colorStyles.border} hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between`}>
-                                        <div className="space-y-2">
-                                          <div className="flex items-center justify-between">
-                                            <span className={`w-9 h-9 rounded-xl ${colorStyles.iconBg} text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform`}>
-                                              <CardIcon className="w-4 h-4" />
-                                            </span>
-                                            <span className={`text-[10px] font-mono font-extrabold ${colorStyles.pill} px-2.5 py-0.5 rounded-full border`}>
-                                              {c.num}
-                                            </span>
-                                          </div>
-                                          <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm pt-1">
-                                            {c.title}
-                                          </h4>
-                                          <p className="text-[11px] text-slate-600 leading-relaxed">
-                                            {c.desc}
-                                          </p>
-                                        </div>
-
-                                        <div className="pt-3 border-t border-slate-100 mt-3">
-                                          <a
-                                            href={c.btnUrl}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className={`w-full py-2 px-2.5 ${colorStyles.btn} text-white text-[11px] font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-102`}
-                                          >
-                                            <span>{c.btnLabel}</span>
-                                            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                                          </a>
-                                        </div>
+                                {/* 8. ATTACHED PRODUCT CATALOGUE CARD */}
+                                <div className="px-5 sm:px-7 pb-6 bg-white">
+                                  <div className="bg-[#F4F7FB] border border-[#CFDFEE] rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-lg bg-[#EF4444] text-white flex items-center justify-center font-bold text-xs tracking-wider shrink-0 shadow-2xs">
+                                        PDF
                                       </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-
-                              {/* 4. ATTACHED PRODUCT CATALOGUE & DIRECTIVE (ANIMATED ACTION HERO BOX) */}
-                              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-900 via-indigo-900 to-slate-950 p-6 sm:p-7 text-white shadow-xl border-2 border-sky-400/40 animate-card-glow">
-                                <div className="relative z-10 space-y-3">
-                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2.5">
-                                      <span className="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-300">
-                                        <FileDown className="w-5 h-5 animate-bounce" />
-                                      </span>
                                       <div>
-                                        <h3 className="font-black text-sm sm:text-base text-white">
-                                          ATTACHED CIRCULAR DIRECTIVE: {exec.displayAttachmentName}
-                                        </h3>
-                                        <p className="text-[11px] text-sky-200">
-                                          Official specifications, test ranges, calibration guidelines, and institutional QR codes.
-                                        </p>
+                                        <div className="font-bold text-[#092C55] text-sm">
+                                          Breath Analyser Product Catalogue
+                                        </div>
+                                        <div className="text-slate-500 text-xs mt-0.5">
+                                          14 Product Models | 16 Pages | PDF (5.16 MB)
+                                        </div>
                                       </div>
                                     </div>
-                                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-bold font-mono self-start sm:self-auto">
-                                      Zero File Attachment • 100% Virus Free
-                                    </span>
-                                  </div>
-
-                                  <p className="text-xs text-slate-200 leading-relaxed">
-                                    Please refer to the attached circular directive for model-wise specifications, institutional procedures and QR codes. Contact our team for model guidance and a commercial quotation.
-                                  </p>
-
-                                  {/* High-Impact Animated Buttons */}
-                                  <div className="flex flex-wrap items-center gap-2.5 pt-2">
-                                    <a
-                                      href={exec.driveLink}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-xl text-xs font-black shadow-lg shadow-sky-500/30 transition-all flex items-center gap-2 cursor-pointer hover:scale-102"
-                                    >
-                                      <FileDown className="w-4 h-4" />
-                                      <span>📄 Open Official Directive: {exec.displayAttachmentName}</span>
-                                      <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-                                    </a>
-
-                                    <a
-                                      href={exec.catalogueUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/25 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hover:scale-102"
-                                    >
-                                      <Globe2 className="w-4 h-4 text-sky-300" />
-                                      <span>🌐 Online Product Catalogue & Specifications</span>
-                                    </a>
-
-                                    <button
-                                      type="button"
-                                      onClick={handleSharePdf}
-                                      className="px-3.5 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hover:scale-102"
-                                      title="Share directive link with colleagues"
-                                    >
-                                      <Share2 className="w-4 h-4 text-emerald-400" />
-                                      <span>{sharedPdf ? 'Copied Link!' : 'Share Directive'}</span>
-                                    </button>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <a
+                                        href={exec.driveLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-3.5 py-1.5 bg-[#087EC1] hover:bg-[#076ba6] text-white rounded-md text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                                      >
+                                        <span>Preview PDF</span>
+                                      </a>
+                                      <a
+                                        href="/attachments/Breath_Analyser_Catalogue_14_Individual_Product_QR_Final.pdf"
+                                        download
+                                        className="px-3.5 py-1.5 bg-white hover:bg-slate-50 text-[#092C55] border border-slate-300 rounded-md text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                                      >
+                                        <span>Download PDF</span>
+                                      </a>
+                                      <a
+                                        href={exec.catalogueUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-3 py-1.5 bg-[#F8FAFC] hover:bg-sky-50 text-[#087EC1] border border-[#BAE6FD] rounded-md text-xs font-bold transition-all inline-flex items-center gap-1 cursor-pointer"
+                                      >
+                                        <span>Online View</span>
+                                      </a>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
 
-                              {/* 5. ENQUIRY & QUOTATION HUB */}
-                              <div className="p-5 bg-gradient-to-br from-slate-50 to-emerald-50/30 rounded-xl border border-slate-200 shadow-xs space-y-3">
-                                <div>
-                                  <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
-                                    <MessageSquare className="w-4 h-4 text-emerald-600" />
-                                    <span>ENQUIRY & QUOTATION</span>
-                                  </h4>
-                                  <p className="text-[11px] text-slate-600 mt-0.5">
-                                    For product selection, technical details or quotation, please contact us through your preferred channel:
+                                {/* 9. PRIMARY CALL TO ACTION (EXACTLY TWO CLEAR ACTIONS) */}
+                                <div className="px-5 sm:px-7 pb-6 bg-white border-t border-[#EEF2F6] pt-5 space-y-3.5">
+                                  <p className="text-xs sm:text-sm text-[#243247]">
+                                    For product information, demonstrations, quotations or institutional requirements, our team would be pleased to assist.
                                   </p>
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <a
-                                    href={`https://wa.me/918940944000?text=${encodeURIComponent('Hello Nunes Instruments, we received the ' + exec.title + ' circular and request a quotation for ' + activeRecipient.name)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer hover:scale-102"
-                                  >
-                                    <MessageSquare className="w-3.5 h-3.5" />
-                                    <span>WhatsApp Enquiry: +91 89409 44000</span>
-                                    <ExternalLink className="w-3 h-3 opacity-80" />
-                                  </a>
-
-                                  <a
-                                    href={`mailto:nunesalcotest@gmail.com?cc=nunescbe@gmail.com&subject=${encodeURIComponent('Enquiry: ' + exec.title + ' - ' + activeRecipient.name)}`}
-                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer hover:scale-102"
-                                  >
-                                    <Mail className="w-3.5 h-3.5" />
-                                    <span>Email Enquiry: nunesalcotest@gmail.com</span>
-                                  </a>
-                                </div>
-
-                                <div className="pt-2 border-t border-slate-200/80 flex flex-wrap items-center gap-2 text-xs">
-                                  <span className="font-bold text-slate-700">Direct Contact Numbers:</span>
-                                  <a href="tel:+919345226022" className="px-2.5 py-1 bg-white hover:bg-sky-50 text-slate-800 border border-slate-300 rounded-lg font-mono font-bold hover:text-sky-700 transition-all flex items-center gap-1">
-                                    <Phone className="w-3 h-3 text-sky-600" />
-                                    <span>93452 26022</span>
-                                  </a>
-                                  <a href="tel:+918940944000" className="px-2.5 py-1 bg-white hover:bg-emerald-50 text-slate-800 border border-slate-300 rounded-lg font-mono font-bold hover:text-emerald-700 transition-all flex items-center gap-1">
-                                    <Phone className="w-3 h-3 text-emerald-600" />
-                                    <span>89409 44000</span>
-                                  </a>
-                                  <a href="tel:+918940933000" className="px-2.5 py-1 bg-white hover:bg-indigo-50 text-slate-800 border border-slate-300 rounded-lg font-mono font-bold hover:text-indigo-700 transition-all flex items-center gap-1">
-                                    <Phone className="w-3 h-3 text-indigo-600" />
-                                    <span>89409 33000</span>
-                                  </a>
-                                </div>
-                              </div>
-
-                              {/* 6. COIMBATORE OFFICE LOCATIONS (3 INTERACTIVE CARDS WITH GOOGLE MAPS BUTTONS) */}
-                              <div className="space-y-2.5">
-                                <div className="flex items-center justify-between">
-                                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                                    <MapPin className="w-4 h-4 text-rose-600" />
-                                    <span>COIMBATORE OFFICE LOCATIONS (3 OFFICES)</span>
-                                  </h4>
-                                  <span className="text-[10px] text-slate-500 font-medium">
-                                    Select an office below to open directions in Google Maps
-                                  </span>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                   
-                                  {/* Office 1: Rathinapuri */}
-                                  <div className="p-4 bg-white rounded-2xl border border-slate-200 hover:border-sky-400 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
-                                    <div className="space-y-1.5">
-                                      <div className="flex items-center justify-between">
-                                        <span className="text-[11px] font-black text-sky-800 uppercase tracking-wide">01. Rathinapuri</span>
-                                        <span className="text-[10px] font-mono font-bold bg-sky-50 text-sky-700 px-2 py-0.5 rounded-full border border-sky-200">PIN 641027</span>
-                                      </div>
-                                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                                        11-A, 2nd Cross, Sundarar Street, Opp. to LaLa Mahall, Nalvar Layout, Rathinapuri, Coimbatore, Tamil Nadu <strong className="text-slate-900 font-semibold">641027</strong>.
-                                      </p>
-                                    </div>
-                                    <div className="pt-3 mt-2.5 border-t border-slate-100">
-                                      <a
-                                        href="https://maps.google.com/?q=11.0366,76.9661"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-[11px] font-bold text-sky-600 hover:text-sky-800 flex items-center justify-between group-hover:text-sky-700 transition-colors"
-                                      >
-                                        <span className="flex items-center gap-1.5">
-                                          <MapPin className="w-3.5 h-3.5 text-rose-500 group-hover:scale-110 transition-transform" />
-                                          <span>Get Directions (Google Maps)</span>
-                                        </span>
-                                        <ExternalLink className="w-3 h-3 opacity-70 group-hover:translate-x-0.5 transition-transform" />
-                                      </a>
-                                    </div>
+                                  {/* Exactly 2 CTAs */}
+                                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                    <a
+                                      href={`mailto:info@nunesinstrumentation.com?cc=${GMAIL_SENDER.email}&subject=${encodeURIComponent(`Quotation / Demonstration Request: ${exec.title} - ${activeRecipient.name}`)}&body=${encodeURIComponent(`Respected NUNES Instrumentation Team,\n\nWe would like to request an official commercial quotation and schedule a product demonstration for your 14-Model Breath Analyser series.\n\nInstitution: ${activeRecipient.name}\nUDISE: ${activeRecipient.udise}\nLocation: ${activeRecipient.block || activeRecipient.taluk || 'Coimbatore'}, Tamil Nadu\nContact Person: ${activeRecipient.principal || 'Administration'}\nEmail: ${activeRecipient.email}\n\nLooking forward to your response.`)}`}
+                                      className="px-5 py-3 bg-[#087EC1] hover:bg-[#076ba6] text-white text-xs sm:text-sm font-bold rounded-md text-center transition-all shadow-xs cursor-pointer"
+                                    >
+                                      Request a Quotation / Demonstration
+                                    </a>
+                                    <a
+                                      href={`mailto:info@nunesinstrumentation.com?cc=${GMAIL_SENDER.email}&subject=${encodeURIComponent(`Institutional Enquiry: ${exec.title}`)}`}
+                                      className="px-5 py-3 bg-white hover:bg-slate-50 text-[#092C55] border-[1.5px] border-[#092C55] text-xs sm:text-sm font-bold rounded-md text-center transition-all shadow-2xs cursor-pointer"
+                                    >
+                                      Contact NUNES Instrumentation
+                                    </a>
                                   </div>
 
-                                  {/* Office 2: Gopalapuram */}
-                                  <div className="p-4 bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
-                                    <div className="space-y-1.5">
-                                      <div className="flex items-center justify-between">
-                                        <span className="text-[11px] font-black text-indigo-800 uppercase tracking-wide">02. Gopalapuram</span>
-                                        <span className="text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200">PIN 641018</span>
-                                      </div>
-                                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                                        6, GJ Chandran Complex, Head Quarters Road, Opp. CSI Church, Gopalapuram, Coimbatore, Tamil Nadu <strong className="text-slate-900 font-semibold">641018</strong>.
-                                      </p>
-                                    </div>
-                                    <div className="pt-3 mt-2.5 border-t border-slate-100">
-                                      <a
-                                        href="https://maps.google.com/?q=11.0028,76.9680"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-between group-hover:text-indigo-700 transition-colors"
-                                      >
-                                        <span className="flex items-center gap-1.5">
-                                          <MapPin className="w-3.5 h-3.5 text-rose-500 group-hover:scale-110 transition-transform" />
-                                          <span>Get Directions (Google Maps)</span>
-                                        </span>
-                                        <ExternalLink className="w-3 h-3 opacity-70 group-hover:translate-x-0.5 transition-transform" />
-                                      </a>
-                                    </div>
-                                  </div>
-
-                                  {/* Office 3: Gandhipuram */}
-                                  <div className="p-4 bg-white rounded-2xl border border-slate-200 hover:border-emerald-400 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
-                                    <div className="space-y-1.5">
-                                      <div className="flex items-center justify-between">
-                                        <span className="text-[11px] font-black text-emerald-800 uppercase tracking-wide">03. Gandhipuram</span>
-                                        <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">PIN 641012</span>
-                                      </div>
-                                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                                        218-628, 1st Street, Cross Cut, Gandhipuram, Coimbatore, Tamil Nadu <strong className="text-slate-900 font-semibold">641012</strong>.
-                                      </p>
-                                    </div>
-                                    <div className="pt-3 mt-2.5 border-t border-slate-100">
-                                      <a
-                                        href="https://maps.google.com/?q=11.0182,76.9658"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-[11px] font-bold text-emerald-600 hover:text-emerald-800 flex items-center justify-between group-hover:text-emerald-700 transition-colors"
-                                      >
-                                        <span className="flex items-center gap-1.5">
-                                          <MapPin className="w-3.5 h-3.5 text-rose-500 group-hover:scale-110 transition-transform" />
-                                          <span>Get Directions (Google Maps)</span>
-                                        </span>
-                                        <ExternalLink className="w-3 h-3 opacity-70 group-hover:translate-x-0.5 transition-transform" />
-                                      </a>
-                                    </div>
-                                  </div>
-
+                                  {/* Optional WhatsApp Text Link */}
+                                  <p className="text-xs text-slate-500 pt-1">
+                                    Prefer WhatsApp? Chat directly with our institutional desk:{' '}
+                                    <a
+                                      href={`https://wa.me/918940944000?text=${encodeURIComponent(`Hello NUNES Instrumentation, reaching out regarding ${exec.title} for ${activeRecipient.name}. We request product information/quotation.`)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[#087EC1] font-bold hover:underline"
+                                    >
+                                      +91 8940944000
+                                    </a>
+                                  </p>
                                 </div>
+
+                                {/* 10. COMPANY SIGNATURE & CONTACT INFORMATION */}
+                                <div className="px-5 sm:px-7 pb-6 bg-white text-xs sm:text-[13.5px] leading-relaxed text-[#243247] space-y-4">
+                                  <div>
+                                    <div>Warm regards,</div>
+                                    <strong className="text-[#092C55]">Sales &amp; Institutional Support Team</strong>
+                                    <div>NUNES Instrumentation</div>
+                                    <div className="text-slate-500 text-xs">Coimbatore, Tamil Nadu</div>
+                                  </div>
+
+                                  <div className="border-t border-[#E2E8F0] pt-4 text-xs text-slate-600 leading-relaxed space-y-1">
+                                    <div className="font-bold text-[#092C55] text-xs tracking-wider uppercase">
+                                      NUNES INSTRUMENTATION
+                                    </div>
+                                    <div className="text-slate-500 text-[11.5px]">
+                                      Industrial | Laboratory | Testing | Measuring | Process Instruments<br />
+                                      Sales • Service • Repairs • Calibration
+                                    </div>
+                                    <div>Coimbatore, Tamil Nadu, India</div>
+                                    <div>
+                                      Phone:{' '}
+                                      <a href="tel:+918940944000" className="text-[#087EC1] font-bold hover:underline">+91 8940944000</a>
+                                      {' '}/{' '}
+                                      <a href="tel:+918940933000" className="text-[#087EC1] font-bold hover:underline">+91 8940933000</a>
+                                    </div>
+                                    <div>
+                                      Email:{' '}
+                                      <a href="mailto:info@nunesinstrumentation.com" className="text-[#087EC1] hover:underline">info@nunesinstrumentation.com</a>
+                                    </div>
+                                    <div>
+                                      Website:{' '}
+                                      <a href="https://www.nunesinstrumentation.com" target="_blank" rel="noreferrer" className="text-[#087EC1] font-bold hover:underline">www.nunesinstrumentation.com</a>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* 11. COMPLIANCE & UNSUBSCRIBE FOOTER */}
+                                <div className="p-4 sm:p-5 bg-[#F4F7FB] border-t border-[#E2E8F0] text-center text-[11px] text-slate-500 space-y-1">
+                                  <p>
+                                    This institutional safety circular was transmitted to institutional correspondents and transport safety administrators for informational and compliance purposes.
+                                  </p>
+                                  <p>
+                                    To update your communication preferences or opt out, please{' '}
+                                    <a href={`mailto:info@nunesinstrumentation.com?subject=${encodeURIComponent(`Unsubscribe Safety Circular - ${activeRecipient.name}`)}`} className="text-[#087EC1] underline">
+                                      Unsubscribe
+                                    </a>.
+                                  </p>
+                                </div>
+
                               </div>
-
-                              {/* 7. SIGNOFF & COMPLIANCE FOOTER */}
-                              <div className="p-4 bg-slate-100/80 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600">
-                                <div>
-                                  <p className="font-bold text-slate-900">Regards,</p>
-                                  <p className="font-extrabold text-sky-900">Nunes Instrumentation Team</p>
-                                  <p className="text-[11px] text-slate-500">Coimbatore, Tamil Nadu</p>
-                                </div>
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <span className="font-bold text-slate-500">Follow Us:</span>
-                                  <a href="https://youtube.com" target="_blank" rel="noreferrer" className="px-2 py-0.5 rounded bg-white text-slate-700 hover:text-red-600 border border-slate-200 font-semibold transition-all">YouTube</a>
-                                  <a href="https://instagram.com" target="_blank" rel="noreferrer" className="px-2 py-0.5 rounded bg-white text-slate-700 hover:text-rose-600 border border-slate-200 font-semibold transition-all">Instagram</a>
-                                  <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="px-2 py-0.5 rounded bg-white text-slate-700 hover:text-sky-600 border border-slate-200 font-semibold transition-all">Google Maps</a>
-                                </div>
-                              </div>
-
                             </div>
+
                           );
                         })() : (
                           /* Standard Raw Mail Body View */
